@@ -1,14 +1,14 @@
 package asteroids.model;
 
 /** 
- * A class of exceptions signaling an illegal bullet as argument.
+ * A class of exceptions signaling an illegal bullet argument.
  */
 public class IllegalBulletException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Initialize this new illegal bullet exception with given bullet.
+	 * Initialize this new bullet duration exception with given bullet.
 	 * 
 	 * @param 	bullet
 	 * 			The bullet for this new illegal bullet exception.
@@ -23,14 +23,14 @@ public class IllegalBulletException extends RuntimeException {
 	}
 	
 	/**
-	 * Return the duration of this illegal duration exception.
+	 * Return the bullet of this illegal bullet exception.
 	 */
 	public Bullet getBullet() {
 		return this.bullet;
 	}
 
 	/**
-	 * A variable registering the duration of this illegal duration exception.
+	 * A variable registering the bullet of this illegal bullet exception.
 	 */
 	private final Bullet bullet;
 }

@@ -1,5 +1,8 @@
 package asteroids.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -54,6 +57,8 @@ public class Ship {
 		setVelocity(xvel, yvel);
 		setRadius(radius);
 		setOrientation(orientation);
+		for (int I=0; I==14; I++)
+			this.loadBullet(new Bullet());
 	}
 	
 	/**
@@ -128,13 +133,27 @@ public class Ship {
 	 * @param 	ypos
 	 * 			The position along the y-axis to check.
 	 * @return	True if and only if neither xpos, nor ypos is negative or positive infinity or not a number.
-	 * 			| result == ((! ((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
-				&& (! ((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+	 * 			If the ship is associated with a certain world, it must be positioned within its bounds.
+	 * 			| if ((! ((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
+	 *			| 	&& (! ((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+	 *			|	if (this.getWorld() != null) 
+	 *			|		if (((this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius())))&&
+	 *			|			((this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius()))))
+	 *			|		then result == true
+	 *			| 	then result == true
+	 *			| else
+	 *			| 	result == false
 	 */
 	public boolean isValidPosition(double xpos, double ypos) {
 		if ((! ((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
-				&& (! ((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+				&& (! ((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos))))) {
+			if (this.getWorld() != null) {
+				if (((this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius())))&&
+						((this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius()))))
+					return true;
+			}
 			return true;
+		}
 		return false;
 	}
 	
@@ -163,13 +182,13 @@ public class Ship {
 	 * 			The new velocity of this ship along the y-axis.
 	 * @post	If the speed of the ship with the new velocity does not exceed its maximum
 	 * 			value, the new velocity of the ship is the given velocity. Otherwise,
-	 * 			the velocity of the new ship is equal to MAX_SPEED.
-	 * 			| if (sqrt(xvel^2 + yvel^2) <= MAX_SPEED)
+	 * 			the velocity of the new ship is equal to the maximum speed of this ship..
+	 * 			| if (sqrt(xvel^2 + yvel^2) <= old.getMaxSpeed())
 	 * 			| 	then (new.getXVelocity() == xvel &&
 	 * 			|		new.getYVelocity() == yvel);
 	 * 			| else
-	 * 			| 	(new.getXVelocity == xvel/sqrt(xvel^2 + yvel^2)*MAX_SPEED &&
-	 * 			|		new.getYVelocity == yvel/sqrt(xvel^2 + yvel^2)*MAX_SPEED);
+	 * 			| 	(new.getXVelocity == xvel/sqrt(xvel^2 + yvel^2)*old.getMaxSpeed() &&
+	 * 			|		new.getYVelocity == yvel/sqrt(xvel^2 + yvel^2)*old.getMaxSpeed());
 	 */
 	@Raw
 	public void setVelocity(double xvel, double yvel) {
@@ -179,6 +198,39 @@ public class Ship {
 		else {
 			this.xVelocity = xvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed;
 			this.yVelocity = yvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed; }
+	}
+	
+	/**
+	 * Return the acceleration of this ship along the x-axis.
+	 */
+	@Basic @Raw
+	public double getXAcceleration() {
+		return this.xAcceleration;
+	}
+	
+	/**
+	 * Return the acceleration of this ship along the y-axis.
+	 */
+	@Basic @Raw
+	public double getYAcceleration() {
+		return this.yAcceleration;
+	}
+	
+	/**
+	 * Set the acceleration of this ship to a given acceleration.
+	 * 
+	 * @param	xacc
+	 * 			The new acceleration of this ship along the x-axis.
+	 * @param	yacc
+	 * 			The new acceleration of this ship along the y-axis.
+	 * @post	The new acceleration of this ship is equal to the given acceleration.
+	 * 			| new.getXAcceleration == xacc
+	 * 			| new.getYAcceleration == yacc
+	 */
+	@Raw
+	public void setAcceleration(double xacc, double yacc) {
+		this.xAcceleration = xacc;
+		this.yAcceleration = yacc;
 	}
 	
 	/**
@@ -299,6 +351,206 @@ public class Ship {
 	}
 	
 	/**
+	 * Return the world with which this ship is associated. Null if none.
+	 */
+	@Basic @Raw
+	public World getWorld() {
+		if (this.getWorld() != null)
+				return new World(this.world.getWidth(), this.world.getHeight());
+		return null;
+	}
+	
+	/**
+	 * Set the world of this ship to the given world.
+	 * 
+	 * @param 	world
+	 * @post	If the ship does not belong to a world yet and if the given world already associates 
+	 * 			the ship with itself, the new world of this ship is the given world.
+	 * 			| if (old.getWorld() == null)&&(world.getEntities().contains(this))
+	 *			|	new.world == world;		
+	 */
+	@Raw
+	public void setWorld(World world) {
+		if ((this.getWorld() == null)&&(world.getEntities().contains(this)))
+				this.world = world;
+	}
+	
+	/**
+	 * Return the mass of this ship.
+	 */
+	@Basic @Raw
+	public double getMass() {
+		return this.mass;
+	}
+	
+	/**
+	 * Set the mass of this ship to the given mass.
+	 * 
+	 * @param	mass
+	 * 			The new mass of the ship.
+	 * @post	If the given mass is at least 4/3*PI*radius^3*density, the new mass of the ship is
+	 * 			the given mass. Otherwise, the mass is set to its minimal value.
+	 * 			| if (mass >= (4/3)*(Math.PI)*Math.pow(old.getRadius(), 3)*old.getMassDensity())
+	 *			|	new.mass == mass;
+	 *			| else
+	 *			|	new.mass == (4/3)*(Math.PI)*Math.pow(old.getRadius(), 3)*old.getMassDensity();
+	 */
+	@Raw
+	public void setMass(double mass) {
+		if (mass >= (4/3)*(Math.PI)*Math.pow(this.getRadius(), 3)*this.getMassDensity())
+			this.mass = mass;
+		else
+			this.mass = (4/3)*(Math.PI)*Math.pow(this.getRadius(), 3)*this.getMassDensity();
+	}
+	
+	/**
+	 * Return the total mass of this ship.
+	 * 
+	 * @result	The resulted mass is equal to the sum of the mass of the ship and the sum
+	 * 			of the masses of the bullets the ship has.
+	 *			| totalMass = this.getMass()
+	 *			| for (Bullet bullet: this.getBullets())
+				|	totalMass = totalMass + bullet.getMass()
+				| result == totalMass
+	 */
+	public double getTotalMass() {
+		double totalMass = this.getMass();
+		for (Bullet bullet: this.getBullets())
+			totalMass = totalMass + bullet.getMass();
+		return totalMass;
+	}
+	
+	/**
+	 * Return the bullets, loaded in this ship.
+	 */
+	public Set<Bullet> getBullets() {
+		return this.bullets;
+	}
+	
+	/**
+	 * Return the total number of bullets, loaded in this ship.
+	 */
+	public int getNbBullets() {
+		return this.getBullets().size();
+	}
+	
+	/**
+	 * Load this ship with the given series of bullets.
+	 * 
+	 * @param	bullets
+	 * 			The series of bullets this ship has to be loaded with.
+	 * @post	| for each I in 0..bullets.length-1:
+	 * 			| 	new.getBullets().contains(bullets[I])
+	 * 			| 	bullets[I].getShip() == new
+	 * @throws	IllegalBulletException
+	 * 			The given bullet is already loaded into another ship.
+	 * 			| ! for each bullet in bullets:
+	 * 			| 	bullet.getShip != this
+	 * @throws	IllegalBulletException
+	 * 			The given ship is not located in the same world as this bullet.
+	 * 			| ! for each bullet in bullets:
+	 * 			| 	this.getWorld() != bullet.getWorld()
+	 */
+	public void loadBullet(Bullet... bullets) {
+		for (Bullet bullet: bullets) {
+			if (bullet.getShip() != null)
+				throw new IllegalBulletException(bullet);
+			if (bullet.getWorld() != this.getWorld())
+				throw new IllegalBulletException(bullet);
+			this.getBullets().add(bullet);
+			bullet.setShip(this);
+		}
+	}
+	
+	/**
+	 * Fire a bullet.
+	 */
+	public void fireBullet() {
+			//
+	}
+	
+	/**
+	 * Return the mass density of this ship.
+	 */
+	@Basic @Raw
+	public double getMassDensity() {
+		return this.massDensity;
+	}
+	
+	/**
+	 * Set the mass density of this ship to the given value.
+	 * 
+	 * @param	massDensity
+	 * @post	If the given density exceeds its minimal value, the new mass density of this ship
+	 * 			is equal to the given value. Otherwise, the mass density of this ship is set to its minimal value.
+	 * 			| if (massDensity > MIN_DENSITY)
+	 * 			| 	new.getMassDensity == massDensity
+	 * 			| else
+	 * 			| 	new.getMassDensity == MIN_DENSITY
+	 */
+	public void setMassDensity(double massDensity) {
+		if (massDensity > MIN_DENSITY)
+			this.massDensity = massDensity;
+		else
+			this.massDensity = MIN_DENSITY;
+	}
+	
+	/**
+	 * Return the thrust force of this ship.
+	 */
+	public double getThrustForce() {
+		return this.thrustForce;
+	}
+	
+	/**
+	 * Set the thrust force of this ship to a given value.
+	 * 
+	 * @param	force
+	 * 			The new thrust force of this ship.
+	 * @post	The new thrust force of this ship is equal to the given thrust force.
+	 * 			| new.getThrustForce == force
+	 */
+	public void setThrustForce(double force) {
+		this.thrustForce = force;
+	}
+	
+	/**
+	 * Return whether the thruster of this ship is enabled.
+	 */
+	public boolean thrusterEnabled() {
+		return this.thruster;
+	}
+	
+	/**
+	 * Enable the thruster of this ship.
+	 * 
+	 * @post	The thruster of the ship is enabled.
+	 * 			| new.thrusterEnabled()
+	 * @post	The new acceleration of this ship is set to the value, derived from Newton's second
+	 * 			law of motion (F=m*a)
+	 * 			| new.getXAcceleration == getThrustForce()/getTotalMass()*Math.cos(getOrientation())
+	 * 			| new.getYAcceleration == getThrustForce()/getTotalMass()*Math.sin(getOrientation())
+	 */
+	public void thrustOn() {
+		this.thruster = true;
+		this.setAcceleration(this.getThrustForce()/this.getTotalMass()*Math.cos(this.getOrientation()), 
+				this.getThrustForce()/this.getTotalMass()*Math.sin(this.getOrientation()));
+	}
+	
+	/**
+	 * Disable the thruster of this ship.
+	 * 
+	 * @post	The thruster of the ship is disabled.
+	 * 			| ! new.thrusterEnabled()
+	 * @post	The acceleration of this ship is set to zero.
+	 * 			| new.getXAcceleration == 0
+	 * 			| new.getYAcceleration == 0
+	 */
+	public void thrustOff() {
+		this.thruster = false;
+	}
+	
+	/**
 	 * Return whether this ship is terminated.
 	 * 
 	 * @return	True if and only if this ship is terminated.
@@ -367,6 +619,10 @@ public class Ship {
 	}
 	
 	/**
+	 * Return 
+	 */
+	
+	/**
 	 * Change the ship's velocity by a given amount, based on its current velocity and orientation.
 	 * 
 	 * @param 	amount
@@ -384,15 +640,14 @@ public class Ship {
 	 * 			| if ((amount >= 0) && (old.getMaxSpeed()-old.getSpeed() >= amount))
 	 * 			| 	then new.getSpeed() == old.getSpeed() + amount
 	 */
-	public void thrust(double amount) {
-		if (amount < 0) 
-			amount = 0;
-		if	(this.getMaxSpeed()-this.getSpeed() < amount) {
+	public void thrust(double dt) {
+		this.thrustOn();
+		if	(this.getMaxSpeed()-this.getSpeed() < dt) {
 			this.setVelocity(this.getMaxSpeed()*Math.cos(this.getOrientation()),
 								this.getMaxSpeed()*Math.sin(this.getOrientation())); }
 		else {
-			this.setVelocity(this.getXVelocity() + amount*Math.cos(this.getOrientation()),
-								this.getYVelocity() + amount*Math.sin(this.getOrientation()));
+			this.setVelocity(this.getXVelocity() + dt*Math.cos(this.getOrientation()),
+								this.getYVelocity() + dt*Math.sin(this.getOrientation()));
 		}
 	}
 	
@@ -457,6 +712,12 @@ public class Ship {
 	 * 			| 	this.move(result)
 	 * 			| 	other.move(result)
 	 * 			| this.getDistanceBetween(other) == 0
+	 * @return	No collision between this ship and the other ship will occur within the returned amount
+	 * 			of time.
+	 * 			|
+	 * 			|
+	 * 			|
+	 * 			|
 	 * @throws	IllegalShipException
 	 * 			The ships already overlap.
 	 * 			| overlap(other)
@@ -520,42 +781,88 @@ public class Ship {
 	/**
 	 * A variable registering the position of this ship along the x-axis.
 	 */
-	public double xPosition;
+	private double xPosition;
 	
 	/**
 	 * A variable registering the position of this ship along the y-axis. 
 	 */
-	public double yPosition;
+	private double yPosition;
 	
 	/**
 	 * A variable registering the velocity of this ship along the x-axis.
 	 */
-	public double xVelocity;
+	private double xVelocity;
 	
 	/**
 	 * A variable registering the velocity of this ship along the y-axis.
 	 */
-	public double yVelocity;
+	private double yVelocity;
+	
+	/**
+	 * A variable registering the acceleration of this ship along the x-axis.
+	 */
+	private double xAcceleration = 0;
+	
+	/**
+	 * A variable registering the acceleration of this ship along the y-axis.
+	 */
+	private double yAcceleration = 0;
 	
 	/**
 	 * A variable registering the orientation of this ship.
 	 */
-	public double orientation;
+	private double orientation;
 	
 	/**
 	 * A variable registering the radius of this ship.
 	 */
-	public double radius;
+	private double radius = MIN_RADIUS;
 	
 	/**
 	 * A variable registering the maximum speed of this ship.
 	 */
-	public double maxSpeed;
+	private double maxSpeed = MAX_SPEED;
 	
 	/**
 	 * A variable registering whether a ship is terminated.
 	 */
-	public boolean isTerminated;
+	private boolean isTerminated;
+	
+	/**
+	 * A variable registering the world of a ship.
+	 */
+	private World world = null;
+	
+	/**
+	 * A variable registering the mass of a ship.
+	 */
+	private double mass;
+	
+	/**
+	 * A variable registering the mass density of a ship.
+	 */
+	private double massDensity = MIN_DENSITY;
+	
+	/**
+	 * A variable registering the bullets of a ship.
+	 *|| INVARIANTEN HIEROP HIER BESPREKEN
+	 */
+	private Set<Bullet> bullets = new HashSet<Bullet>();
+	
+	/**
+	 * A variable registering whether the thruster of this ship is enabled.
+	 */
+	private boolean thruster = false; 
+	
+	/**
+	 * A variable registering the force the active thruster of this ship exerts.
+	 */
+	private double thrustForce = STANDARD_FORCE;
+	
+	/**
+	 * A variable registering the minimum radius of a ship.
+	 */
+	private static double MIN_RADIUS = 10;
 	
 	/** 
 	 * A variable registering the maximum velocity of a ship.
@@ -563,7 +870,14 @@ public class Ship {
 	private static final double MAX_SPEED = 300000;
 	
 	/** 
-	 * A variable registering the maximum radius of a ship.
+	 * A variable registering the minimum density of a ship.
 	 */
-	private static double MIN_RADIUS = 10;
+	private static final double MIN_DENSITY = 1.42*Math.pow(10, 12);
+	
+	/** 
+	 * A variable registering the standard force the active thruster of a ship exerts.
+	 */
+	private static final double STANDARD_FORCE = 1.1*Math.pow(10, 21);
+	
+	
 }

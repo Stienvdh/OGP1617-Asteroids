@@ -12,7 +12,7 @@ public class IllegalDurationException extends RuntimeException {
 	 * 
 	 * @param 	dt
 	 * 			The duration for this new illegal duration exception.
-	 * @post	The duration of this new illegal duration exception is the given ship.
+	 * @post	The duration of this new illegal duration exception is the given duration.
 	 * 			| new.getDuration() == dt
 	 * @effect	This new illegal duration exception is further initialized as a new runtime
 	 * 			exception involving no diagnostic message and no cause.
