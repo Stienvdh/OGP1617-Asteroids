@@ -18,7 +18,7 @@ import be.kuleuven.cs.som.annotate.*;
  * 
  * 
  */
-public class Ship {
+public class Ship extends Entity{
 	
 	/**
 	 * Initialize this new ship with given position, velocity, radius and orientation.
@@ -364,6 +364,7 @@ public class Ship {
 	 * Set the world of this ship to the given world.
 	 * 
 	 * @param 	world
+	 * 			The world, in which the ship has to be located.
 	 * @post	If the ship does not belong to a world yet and if the given world already associates 
 	 * 			the ship with itself, the new world of this ship is the given world.
 	 * 			| if (old.getWorld() == null)&&(world.getEntities().contains(this))
@@ -371,7 +372,7 @@ public class Ship {
 	 */
 	@Raw
 	public void setWorld(World world) {
-		if ((this.getWorld() == null)&&(world.getEntities().contains(this)))
+		if ((this.getWorld() == null)&&(world.getEntities().containsValue(this)))
 				this.world = world;
 	}
 	
@@ -447,15 +448,15 @@ public class Ship {
 	 * 			| ! for each bullet in bullets:
 	 * 			| 	bullet.getShip != this
 	 * @throws	IllegalBulletException
-	 * 			The given ship is not located in the same world as this bullet.
+	 * 			The given ship is already located in a world.
 	 * 			| ! for each bullet in bullets:
-	 * 			| 	this.getWorld() != bullet.getWorld()
+	 * 			| 	this.getWorld() != null
 	 */
 	public void loadBullet(Bullet... bullets) {
 		for (Bullet bullet: bullets) {
 			if (bullet.getShip() != null)
 				throw new IllegalBulletException(bullet);
-			if (bullet.getWorld() != this.getWorld())
+			if (bullet.getWorld() != null)
 				throw new IllegalBulletException(bullet);
 			this.getBullets().add(bullet);
 			bullet.setShip(this);
@@ -466,7 +467,6 @@ public class Ship {
 	 * Fire a bullet.
 	 */
 	public void fireBullet() {
-			//
 	}
 	
 	/**
@@ -535,6 +535,13 @@ public class Ship {
 		this.thruster = true;
 		this.setAcceleration(this.getThrustForce()/this.getTotalMass()*Math.cos(this.getOrientation()), 
 				this.getThrustForce()/this.getTotalMass()*Math.sin(this.getOrientation()));
+	}
+	
+	/**
+	 * Return whether this ship is located in a world.
+	 */
+	public boolean hasPosition() {
+		return this.getWorld() != null;
 	}
 	
 	/**

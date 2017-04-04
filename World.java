@@ -1,112 +1,151 @@
 package asteroids.model;
 
-import be.kuleuven.cs.som.annotate.*;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * A two-dimensional, rectangular area containing ships and bullets.
- *
- */
 public class World {
 	
 	public World(double width, double height) {
-		World.width = width;
-		World.height = height;
-		HashSet<Entity> entities = new HashSet<Entity>();
+		this.setSize(width,height);
 	}
 	
 	/**
-	 * defensief
-	 * @param ship
+	 * Return the width of this world.
 	 */
-	public void addShip(Ship ship) throws IllegalShipException {
-		if (ship == null)
-			throw new IllegalShipException(ship);
-		entities.add(ship);
+	public double getWidth() {
+		return this.width;
 	}
 	
 	/**
-	 * defensief
-	 * @param ship
+	 * Return the height of this world.
 	 */
-	public void removeShip(Ship ship) throws IllegalShipException {
-		if (ship == null)
-			throw new IllegalShipException(ship);
-		if (! entities.contains(ship))
-			throw new IllegalShipException(ship);
-		entities.remove(ship);
+	public double getHeight() {
+		return this.height;
 	}
 	
 	/**
-	 * defensief
-	 * @param ship
+	 * Set the width and height to given values.
+	 * 
+	 * @param 	width
+	 * 			The new width of this world.
+	 * @param 	height
+	 * 			The new height of this world.
+	 * @post	If nor the given width, nor the given height exceeds its upper bound, the size of this
+	 * 			world is set to the given width and height. Otherwise, its size is set to its
+	 * 			upper bound.
+	 * 			| if ! width > UPPER_WIDTH && ! height > UPPER_HEIGHT
+	 * 			| 	then new.getWidth() == width && new.getHeight() == height
+	 * 			| else
+	 * 			| 	new.getWidth() == UPPER_WIDTH && new.getHeight() == UPPER_HEIGHT
 	 */
-	public void addBullet(Bullet bullet) throws IllegalBulletException {
-		if (bullet == null)
-			throw new IllegalBulletException(bullet);
-		entities.add(bullet);
+	public void setSize(double width, double height) {
+		if ((! (width>UPPER_WIDTH))&&(! (height>UPPER_HEIGHT))) {
+			this.width = width;
+			this.height = height; }
+		else
+			this.width = UPPER_WIDTH;
+			this.height = UPPER_HEIGHT;
 	}
 	
 	/**
-	 * defensief
-	 * @param ship
+	 * Return the entities, located in this world.
 	 */
-	public void removeBullet(Bullet bullet) {
-		if (bullet == null)
-			throw new IllegalBulletException(bullet);
-		if (! entities.contains(bullet))
-			throw new IllegalBulletException(bullet);
-		entities.remove(bullet);
+	public HashMap<double[],Entity> getEntities() {
+		return this.entities;
 	}
 	
 	/**
-	 * totaal
-	 * @param xpos
-	 * @param ypos
-	 * @return
+	 * Add a given entity to this world.
+	 * 
+	 * @param 	entity
+	 * 			The entity, that has to be added to this world.
+	 * @post	The world contains the given entity.
+	 * 			| new.getEntities().contains(entity)
+	 * @post	The given entity is located in this world. 
+	 * 			| (new entity).getWorld() == this
+	 * @throws	IllegalEntityException
+	 * 			The given entity is already located in another world or ship.
+	 * 			| entity.hasPosition()
+	 *OVERLAPDINGEN
 	 */
-	public Entity locateEntity(double xpos, double ypos) {
-		for (Entity entity : entities) {
-			if (entity instanceof Ship) {
-				Ship currentShip = (Ship) entity;
-				if (Math.sqrt(Math.pow(xpos - currentShip.getXPosition(),2) + (Math.pow(ypos - currentShip.getYPosition(),2))) <= currentShip.getRadius())
-					return entity;
-			}
-			if (entity instanceof Bullet) {
-				Bullet currentBullet = (Bullet) entity;
-				if (Math.sqrt(Math.pow(xpos - currentBullet.getXPosition(),2) + (Math.pow(ypos - currentBullet.getYPosition(),2))) <= currentBullet.getRadius())
-					return entity;
-			}
-		}
-		return null;
+	public void addEntity(Entity entity) {
+		if (entity instanceof Ship)
+			this.getShips().add((Ship) entity);
+		else if (entity instanceof Bullet)
+			this.getShips().add((Ship) entity);
+		double[] pos = {entity.getXPosition(),entity.getYPosition()};
+		this.getEntities().put(pos, entity);
+		entity.setWorld(this);
 	}
 	
 	/**
-	 * defensief
+	 * Return, if any, the entity whose center coincides with the given position. 
+	 * 
+	 * @param	xpos
+	 * 			The position along the x-axis to investigate.
+	 * @param	ypos
+	 * 			The position along the y-axis to investigate. 
+	 * @return 	Return the entity whose center coincides with the given position. Null if none.
+	 * 			| if this.getEntities().containsValue([xpos,ypos])
+	 * 			| 	result.getXPosition() == xpos
+	 * 			| 	result.getYPosition() == ypos
+	 * 			| else
+	 * 			| 	result == null
 	 */
-	public void evolve(double dt) {
-		double tc = dt;
-		ArrayList timeList = new ArrayList();
-		for (Entity entity1 : entities) {
-			for (Entity entity2 : entities) {
-				if ((entity1.getTimeToCollision(entity2) < dt) && (entity1.getTimeToCollision(entity2) < tc))
-					tc = entity1.getTimeToCollision(entity2);
-			}
-		}
-		//
-		if (tc < dt)
-			this.evolve(dt - tc);
-		
+	public Entity getEntityAt(double xpos,double ypos) {
+		double[] pos = {xpos,ypos};
+		if (this.getEntities().containsKey(pos))
+				return this.getEntities().get(pos);
+		else
+			return null;
 	}
 	
-	public Set<Entity> entities;
+	/**
+	 * Return the ships, located in this world.
+	 */
+	public HashSet<Ship> getShips() {
+		return this.ships;
+	}
 	
-	private static double height;
+	/**
+	 * Return the bullets, located in this world.
+	 */
+	public HashSet<Bullet> getBullets() {
+		return this.bullets;
+	}
 	
-	private static double width;
+	/**
+	 * A variable registering the width of this world.
+	 */
+	public double height;
 	
-	private static double MAX_VALUE;
+	/**
+	 * A variable registering the width of this world.
+	 */
+	public double width;
+	
+	/**
+	 * A variable registering the entities, located in this world, and the position of their center.
+	 */
+	public HashMap<double[],Entity> entities;
+	
+	/**
+	 * A variable registering the ships, located in this world.
+	 */
+	public HashSet<Ship> ships;
+	
+	/**
+	 * A variable registering the bullets, located in this world.
+	 */
+	public HashSet<Bullet> bullets;
+	
+	/**
+	 * A variable registering the upper bound for the width of a world.
+	 */
+	private static final double UPPER_WIDTH = Double.MAX_VALUE;
+	
+	/**
+	 * A variable registering the upper bound for the width of a world.
+	 */
+	private static final double UPPER_HEIGHT = Double.MAX_VALUE;
 }

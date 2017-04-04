@@ -8,7 +8,7 @@ public class IllegalBulletException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Initialize this new bullet duration exception with given bullet.
+	 * Initialize this new bullet exception with given bullet.
 	 * 
 	 * @param 	bullet
 	 * 			The bullet for this new illegal bullet exception.
