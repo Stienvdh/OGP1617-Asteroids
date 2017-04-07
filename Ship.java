@@ -29,6 +29,10 @@ public class Ship extends Entity{
 	 * 			The initial velocity for this ship.
 	 * @param	radius
 	 * 			The radius for this ship.
+	 * @param	orientation
+	 * 			The orientation for this ship
+	 * @param	mass
+	 * 			The mass for this ship
 	 * @pre		This ship can have the given orientation as orientation.
 	 * 			| isValidOrientation(orientation)
 	 * @post	The new position for this new ship is equal to the given position.
@@ -41,6 +45,14 @@ public class Ship extends Entity{
 	 * 			| new.getRadius() == radius
 	 * @post	The new orientation for this new ship is equal to the given orientation.
 	 * 			| new.getOrientation() == orientation
+	 * @post	The new mass for this new ship is equal to the given mass.
+	 * 			| new.getMass() == mass
+	 * @post	The new mass density for this new ship is equal to its lower bound.
+	 * 			| new.getMassDensity() == MIN_DENSITY
+	 * @post	The new thrust force for this new ship is equal to its standard value.
+	 * 			| new.getThrustForce() == STANDARD_FORCE
+	 * @post	The new maximum speed for this new ship is equal to its upper bound.
+	 * 			| new.getMaxSpeed() == MAX_SPEED
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
 	 * 			| (! isValidPosition(xpos, ypos))
@@ -50,15 +62,19 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public Ship(double xpos, double ypos, double xvel, double yvel,double radius, double orientation, 
-			double maxSpeed) 
+			double mass) 
 			throws IllegalRadiusException, IllegalPositionException {
-		setMaxSpeed(maxSpeed);
 		setPosition(xpos, ypos);
 		setVelocity(xvel, yvel);
 		setRadius(radius);
 		setOrientation(orientation);
+		setMass(mass);
+		setMassDensity(MIN_DENSITY);
+		setThrustForce(STANDARD_FORCE);
+		setMaxSpeed(MAX_SPEED);
+		setWorld(null);
 		for (int I=0; I==14; I++)
-			this.loadBullet(new Bullet());
+			this.loadBullet(new Bullet(mass, mass, mass, mass, mass));
 	}
 	
 	/**
@@ -120,7 +136,7 @@ public class Ship extends Entity{
 	@Raw
 	public void setPosition(double xpos, double ypos) {
 		if (! isValidPosition(xpos,ypos))
-			throw new IllegalPositionException(xpos, ypos, this);
+			throw new IllegalPositionException(xpos, ypos);
 		this.xPosition = xpos;
 		this.yPosition = ypos;
 	}
@@ -298,7 +314,7 @@ public class Ship extends Entity{
 	@Raw
 	public void setRadius(double radius) throws IllegalRadiusException{
 		if (radius < MIN_RADIUS)
-			throw new IllegalRadiusException(radius, this);
+			throw new IllegalRadiusException(radius);
 		this.radius = radius;
 	}
 	
@@ -372,7 +388,7 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public void setWorld(World world) {
-		if ((this.getWorld() == null)&&(world.getEntities().containsValue(this)))
+		if (this.getWorld() == null)
 				this.world = world;
 	}
 	
@@ -444,19 +460,13 @@ public class Ship extends Entity{
 	 * 			| 	new.getBullets().contains(bullets[I])
 	 * 			| 	bullets[I].getShip() == new
 	 * @throws	IllegalBulletException
-	 * 			The given bullet is already loaded into another ship.
-	 * 			| ! for each bullet in bullets:
-	 * 			| 	bullet.getShip != this
-	 * @throws	IllegalBulletException
-	 * 			The given ship is already located in a world.
-	 * 			| ! for each bullet in bullets:
-	 * 			| 	this.getWorld() != null
+	 * 			A given bullet is already located in a ship/world.
+	 * 			| for at least one bullet in bullets:
+	 * 			| 	bullet.hasPosition()
 	 */
-	public void loadBullet(Bullet... bullets) {
+	public void loadBullet(Bullet... bullets) throws IllegalBulletException {
 		for (Bullet bullet: bullets) {
-			if (bullet.getShip() != null)
-				throw new IllegalBulletException(bullet);
-			if (bullet.getWorld() != null)
+			if (bullet.hasPosition())
 				throw new IllegalBulletException(bullet);
 			this.getBullets().add(bullet);
 			bullet.setShip(this);
@@ -573,10 +583,25 @@ public class Ship extends Entity{
 	 * 
 	 * @post	The new state of this ship is terminated.
 	 * 			| new.isTerminated()
+	 * @post	This ship is no longer associated with its world, if any. 
+	 * 			| new.getWorld() == null
+	 * 			| ! old.getWorld().contains(this)
+	 * @post	This ship does not load any bullets.
+	 * 			| for each bullet in old.getBullets():
+	 * 			| 	(new bullet).getShip() == null
+	 * 			| 	! new.getBullets().contains(bullet)
 	 */
 	@Raw
 	public void terminate() {
 		this.isTerminated = true;
+		this.setWorld(null);
+		double[] pos = {this.getXPosition(),this.getYPosition()};
+		this.getWorld().getEntities().remove(pos);
+		this.getWorld().getShips().remove(this);
+		for (Bullet bullet: this.getBullets()) {
+			this.getBullets().remove(bullet);
+			bullet.setShip(null);
+		}
 	}
 	
 	/**
@@ -848,7 +873,7 @@ public class Ship extends Entity{
 	/**
 	 * A variable registering the mass density of a ship.
 	 */
-	private double massDensity = MIN_DENSITY;
+	private double massDensity;
 	
 	/**
 	 * A variable registering the bullets of a ship.
@@ -859,12 +884,12 @@ public class Ship extends Entity{
 	/**
 	 * A variable registering whether the thruster of this ship is enabled.
 	 */
-	private boolean thruster = false; 
+	private boolean thruster; 
 	
 	/**
 	 * A variable registering the force the active thruster of this ship exerts.
 	 */
-	private double thrustForce = STANDARD_FORCE;
+	private double thrustForce;
 	
 	/**
 	 * A variable registering the minimum radius of a ship.
