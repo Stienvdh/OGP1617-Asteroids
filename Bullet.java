@@ -1,45 +1,32 @@
 package asteroids.model;
 
-import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 
 public class Bullet extends Entity{
 	
 	/**
-	 * 
-	 */
-	public Bullet(double x, double y, double xVelocity, double yVelocity, double radius) {
-		
-	}
-	
-	/**
-	 * Return the position of this bullet along the x-axis.
-	 */
-	@Basic @Raw
-	public double getXPosition() {
-		return this.xPosition;
-	}
-	
-	/**
-	 * Set the position of this bullet to a given position.
+	 * Create a new bullet with given position, velocity and radius.
 	 * 
 	 * @param	xpos
-	 * 			The new position of this bullet along the x-axis.
-	 * @param	ypos
-	 * 			The new position of this bullet along the y-axis.
-	 * @post	The new position for this new bullet is equal to the given position.
+	 * 			The position of this bullet along the x-axis.
+	 * @param	ypos 
+	 * 			The position of this bullet along the y-axis.
+	 * @post	The position of this bullet is the given position.
 	 * 			| new.getXPosition() == xpos
-	 * 			| new.getYPosition() == ypos
+	 * 			| new.getYPosition() == ypos
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
-	 * 			| ! isValidPosition(xpos, ypos)
+	 * 			| ! isValidPosition(xpos,ypos)
 	 */
-	@Raw
-	public void setPosition(double xpos, double ypos) {
-		if (! isValidPosition(xpos,ypos))
-			throw new IllegalPositionException(xpos, ypos);
-		this.xPosition = xpos;
-		this.yPosition = ypos;
+	public Bullet(double xpos, double ypos, double xvel, double yvel, double radius) 
+			throws IllegalPositionException {
+		setWorld(null);
+		setShip(null);
+		setSource(null);
+		setPosition(xpos, ypos);
+		setMaxSpeed(MAX_SPEED);
+		setVelocity(xvel, yvel);
+		setRadius(radius);
 	}
 	
 	/**
@@ -49,6 +36,10 @@ public class Bullet extends Entity{
 	 * 			The position along the x-axis to check.
 	 * @param 	ypos
 	 * 			The position along the y-axis to check.
+	 * @return 	If xpos or ypos is infinity or not a number, false is returned.
+	 * 			| if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
+				|	||(((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+				|	then result == false
 	 * @return	If this bullet is not associated with a world, nor with a ship, it is positioned
 	 * 			in an unbounded two-dimensional space.
 	 * 			| if (! hasPosition())
@@ -73,19 +64,21 @@ public class Bullet extends Entity{
 	 * 			| 		(for each entity in this.getMotherWorld().getEntities(): !this.overlap(entity)
 	 */
 	public boolean isValidPosition(double xpos, double ypos) {
-		if (! hasPosition())
+		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
+				||(((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+			return false;
+		if (! this.hasPosition())
 			return true;
 		else if (this.getWorld() != null)
 			world = this.getWorld();
-		else if (this.getShip() != null) {
-			if (this.getShip().getBullets().contains(this))
-				return true;
-			world = this.getMotherWorld();
-		}
+		else if (this.getShip() != null)
+			return true;
+		else 
+			world = this.getSource().getWorld();
 		if ((this.getRadius()<=xpos)&&(xpos<=world.getWidth()-this.getRadius())&&
 				(this.getRadius()<=ypos)&&(ypos<=world.getHeight()-this.getRadius())) {
 			for (Entity entity: world.getEntities().values()) {
-				if (this.overlap(entity))
+				if ((this.overlap(entity))&&(entity!=this))
 				return false;
 			return true;
 			}
@@ -94,11 +87,30 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Return the position of this bullet along the y-axis.
+	 * Set the maximum speed of this bullet to a given speed.
+	 * 
+	 * @param 	maxSpeed	
+	 * 			The new maximum speed of this bullet.
+	 * @post	If the given speed does not exceed the maximum speed of a bullet, the new
+	 * 			maximum speed of this bullet is the given speed. Otherwise, the new maximum speed of
+	 * 			this bullet is MAX_SPEED.
+	 * 			| if maxSpeed <= MAX_SPEED
+	 * 			| 	new.getMaxSpeed == maxSpeed
+	 * 			| else
+	 * 			| 	new.getMaxSpeed == MAX_SPEED
+	 * @post	If the current velocity of this bullet exceeds its maximum value, the velocity of
+	 * 			this bullet is set to its maximum value. 
+	 * 			| if (old.getSpeed() > new.getMaxSpeed())
+	 *			| 	new.getXVelocity == new.getMaxSpeed()*Math.cos(old.getOrientation()), 
+	 *			| 	new.getYVelocity == new.getMaxSpeed()*Math.sin(old.getOrientation());
 	 */
-	@Basic @Raw
-	public double getYPosition() {
-		return this.yPosition;
+	@Raw
+	public void setMaxSpeed(double maxSpeed) {
+		if (Math.abs(maxSpeed) > MAX_SPEED)
+			this.maxSpeed = MAX_SPEED;
+		else
+			this.maxSpeed = maxSpeed;
+		this.setVelocity(this.getXVelocity(), this.getYVelocity());
 	}
 	
 	/**
@@ -112,7 +124,7 @@ public class Bullet extends Entity{
 	 * Return the mass density of this bullet.
 	 */
 	public double getMassDensity() {
-		return this.massDensity;
+		return DENSITY;
 	}
 	
 	/**
@@ -129,14 +141,17 @@ public class Bullet extends Entity{
 	 * 			The ship in which this bullet has to be loaded.
 	 * @post	This bullet is loaded in the given ship.
 	 * 			| new.ship == ship
-	 * @throws	IllegalShipException
-	 * 			The given ship did not load this bullet.
-	 * 			| ! ship.getBullets().contains(this)
+	 * @throws	IllegalBulletException
+	 * 			This bullet is already located in a world/loaded by as ship/fired by a ship.
+	 * 			| this.hasPosition()
 	 */
-	public void setShip(Ship ship) {
-		if (! ship.getBullets().contains(this))
-			throw new IllegalShipException(ship);
-		this.ship = ship;
+	public void setShip(Ship ship) throws IllegalBulletException{
+		if (ship==null)
+			this.ship=null;
+		else if (this.hasPosition())
+			throw new IllegalBulletException(this);
+		else
+			this.ship = ship;
 	}
 	
 	/**
@@ -149,23 +164,56 @@ public class Bullet extends Entity{
 	/**
 	 * Locate this bullet in the given world.
 	 * 
-	 *@param 	world
+	 * @param 	world
 	 * 			The world, in which this bullet has to be located.
 	 * @post	If the bullet does not belong to a world/ship yet and if the given world already associates 
 	 * 			the bullet with itself, the new world of this bullet is the given world.
 	 * 			| if (!old.hasPosition())&&(world.getEntities().contains(this))
 	 *			|	new.world == world;		
+	 * @throws	IllegalBulletException
+	 * 			This bullet is already located in a world/loaded by as ship/fired by a ship.
+	 * 			| this.hasPosition()
 	 */
-	public void setWorld(World world) {
-		if (!this.hasPosition()&&(world.getEntities().containsValue(this)))
-			this.world = world;
+	public void setWorld(World world) throws IllegalBulletException{
+		if (world==null)
+			this.world=null;
+		if (this.hasPosition())
+			throw new IllegalBulletException(this);
+		this.world = world;
 	}
 	
 	/**
 	 * Return whether this bullet is located in a world/ship.
 	 */
 	public boolean hasPosition() {
-		return ((this.getWorld()!=null)||(this.getShip()!=null));
+		return ((this.getWorld()!=null)||(this.getShip()!=null)||(this.getSource()!=null));
+	}
+	
+	/**
+	 * Return the ship that fired this bullet.
+	 */
+	public Ship getSource() {
+		return this.source;
+	}
+	
+	/**
+	 * Set the source of this bullet to a given ship.
+	 * 
+	 * @param	source
+	 * 			The ship that fired this bullet.
+	 * @post	The source of this bullet is the given ship.
+	 * 			| new.getSource() == source
+	 * @throws 	IllegalBulletException
+	 * 			This bullet is already located in a world/loaded by as ship/fired by a ship.
+	 * 			| this.hasPosition()
+	 */
+	public void setSource(Ship source) throws IllegalBulletException {
+		if (source==null)
+			this.source=null;
+		else if (this.hasPosition())
+			throw new IllegalBulletException(this);
+		else
+			this.source = source;
 	}
 	
 	/**
@@ -187,26 +235,9 @@ public class Bullet extends Entity{
 	 * 			| radius < MIN_RADIUS
 	 */
 	public void setRadius(double radius) {
-		if (radius < MIN_RADIUS)
+		if (radius <= MIN_RADIUS)
 			throw new IllegalRadiusException(radius);
 		this.radius = radius;
-	}
-	
-	/**
-	 * Return the mother world of this bullet.
-	 * 
-	 * @return	If this bullet is loaded in a ship, the world associated with this ship is returned.
-	 * 			Otherwise, null is returned.
-	 * 			| if this.getShip() != null
-	 * 			| 	return this.getShip().getWorld()
-	 * 			| else
-	 * 			| 	return null
-	 */
-	public World getMotherWorld() {
-		if (this.getShip().getWorld() != null)
-			return this.getShip().getWorld();
-		else
-			return null;
 	}
 	
 	/**
@@ -240,46 +271,24 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Return whether this bullet is terminated.
-	 */
-	public boolean isTerminated() {
-		return this.isTerminated;
-	}
-	
-	/**
-	 * A variable registering the position of this bullet along the x-axis.
-	 */
-	private double xPosition;
-	
-	/**
-	 * A variable registering the position of this bullet along the y-axis. 
-	 */
-	private double yPosition;
-	
-	/** 
-	 * A variable registering the mass of this bullet.
-	 */
-	private double massDensity = DENSITY;
-	
-	/**
 	 * A variable registering in which ship this bullet is loaded. Null if none.
 	 */
-	private Ship ship;
+	private Ship ship = null;
 	
 	/**
 	 * A variable registering in which world this bullet is loaded. Null if none.
 	 */
-	private World world;
+	private World world = null;
 	
 	/**
-	 * A variable registering the radius of this bullet.
+	 * A variable registering the ship that fired this bullet. Null if none.
 	 */
-	private double radius;
+	private Ship source = null;
 	
 	/**
-	 * A variable registering whether this bullet is terminated.
+	 * A variable registering the maximum speed of a bullet.
 	 */
-	private boolean isTerminated;
+	private static double MAX_SPEED = 300000;
 	
 	/**
 	 * A variable registering the minimum radius of a bullet.

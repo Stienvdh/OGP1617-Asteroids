@@ -65,13 +65,13 @@ public class Ship extends Entity{
 			double mass) 
 			throws IllegalRadiusException, IllegalPositionException {
 		setPosition(xpos, ypos);
+		setMaxSpeed(MAX_SPEED);
 		setVelocity(xvel, yvel);
 		setRadius(radius);
 		setOrientation(orientation);
 		setMass(mass);
 		setMassDensity(MIN_DENSITY);
 		setThrustForce(STANDARD_FORCE);
-		setMaxSpeed(MAX_SPEED);
 		setWorld(null);
 		for (int I=0; I==14; I++)
 			this.loadBullet(new Bullet(mass, mass, mass, mass, mass));
@@ -100,45 +100,7 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public Ship() {
-		this(0.0,0.0,0.0,0.0,MIN_RADIUS,0.0,MAX_SPEED);
-	}
-	
-	/**
-	 * Return the position of this ship along the x-axis.
-	 */
-	@Basic @Raw
-	public double getXPosition() {
-		return this.xPosition;
-	}
-	
-	/**
-	 * Return the position of this ship along the y-axis.
-	 */
-	@Basic @Raw
-	public double getYPosition() {
-		return this.yPosition;
-	}
-	
-	/**
-	 * Set the position of this ship to a given position.
-	 * 
-	 * @param	xpos
-	 * 			The new position of this ship along the x-axis.
-	 * @param	ypos
-	 * 			The new position of this ship along the y-axis.
-	 * @post	The new position for this new ship is equal to the given position.
-	 * 			| new.getXPosition() == xpos
-	 * 			| new.getYPosition() == ypos
-	 * @throws	IllegalPositionException
-	 * 			The given position is not valid.
-	 * 			| ! isValidPosition(xpos, ypos)
-	 */
-	@Raw
-	public void setPosition(double xpos, double ypos) {
-		if (! isValidPosition(xpos,ypos))
-			throw new IllegalPositionException(xpos, ypos);
-		this.xPosition = xpos;
-		this.yPosition = ypos;
+		this(0.0,0.0,0.0,0.0,MIN_RADIUS,0.0,0.0);
 	}
 	
 	/**
@@ -161,108 +123,21 @@ public class Ship extends Entity{
 	 *			| 	result == false
 	 */
 	public boolean isValidPosition(double xpos, double ypos) {
-		if ((! ((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
-				&& (! ((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos))))) {
-			if (this.getWorld() != null) {
-				if (((this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius())))&&
-						((this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius()))))
-					return true;
+		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
+				&& (((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+			return false;
+		if (this.getWorld() != null) {
+			if (((this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius())))&&
+					((this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius())))) {
+				for (Entity entity: world.getEntities().values()) {
+					if ((this.overlap(entity))&&(entity!=this))
+						return false;
+				}
+				return true;
 			}
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Return the velocity of this ship along the x-axis.
-	 */
-	@Basic @Raw
-	public double getXVelocity() {
-		return this.xVelocity;
-	}
-	
-	/**
-	 * Return the velocity of this ship along the y-axis.
-	 */
-	@Basic @Raw
-	public double getYVelocity() {
-		return this.yVelocity;
-	}
-	
-	/**
-	 * Set the velocity of this ship to a given velocity.
-	 * 
-	 * @param	xvel
-	 * 			The new velocity of this ship along the x-axis.
-	 * @param	yvel
-	 * 			The new velocity of this ship along the y-axis.
-	 * @post	If the speed of the ship with the new velocity does not exceed its maximum
-	 * 			value, the new velocity of the ship is the given velocity. Otherwise,
-	 * 			the velocity of the new ship is equal to the maximum speed of this ship..
-	 * 			| if (sqrt(xvel^2 + yvel^2) <= old.getMaxSpeed())
-	 * 			| 	then (new.getXVelocity() == xvel &&
-	 * 			|		new.getYVelocity() == yvel);
-	 * 			| else
-	 * 			| 	(new.getXVelocity == xvel/sqrt(xvel^2 + yvel^2)*old.getMaxSpeed() &&
-	 * 			|		new.getYVelocity == yvel/sqrt(xvel^2 + yvel^2)*old.getMaxSpeed());
-	 */
-	@Raw
-	public void setVelocity(double xvel, double yvel) {
-		if (Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2)) <= this.maxSpeed) {
-			this.xVelocity = xvel;
-			this.yVelocity = yvel; }
-		else {
-			this.xVelocity = xvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed;
-			this.yVelocity = yvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed; }
-	}
-	
-	/**
-	 * Return the acceleration of this ship along the x-axis.
-	 */
-	@Basic @Raw
-	public double getXAcceleration() {
-		return this.xAcceleration;
-	}
-	
-	/**
-	 * Return the acceleration of this ship along the y-axis.
-	 */
-	@Basic @Raw
-	public double getYAcceleration() {
-		return this.yAcceleration;
-	}
-	
-	/**
-	 * Set the acceleration of this ship to a given acceleration.
-	 * 
-	 * @param	xacc
-	 * 			The new acceleration of this ship along the x-axis.
-	 * @param	yacc
-	 * 			The new acceleration of this ship along the y-axis.
-	 * @post	The new acceleration of this ship is equal to the given acceleration.
-	 * 			| new.getXAcceleration == xacc
-	 * 			| new.getYAcceleration == yacc
-	 */
-	@Raw
-	public void setAcceleration(double xacc, double yacc) {
-		this.xAcceleration = xacc;
-		this.yAcceleration = yacc;
-	}
-	
-	/**
-	 * Return the absolute value of the speed of the ship.
-	 */
-	@Raw
-	public double getSpeed() {
-		return Math.sqrt(Math.pow(getXVelocity(),2) + Math.pow(getYVelocity(),2));
-	}
-	
-	/**
-	 * Return the maximal speed of this ship.
-	 */
-	@Basic @Raw
-	public double getMaxSpeed() {
-		return this.maxSpeed;
+			return false;
+			}
+		return true;
 	}
 	
 	/**
@@ -293,11 +168,24 @@ public class Ship extends Entity{
 	}
 	
 	/**
-	 * Return the radius of this ship.
+	 * Return the acceleration of this ship.
 	 */
 	@Basic @Raw
-	public double getRadius() {
-		return this.radius;
+	public double getAcceleration() {
+		return this.acceleration;
+	}
+	
+	/**
+	 * Set the acceleration of this ship to a given acceleration.
+	 * 
+	 * @param	acc
+	 * 			The new acceleration of this ship
+	 * @post	The new acceleration of this ship is equal to the given acceleration.
+	 * 			| new.getAcceleration == acc
+	 */
+	@Raw
+	public void setAcceleration(double acc) {
+		this.acceleration = acc;
 	}
 	
 	/**
@@ -313,7 +201,7 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public void setRadius(double radius) throws IllegalRadiusException{
-		if (radius < MIN_RADIUS)
+		if (radius <= MIN_RADIUS)
 			throw new IllegalRadiusException(radius);
 		this.radius = radius;
 	}
@@ -388,7 +276,7 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public void setWorld(World world) {
-		if (this.getWorld() == null)
+		if ((this.getWorld() == null)||(world==null))
 				this.world = world;
 	}
 	
@@ -503,6 +391,7 @@ public class Ship extends Entity{
 			this.massDensity = massDensity;
 		else
 			this.massDensity = MIN_DENSITY;
+		this.setMass(this.getMass());
 	}
 	
 	/**
@@ -538,13 +427,11 @@ public class Ship extends Entity{
 	 * 			| new.thrusterEnabled()
 	 * @post	The new acceleration of this ship is set to the value, derived from Newton's second
 	 * 			law of motion (F=m*a)
-	 * 			| new.getXAcceleration == getThrustForce()/getTotalMass()*Math.cos(getOrientation())
-	 * 			| new.getYAcceleration == getThrustForce()/getTotalMass()*Math.sin(getOrientation())
+	 * 			| new.getAcceleration == this.getThrustForce()/this.getTotalMass()
 	 */
 	public void thrustOn() {
 		this.thruster = true;
-		this.setAcceleration(this.getThrustForce()/this.getTotalMass()*Math.cos(this.getOrientation()), 
-				this.getThrustForce()/this.getTotalMass()*Math.sin(this.getOrientation()));
+		this.setAcceleration(this.getThrustForce()/this.getTotalMass());
 	}
 	
 	/**
@@ -565,17 +452,7 @@ public class Ship extends Entity{
 	 */
 	public void thrustOff() {
 		this.thruster = false;
-	}
-	
-	/**
-	 * Return whether this ship is terminated.
-	 * 
-	 * @return	True if and only if this ship is terminated.
-	 * 			| result == this.isTerminated()
-	 */
-	@Basic @Raw
-	public boolean isTerminated() {
-		return this.isTerminated;
+		this.setAcceleration(0);
 	}
 	
 	/**
@@ -605,14 +482,17 @@ public class Ship extends Entity{
 	}
 	
 	/**
-	 * Move the ship for a given amount of time according to its current position, velocity and orientation.
+	 * Move the ship for a given amount of time according to its current position, velocity, 
+	 * acceleration and orientation.
 	 * 
 	 * @param 	dt
 	 * 			The duration of the movement.
 	 * @post	The new position of the ship is the position it reaches if starts from its old position
-	 * 			and orientation and does not change its velocity while moving. 
-	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
-	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
+	 * 			and its orientation and acceleration do not change during the movement.
+	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity() +
+	 * 			| 	Math.pow(getAcceleration(),2)*dt/2*Math.cos(this.getOrientation())
+	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity() +
+	 * 			| 	
 	 * @throws 	IllegalDurationException
 	 * 			The given duration of the movement is negative.
 	 * 			| dt < 0
@@ -621,8 +501,12 @@ public class Ship extends Entity{
 		if (dt < 0)
 			throw new IllegalDurationException(dt);
 		else if (dt > 0) {
-			this.setPosition(getXPosition()+getXVelocity()*dt,
-								getYPosition()+getYVelocity()*dt);
+			this.setPosition(getXPosition()+getXVelocity()*dt+
+					Math.pow(getAcceleration()*Math.cos(this.getOrientation()),2)*dt/2,
+								getYPosition()+getYVelocity()*dt+
+					Math.pow(getAcceleration()*Math.sin(this.getOrientation()),2)*dt/2);
+			this.setVelocity(getXVelocity()+getAcceleration()*Math.cos(this.getOrientation())*dt, 
+					getYVelocity()+getAcceleration()*Math.sin(this.getOrientation())*dt);
 		}
 	}
 	
@@ -648,88 +532,6 @@ public class Ship extends Entity{
 			angle += 2 * Math.PI;
 		}
 		setOrientation(getOrientation()+angle);
-	}
-	
-	/**
-	 * Return 
-	 */
-	
-	/**
-	 * Change the ship's velocity by a given amount, based on its current velocity and orientation.
-	 * 
-	 * @param 	amount
-	 * 			The amount of velocity the ship gains.
-	 * @post	If the given amount is negative, the amount is set to zero.
-	 * 			| if (amount < 0)
-	 * 			| 	then (new.getXVelocity() == old.getXVelocity() &&
-	 * 			|			new.getYVelocity() == old.getYVelocity())
-	 * @post	If the thrust causes the ship's velocity to exceed its maximum value, the ship's velocity 
-	 * 			is set to its maximum value.
-	 * 			| if (old.getMaxSpeed()-old.getSpeed() < amount)
-	 * 			| 	then new.getSpeed() == old.getMaxSpeed()
-	 * @post	If the given amount is nonnegative and does not cause the ship to exceed its maximum speed,
-	 * 			the ship's velocity is increased by the given amount. 
-	 * 			| if ((amount >= 0) && (old.getMaxSpeed()-old.getSpeed() >= amount))
-	 * 			| 	then new.getSpeed() == old.getSpeed() + amount
-	 */
-	public void thrust(double dt) {
-		this.thrustOn();
-		if	(this.getMaxSpeed()-this.getSpeed() < dt) {
-			this.setVelocity(this.getMaxSpeed()*Math.cos(this.getOrientation()),
-								this.getMaxSpeed()*Math.sin(this.getOrientation())); }
-		else {
-			this.setVelocity(this.getXVelocity() + dt*Math.cos(this.getOrientation()),
-								this.getYVelocity() + dt*Math.sin(this.getOrientation()));
-		}
-	}
-	
-	/**
-	 * Return the distance between this ship and a given ship.
-	 * 
-	 * @param 	other
-	 * 			The ship with which this ship will collide.
-	 * @return	The distance between two ships is the distance between its centers minus the radiuses of both 
-	 * 			ships. The distance can thus be negative. The distance between a ship and itself is zero.
-	 * 			| if (this == other)
-	 *			| 	then result == 0
-	 *			| else
-	 *			|	result == (Math.sqrt(Math.pow(this.getXPosition()-other.getXPosition(),2)
-	 *			|	+ Math.pow(this.getYPosition()-other.getYPosition(),2))
-	 *			|	- this.getRadius() - other.getRadius())
-	 * @throws 	IllegalShipException
-	 * 			At least one of the ships involved is ineffective or terminated.
-	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
-	 */
-	public double getDistanceBetween(Ship other) throws IllegalShipException {
-		if ((other == null)||(other.isTerminated()))
-			throw new IllegalShipException(other);
-		if (this.isTerminated())
-			throw new IllegalShipException(this);
-		if (this == other)
-			return 0;
-		return (Math.sqrt(Math.pow(this.getXPosition()-other.getXPosition(),2)
-					+ Math.pow(this.getYPosition()-other.getYPosition(),2))
-					- this.getRadius() - other.getRadius());
-	}
-	
-	/**
-	 * Return whether this ship overlaps with the given ship.
-	 * 
-	 * @param 	other
-	 * 			The ship with which this ship might overlap.
-	 * @return	True if and only if the distance between the ships is positive. A ship thus always overlaps 
-	 * 			with itself.
-	 * 			| result == (getDistanceBetween(this,other) <= 0)
-	 * @throws 	IllegalShipException
-	 * 			At least one of the ships involved is ineffective or terminated.
-	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
-	 */
-	public boolean overlap(Ship other) throws IllegalArgumentException{
-		if ((other == null)||(other.isTerminated()))
-			throw new IllegalShipException(other);
-		if ((this == null)||(this.isTerminated()))
-			throw new IllegalShipException(this);
-		return (getDistanceBetween(other) <= 0);
 	}
 	
 	/**
@@ -809,36 +611,10 @@ public class Ship extends Entity{
 			return null;
 	}
 	
-	
 	/**
-	 * A variable registering the position of this ship along the x-axis.
+	 * A variable registering the acceleration of this ship.
 	 */
-	private double xPosition;
-	
-	/**
-	 * A variable registering the position of this ship along the y-axis. 
-	 */
-	private double yPosition;
-	
-	/**
-	 * A variable registering the velocity of this ship along the x-axis.
-	 */
-	private double xVelocity;
-	
-	/**
-	 * A variable registering the velocity of this ship along the y-axis.
-	 */
-	private double yVelocity;
-	
-	/**
-	 * A variable registering the acceleration of this ship along the x-axis.
-	 */
-	private double xAcceleration = 0;
-	
-	/**
-	 * A variable registering the acceleration of this ship along the y-axis.
-	 */
-	private double yAcceleration = 0;
+	private double acceleration = 0;
 	
 	/**
 	 * A variable registering the orientation of this ship.
@@ -846,34 +622,19 @@ public class Ship extends Entity{
 	private double orientation;
 	
 	/**
-	 * A variable registering the radius of this ship.
-	 */
-	private double radius = MIN_RADIUS;
-	
-	/**
-	 * A variable registering the maximum speed of this ship.
-	 */
-	private double maxSpeed = MAX_SPEED;
-	
-	/**
-	 * A variable registering whether a ship is terminated.
-	 */
-	private boolean isTerminated;
-	
-	/**
 	 * A variable registering the world of a ship.
 	 */
 	private World world = null;
 	
 	/**
-	 * A variable registering the mass of a ship.
+	 * A variable registering the mass of this ship.
 	 */
 	private double mass;
 	
 	/**
-	 * A variable registering the mass density of a ship.
+	 * A variable registering the mass density of this entity.
 	 */
-	private double massDensity;
+	protected double massDensity = MIN_DENSITY;
 	
 	/**
 	 * A variable registering the bullets of a ship.
@@ -884,22 +645,22 @@ public class Ship extends Entity{
 	/**
 	 * A variable registering whether the thruster of this ship is enabled.
 	 */
-	private boolean thruster; 
+	private boolean thruster = false; 
 	
 	/**
 	 * A variable registering the force the active thruster of this ship exerts.
 	 */
-	private double thrustForce;
+	private double thrustForce = STANDARD_FORCE;
+	
+	/**
+	 * A variable registering the maximum speed of a ship.
+	 */
+	private static double MAX_SPEED = 300000;
 	
 	/**
 	 * A variable registering the minimum radius of a ship.
 	 */
 	private static double MIN_RADIUS = 10;
-	
-	/** 
-	 * A variable registering the maximum velocity of a ship.
-	 */
-	private static final double MAX_SPEED = 300000;
 	
 	/** 
 	 * A variable registering the minimum density of a ship.

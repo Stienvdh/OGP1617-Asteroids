@@ -39,12 +39,12 @@ public class World {
 	 * 			| 	new.getWidth() == UPPER_WIDTH && new.getHeight() == UPPER_HEIGHT
 	 */
 	public void setSize(double width, double height) {
-		if ((! (width>UPPER_WIDTH))&&(! (height>UPPER_HEIGHT))) {
-			this.width = width;
-			this.height = height; }
-		else
+		if ((width>UPPER_WIDTH)||(height>UPPER_HEIGHT)||(Double.isNaN(width))||Double.isNaN(height)) {
 			this.width = UPPER_WIDTH;
-			this.height = UPPER_HEIGHT;
+			this.height = UPPER_HEIGHT; }
+		else
+			this.width = width;
+			this.height = height;
 	}
 	
 	/**
@@ -59,24 +59,65 @@ public class World {
 	 * 
 	 * @param 	entity
 	 * 			The entity, that has to be added to this world.
+	 * @throws	IllegalWorldException 
+	 * 			The given entity is already located in a world/ship.
+	 * 			| hasPosition()
 	 * @post	The world contains the given entity.
 	 * 			| new.getEntities().contains(entity)
 	 * @post	The given entity is located in this world. 
 	 * 			| (new entity).getWorld() == this
 	 * @throws	IllegalEntityException
-	 * 			The given entity is already located in another world or ship.
+	 * 			The given entity is already associated with another world or ship.
 	 * 			| entity.hasPosition()
-	 *OVERLAPDINGEN
+	 * @throws 	IllegalEntityException
+	 * 			The given entity does not have a valid position in this world.
+	 * 			| ! isValidPosition(entity.getXPosition(),entity.getYposition())
 	 */
-	public void addEntity(Entity entity) {
-		if (entity instanceof Ship)
-			this.getShips().add((Ship) entity);
-		else if (entity instanceof Bullet)
-			this.getShips().add((Ship) entity);
-		double[] pos = {entity.getXPosition(),entity.getYPosition()};
-		this.getEntities().put(pos, entity);
+	public void addEntity(Entity entity) throws IllegalEntityException {
 		entity.setWorld(this);
+		if (! entity.isValidPosition(entity.getXPosition(), entity.getYPosition())) {
+			entity.setWorld(null);
+			throw new IllegalEntityException(entity);
+		}
+		else {
+			if (entity instanceof Ship)
+				this.getShips().add((Ship) entity);
+			else if (entity instanceof Bullet)
+				this.getShips().add((Ship) entity);
+			double[] pos = {entity.getXPosition(),entity.getYPosition()};
+			this.getEntities().put(pos, entity);
+		}
 	}
+	
+	/**
+	 * Remove a given entity from this world.
+	 * 
+	 * @param	entity
+	 * 			The entity to remove from this world.
+	 * @post	This world does not contain the given entity.
+	 * 			| ! this.getEntities().contains(entity)
+	 * 			| if entity instanceof Ship
+	 * 			| 	! new.getShips().contains(entity)
+	 * 			| if entity instanceof Bullet
+	 * 			| 	! new.getBullets().contains(entity)
+	 * @post	This entity is no longer associated with this world.
+	 * 			| (new entity).getWorld() == null
+	 * @throws	IllegalEntityException
+	 * 			This world does not contain the given entity.
+	 * 			| ! this.getEntities().containsValue(entity)
+	 */
+	public void removeEntity(Entity entity) throws IllegalEntityException {
+		if (! this.getEntities().containsValue(entity))
+			throw new IllegalEntityException(entity);
+		double[] pos = {entity.getXPosition(),entity.getYPosition()};
+		this.getEntities().remove(pos, entity);
+		if (entity instanceof Ship)
+			this.getShips().remove(entity);
+		else if (entity instanceof Bullet)
+			this.getBullets().remove(entity);
+		entity.setWorld(null);
+	}
+	
 	
 	/**
 	 * Return, if any, the entity whose center coincides with the given position. 
