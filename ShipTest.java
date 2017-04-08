@@ -209,24 +209,6 @@ public class ShipTest {
 	}
 	
 	@Test
-	public void testThrust() throws ModelException {
-		Ship ship = facade.createShip(100, 200, 10, 20, 30, Math.PI);
-		ship.thrust(10);
-		assertEquals(20, ship.getYVelocity(), EPSILON);
-		assertEquals(0, ship.getXVelocity(), EPSILON);
-		ship.turn(Math.PI/2);
-		ship.thrust(10);
-		assertEquals(0, ship.getXVelocity(), EPSILON);
-		assertEquals(10, ship.getYVelocity(), EPSILON);
-		ship.thrust(MAX_SPEED);
-		assertEquals(0, ship.getXVelocity(), EPSILON);
-		assertEquals(-MAX_SPEED, ship.getYVelocity(), EPSILON);
-		ship.thrust(-2);
-		assertEquals(0, ship.getXVelocity(), EPSILON);
-		assertEquals(-MAX_SPEED, ship.getYVelocity(), EPSILON);
-	}
-	
-	@Test
 	public void testgetDistanceBetween_LegalCase() throws ModelException {
 		Ship ship1 = facade.createShip(100, 200, 10, 20, 30, Math.PI);
 		Ship ship2 = facade.createShip(0, 0, 10, 20, 30, Math.PI);
