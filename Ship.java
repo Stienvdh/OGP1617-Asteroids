@@ -130,7 +130,7 @@ public class Ship extends Entity{
 			if (((this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius())))&&
 					((this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius())))) {
 				for (Entity entity: world.getEntities().values()) {
-					if ((this.overlap(entity))&&(entity!=this))
+					if ((this.overlap(entity))&&(entity!=this)&&(!this.getBullets().contains(entity)))
 						return false;
 				}
 				return true;
@@ -490,9 +490,15 @@ public class Ship extends Entity{
 	 * @post	The new position of the ship is the position it reaches if starts from its old position
 	 * 			and its orientation and acceleration do not change during the movement.
 	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity() +
-	 * 			| 	Math.pow(getAcceleration(),2)*dt/2*Math.cos(this.getOrientation())
+	 * 			| 	old.getAcceleration()*Math.cos(old.getOrientation())*Math.pow(dt,2)/2
 	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity() +
-	 * 			| 	
+	 * 			| 	old.getAcceleration()*Math.sin(old.getOrientation())*Math.pow(dt,2)/2
+	 * @post 	The new velocity of this ship is the velocity it reaches if its acceleration and
+	 * 			orientation do not change during the movement.
+	 * 			| new.getXVelocity() = old.getXVelocity()+
+	 * 			| 	old.getAcceleration()*Math.cos(old.getOrientation())*dt
+	 * 			| new.getYVelocity() = old.getYVelocity()+
+	 * 			| 	old.getAcceleration()*Math.sin(old.getOrientation())*dt
 	 * @throws 	IllegalDurationException
 	 * 			The given duration of the movement is negative.
 	 * 			| dt < 0
@@ -502,9 +508,9 @@ public class Ship extends Entity{
 			throw new IllegalDurationException(dt);
 		else if (dt > 0) {
 			this.setPosition(getXPosition()+getXVelocity()*dt+
-					Math.pow(getAcceleration()*Math.cos(this.getOrientation()),2)*dt/2,
+					this.getAcceleration()*Math.cos(this.getOrientation())*Math.pow(dt,2)/2,
 								getYPosition()+getYVelocity()*dt+
-					Math.pow(getAcceleration()*Math.sin(this.getOrientation()),2)*dt/2);
+					this.getAcceleration()*Math.sin(this.getOrientation())*Math.pow(dt,2)/2);
 			this.setVelocity(getXVelocity()+getAcceleration()*Math.cos(this.getOrientation())*dt, 
 					getYVelocity()+getAcceleration()*Math.sin(this.getOrientation())*dt);
 		}
@@ -577,6 +583,65 @@ public class Ship extends Entity{
 		else
 			return -(dv[0]*dr[0]+dv[1]*dr[1]+Math.sqrt(d))/(dv[0]*dv[0]+dv[1]*dv[1]);	
 	}
+	
+	/**
+	 * Return the time until the first collision of this ship with the boundaries of its world, if any.
+	 * 
+	 * @return 	If this ship is not located in a world, positive infinity is returned.
+	 * 			| if this.getWorld() == null
+	 * 			| 	result == Double.POSITIVE_INFINITY
+	 * @return 	If this ship is located in a world, the first collision of this ship with the 
+	 * 			boundaries of that world will happen after the returned time. Other entities in 
+	 * 			this world are not taken into account.
+	 * 			| xpos = getAcceleration()*Math.cos(getOrientation())*Math.pow(result,2)/2
+	 * 			| 	+getXVelocity()*result+getXPosition()
+	 * 			| ypos = getAcceleration()*Math.sin(getOrientation())*Math.pow(result,2)/2
+	 * 			| 	+getYVelocity()*result+getYPosition()
+	 *			| xpos == this.getWorld().getWidth()-this.getRadius() ||
+	 *			| xpos == this.getRadius ||
+	 *			| ypos == this.getWorld().getHeight()-this.getRadius() ||
+	 *			| ypos == this.getRadius() ||
+	 */
+	public double getTimeToBoundary() {
+		if (this.getWorld()==null)
+			return Double.POSITIVE_INFINITY;
+		double timeX1 = solveQuad(this.getAcceleration()*Math.cos(getAcceleration())/2,this.getXVelocity(),
+					-getWorld().getWidth()+getXPosition()+this.getRadius());
+		double timeX2 = solveQuad(this.getAcceleration()*Math.cos(getAcceleration())/2,this.getXVelocity(),
+					getXPosition()-getRadius());
+		double timeY1 = solveQuad(this.getAcceleration()*Math.sin(getAcceleration())/2,this.getYVelocity(),
+				-getWorld().getHeight()+getYPosition()+this.getRadius());
+		double timeY2 = solveQuad(this.getAcceleration()*Math.sin(getAcceleration())/2,this.getYVelocity(),
+					getYPosition()-getRadius());
+		double timeX = Math.min(timeX1,timeX2);
+		double timeY = Math.min(timeY1,timeY2);
+		return Math.min(timeX, timeY);
+	}
+	
+	public double solveQuad(double a,double b,double c) {
+		if (a==0)
+			if (b==0)
+				return Double.POSITIVE_INFINITY;
+			else
+				return -c/b;
+		double discr = Math.pow(b, 2)-4*a*c;
+		if (discr > 0) {
+			double root1 = (-b-Math.sqrt(discr))/2*a;
+			double root2 = (-b+Math.sqrt(discr))/2*a;
+			if ((root1>=0)||(root2>=0)) {
+				if ((root1>=0)&&(root2>=0))
+					return Math.min(root1,root2);
+				else
+					return Math.max(root1, root2);
+			}
+			else
+				return Double.POSITIVE_INFINITY;
+		}
+		else if (discr == 0)
+			return -b/2*a;
+		else
+			return Double.POSITIVE_INFINITY;
+		}
 	
 	/**
 	 * Return the position where this ship will collide with another ship.

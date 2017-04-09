@@ -142,6 +142,13 @@ public class World {
 	}
 	
 	/**
+	 * A method to evolve this world for a given duration.
+	 */
+	public void evolve(double dt) {
+		
+	}
+	
+	/**
 	 * Return the ships, located in this world.
 	 */
 	public HashSet<Ship> getShips() {

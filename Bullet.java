@@ -75,11 +75,17 @@ public class Bullet extends Entity{
 			return true;
 		else 
 			world = this.getSource().getWorld();
+		if (world == null)
+			return true;
 		if ((this.getRadius()<=xpos)&&(xpos<=world.getWidth()-this.getRadius())&&
 				(this.getRadius()<=ypos)&&(ypos<=world.getHeight()-this.getRadius())) {
 			for (Entity entity: world.getEntities().values()) {
-				if ((this.overlap(entity))&&(entity!=this))
-				return false;
+				if ((this.overlap(entity))&&(entity!=this)) {
+					if (this.getShip()!=entity)
+						return false;
+					else
+						return true;
+				}
 			return true;
 			}
 		}
@@ -238,6 +244,76 @@ public class Bullet extends Entity{
 		if (radius <= MIN_RADIUS)
 			throw new IllegalRadiusException(radius);
 		this.radius = radius;
+	}
+	
+	/**
+	 * Move this bullet for a given amount of time according to its current position, velocity 
+	 * and orientation.
+	 * 
+	 * @param 	dt
+	 * 			The duration of the movement.
+	 * @post	The new position of the bullet is the position it reaches if starts from its old position
+	 * 			and its orientation and velocity do not change during the movement.
+	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
+	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
+	 * @throws 	IllegalDurationException
+	 * 			The given duration of the movement is negative.
+	 * 			| dt < 0
+	 */
+	public void move(double dt) throws IllegalDurationException {
+		if (dt < 0)
+			throw new IllegalDurationException(dt);
+		else if (dt > 0) {
+			this.setPosition(getXPosition()+getXVelocity()*dt,
+								getYPosition()+getYVelocity()*dt);
+		}
+	}
+	
+	/**
+	 * Return the time until the first collision of this bullet with the boundaries 
+	 * of its world, if any.
+	 * 
+	 * @return 	If this bullet is not located in a world/associated with a ship, infinity is returned.
+	 * 			| if ! this.hasPosition()
+	 * 			| 	result == Double.POSITIVE_INFINITY
+	 * @return	If this bullet has no speed, infinity is returned.
+	 * 			| if this.getSpeed() == 0
+	 * 			| 	result == Double.POSITIVE_INFINITY
+	 * @return 	TO DO
+	 */
+	public double getTimeToBoundary() {
+		if ((this.getSpeed()==0)||(!hasPosition()))
+			return Double.POSITIVE_INFINITY;
+		else
+			if (this.getSource()!=null)
+				world = this.getSource().getWorld();
+			else if (this.getShip()!=null)
+				return this.getShip().getTimeToBoundary();
+			else
+				world = this.getWorld();
+			double timeX;
+			if (this.getXVelocity()!=0) {
+				double timeX1 = (world.getWidth()-this.getRadius()-this.getXPosition())/getXVelocity();
+				double timeX2 = (this.getRadius()-this.getXPosition())/getXVelocity();
+				if ((timeX1>=0)&&(timeX2>=0))
+					timeX = Math.min(timeX1, timeX2);
+				else
+					timeX = Math.max(timeX1, timeX2);
+			}
+			else 
+				timeX = Double.POSITIVE_INFINITY;
+			double timeY;
+			if (this.getYVelocity()!=0) {
+				double timeY1 = (world.getHeight()-this.getRadius()-this.getYPosition())/getYVelocity();
+				double timeY2 = (this.getRadius()-this.getYPosition())/getYVelocity();
+				if ((timeY1>=0)&&(timeY2>=0))
+					timeY = Math.min(timeY1, timeY2);
+				else
+					timeY = Math.max(timeY1, timeY2);
+			}
+			else 
+				timeY = Double.POSITIVE_INFINITY;
+			return Math.min(timeX,timeY);
 	}
 	
 	/**

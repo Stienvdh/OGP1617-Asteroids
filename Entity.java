@@ -208,4 +208,6 @@ public abstract class Entity {
 	public abstract double getMass();
 	public abstract double getMassDensity();
 	public abstract void setWorld(World world);
+	public abstract void move(double dt);
+	public abstract double getTimeToBoundary();
 }
