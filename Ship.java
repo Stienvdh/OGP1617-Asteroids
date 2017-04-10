@@ -1,7 +1,7 @@
 package asteroids.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import be.kuleuven.cs.som.annotate.*;
 
@@ -74,7 +74,7 @@ public class Ship extends Entity{
 		setThrustForce(STANDARD_FORCE);
 		setWorld(null);
 		for (int I=0; I==14; I++)
-			this.loadBullet(new Bullet(mass, mass, mass, mass, mass));
+			this.loadBullet(new Bullet(xpos, ypos, xvel, yvel, 0.2*radius));
 	}
 	
 	/**
@@ -127,10 +127,12 @@ public class Ship extends Entity{
 				&& (((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
 			return false;
 		if (this.getWorld() != null) {
-			if (((this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius())))&&
-					((this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius())))) {
-				for (Entity entity: world.getEntities().values()) {
-					if ((this.overlap(entity))&&(entity!=this)&&(!this.getBullets().contains(entity)))
+			if (getTimeToBoundary()!=0) {
+				for (Entity entity: getWorld().getEntities().values()) {
+					if ((entity!=this)&&(!this.getBullets().contains(entity))&&
+							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+									Math.pow(ypos-entity.getYPosition(),2)))<=
+									(entity.getRadius()+getRadius())))
 						return false;
 				}
 				return true;
@@ -328,7 +330,7 @@ public class Ship extends Entity{
 	/**
 	 * Return the bullets, loaded in this ship.
 	 */
-	public Set<Bullet> getBullets() {
+	public List<Bullet> getBullets() {
 		return this.bullets;
 	}
 	
@@ -358,6 +360,8 @@ public class Ship extends Entity{
 				throw new IllegalBulletException(bullet);
 			this.getBullets().add(bullet);
 			bullet.setShip(this);
+			bullet.setPosition(getXPosition(), getYPosition());
+			bullet.setVelocity(getXVelocity(), getYVelocity());
 		}
 	}
 	
@@ -365,6 +369,29 @@ public class Ship extends Entity{
 	 * Fire a bullet.
 	 */
 	public void fireBullet() {
+		if ((this.getNbBullets()>0)&&(this.getWorld()!=null)) {
+			Bullet bullet = this.getBullets().get(0);
+			bullet.setShip(null);
+			bullet.setSource(this);
+			this.getBullets().remove(0);
+			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
+				INITIAL_SPEED*Math.sin(getOrientation()));
+			double xpos = getXPosition()+(getRadius()+2*bullet.getRadius())*Math.cos(getOrientation());
+			double ypos = getYPosition()+(getRadius()+2*bullet.getRadius())*Math.cos(getOrientation());
+			if (bullet.getTimeToBoundary()==0)
+				bullet.terminate();
+			if (! bullet.isValidPosition(xpos,ypos))
+				for (Entity entity: getWorld().getEntities().values()) {
+					if ((!bullet.isTerminated())&&(entity!=bullet)&&
+							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+									Math.pow(ypos-entity.getYPosition(),2)))<=
+									(entity.getRadius()+bullet.getRadius())))
+						bullet.terminate();
+						entity.terminate();
+				}
+			else 
+				bullet.setPosition(xpos, ypos);
+		}
 	}
 	
 	/**
@@ -514,6 +541,14 @@ public class Ship extends Entity{
 			this.setVelocity(getXVelocity()+getAcceleration()*Math.cos(this.getOrientation())*dt, 
 					getYVelocity()+getAcceleration()*Math.sin(this.getOrientation())*dt);
 		}
+		for (Bullet bullet: this.getBullets()) {
+			bullet.setPosition(getXPosition()+getXVelocity()*dt+
+					this.getAcceleration()*Math.cos(this.getOrientation())*Math.pow(dt,2)/2,
+								getYPosition()+getYVelocity()*dt+
+					this.getAcceleration()*Math.sin(this.getOrientation())*Math.pow(dt,2)/2);
+			bullet.setVelocity(getXVelocity()+getAcceleration()*Math.cos(this.getOrientation())*dt, 
+					getYVelocity()+getAcceleration()*Math.sin(this.getOrientation())*dt);
+		}
 	}
 	
 	/**
@@ -605,6 +640,9 @@ public class Ship extends Entity{
 	public double getTimeToBoundary() {
 		if (this.getWorld()==null)
 			return Double.POSITIVE_INFINITY;
+		if ((getXPosition()<=getRadius())||(getXPosition()>=getWorld().getWidth()-getRadius())||
+			(getYPosition()<=getRadius())||(getYPosition()>=getWorld().getHeight()-getRadius()))
+			return 0;
 		double timeX1 = solveQuad(this.getAcceleration()*Math.cos(getAcceleration())/2,this.getXVelocity(),
 					-getWorld().getWidth()+getXPosition()+this.getRadius());
 		double timeX2 = solveQuad(this.getAcceleration()*Math.cos(getAcceleration())/2,this.getXVelocity(),
@@ -705,7 +743,7 @@ public class Ship extends Entity{
 	 * A variable registering the bullets of a ship.
 	 *|| INVARIANTEN HIEROP HIER BESPREKEN
 	 */
-	private Set<Bullet> bullets = new HashSet<Bullet>();
+	private List<Bullet> bullets = new ArrayList<Bullet>();
 	
 	/**
 	 * A variable registering whether the thruster of this ship is enabled.
@@ -736,6 +774,11 @@ public class Ship extends Entity{
 	 * A variable registering the standard force the active thruster of a ship exerts.
 	 */
 	private static final double STANDARD_FORCE = 1.1*Math.pow(10, 21);
+	
+	/**
+	 * A variable registering the initial speed of a bullet when fired.
+	 */
+	private static final double INITIAL_SPEED = 250;
 	
 	
 }

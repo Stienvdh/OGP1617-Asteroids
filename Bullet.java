@@ -69,22 +69,15 @@ public class Bullet extends Entity{
 			return false;
 		if (! this.hasPosition())
 			return true;
-		else if (this.getWorld() != null)
-			world = this.getWorld();
-		else if (this.getShip() != null)
-			return true;
-		else 
-			world = this.getSource().getWorld();
-		if (world == null)
-			return true;
-		if ((this.getRadius()<=xpos)&&(xpos<=world.getWidth()-this.getRadius())&&
-				(this.getRadius()<=ypos)&&(ypos<=world.getHeight()-this.getRadius())) {
-			for (Entity entity: world.getEntities().values()) {
-				if ((this.overlap(entity))&&(entity!=this)) {
-					if (this.getShip()!=entity)
-						return false;
-					else
-						return true;
+		if (this.getShip()!=null)
+			return getShip().isValidPosition(xpos, ypos);
+		if (getTimeToBoundary()!=0) {
+			for (Entity entity: getWorld().getEntities().values()) {
+				if ((entity!=this)&&
+						((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+								Math.pow(ypos-entity.getYPosition(),2)))<=
+								(entity.getRadius()+getRadius()))) {
+					return false;
 				}
 			return true;
 			}
@@ -164,7 +157,12 @@ public class Bullet extends Entity{
 	 * Return the world, in which this bullet is located. Null if none.
 	 */
 	public World getWorld() {
-		return this.world;
+		if (this.world!=null)
+			return this.world;
+		if (this.getSource()!=null)
+			return this.getSource().getWorld();
+		else
+			return null;
 	}
 	
 	/**
@@ -263,7 +261,7 @@ public class Bullet extends Entity{
 	public void move(double dt) throws IllegalDurationException {
 		if (dt < 0)
 			throw new IllegalDurationException(dt);
-		else if (dt > 0) {
+		if (this.getShip()!=null) {
 			this.setPosition(getXPosition()+getXVelocity()*dt,
 								getYPosition()+getYVelocity()*dt);
 		}
@@ -285,15 +283,11 @@ public class Bullet extends Entity{
 		if ((this.getSpeed()==0)||(!hasPosition()))
 			return Double.POSITIVE_INFINITY;
 		else
-			if (this.getSource()!=null)
-				world = this.getSource().getWorld();
-			else if (this.getShip()!=null)
+			if (this.getShip()!=null)
 				return this.getShip().getTimeToBoundary();
-			else
-				world = this.getWorld();
 			double timeX;
 			if (this.getXVelocity()!=0) {
-				double timeX1 = (world.getWidth()-this.getRadius()-this.getXPosition())/getXVelocity();
+				double timeX1 = (getWorld().getWidth()-this.getRadius()-this.getXPosition())/getXVelocity();
 				double timeX2 = (this.getRadius()-this.getXPosition())/getXVelocity();
 				if ((timeX1>=0)&&(timeX2>=0))
 					timeX = Math.min(timeX1, timeX2);
@@ -304,7 +298,7 @@ public class Bullet extends Entity{
 				timeX = Double.POSITIVE_INFINITY;
 			double timeY;
 			if (this.getYVelocity()!=0) {
-				double timeY1 = (world.getHeight()-this.getRadius()-this.getYPosition())/getYVelocity();
+				double timeY1 = (getWorld().getHeight()-this.getRadius()-this.getYPosition())/getYVelocity();
 				double timeY2 = (this.getRadius()-this.getYPosition())/getYVelocity();
 				if ((timeY1>=0)&&(timeY2>=0))
 					timeY = Math.min(timeY1, timeY2);
@@ -340,10 +334,10 @@ public class Bullet extends Entity{
 			this.setWorld(null);
 		}
 		if (this.getShip()!=null) {
-			if (this.getShip().getBullets().contains(this))
-				this.getShip().getBullets().remove(this);
+			this.getShip().getBullets().remove(this);
 			this.setShip(null);
 		}
+		setSource(null);
 	}
 	
 	/**

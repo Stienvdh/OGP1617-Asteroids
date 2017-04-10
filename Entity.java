@@ -207,7 +207,9 @@ public abstract class Entity {
 	public abstract void setRadius(double radius);
 	public abstract double getMass();
 	public abstract double getMassDensity();
+	public abstract World getWorld();
 	public abstract void setWorld(World world);
 	public abstract void move(double dt);
 	public abstract double getTimeToBoundary();
+	public abstract void terminate();
 }
