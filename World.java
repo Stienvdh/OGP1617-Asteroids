@@ -142,10 +142,65 @@ public class World {
 	}
 	
 	/**
+	 * Return whether this world is terminated.
+	 */
+	public boolean isTerminated() {
+		return this.isTerminated;
+	}
+	
+	/**
+	 * Terminate this world.
+	 */
+	public void terminate() {
+		this.isTerminated=true;
+		for (Entity entity: this.getEntities().values())
+			entity.setWorld(null);
+		this.entities.clear();
+		this.ships.clear();
+		this.bullets.clear();
+	}
+	
+	/**
 	 * A method to evolve this world for a given duration.
 	 */
 	public void evolve(double dt) {
-		
+		double boundary = Double.POSITIVE_INFINITY;
+		Entity entityB = null;
+		double collision = Double.POSITIVE_INFINITY;
+		Entity entityC1 = null;
+		Entity entityC2 = null;
+		double bound = Double.POSITIVE_INFINITY;
+		double coll = Double.POSITIVE_INFINITY;
+		for (Entity entity1: this.getEntities().values()) {
+			bound = entity1.getTimeToBoundary();
+			if (bound < boundary) {
+				boundary = bound;
+				entityB = entity1;
+			}
+			for (Entity entity2: this.getEntities().values()) {
+				coll = entity1.getTimeToCollision(entity2);
+				if (coll<collision) {
+					collision = coll;
+					entityC1 = entity1;
+					entityC2 = entity2;
+				}
+			}
+		}
+		if (Math.min(boundary, collision)>dt) {
+			for (Entity entity: this.getEntities().values())
+				entity.move(dt);
+		}
+		else
+			for (Entity entity: this.getEntities().values())
+				entity.move(Math.min(boundary, collision));
+			if (boundary<=collision) {
+				entityB.collideBoundary();
+				this.evolve(dt-boundary);
+			}
+			else {
+				entityC1.collide(entityC2);
+				this.evolve(dt-collision);
+			}
 	}
 	
 	/**
@@ -186,6 +241,11 @@ public class World {
 	 * A variable registering the bullets, located in this world.
 	 */
 	public HashSet<Bullet> bullets;
+	
+	/**
+	 * A variable registering whether this world is terminated.
+	 */
+	public boolean isTerminated = false;
 	
 	/**
 	 * A variable registering the upper bound for the width of a world.

@@ -162,10 +162,197 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Return whether this bullet is terminated.
+	 * Return the time until the first collision of this ship with the boundaries of its world, if any.
+	 * 
+	 * @return 	If this ship is not located in a world, positive infinity is returned.
+	 * 			| if this.getWorld() == null
+	 * 			| 	result == Double.POSITIVE_INFINITY
+	 * @return 	If this ship is located in a world, the first collision of this ship with the 
+	 * 			boundaries of that world will happen after the returned time. Other entities in 
+	 * 			this world are not taken into account.
+	 * 			| 
+	 */
+	public double getTimeToBoundary() {
+		if (this.getWorld()==null)
+			return Double.POSITIVE_INFINITY;
+		double X;
+		double Y;
+		if (this.getXVelocity()!=0) {
+			X = Math.max((getRadius()-getXPosition())/getXVelocity(),
+					(getWorld().getWidth()-getRadius()-getXPosition())/getXVelocity());
+		}
+		else
+			X = Double.POSITIVE_INFINITY;
+		if (this.getYVelocity()!=0) {
+			Y = Math.max((getRadius()-getYPosition())/getYVelocity(),
+					(getWorld().getHeight()-getRadius()-getYPosition())/getYVelocity());
+		}
+		else
+			Y = Double.POSITIVE_INFINITY;
+		return Math.min(X, Y);
+		}
+	
+	/**
+	 * Return where this entity will collide with a boundary of its world, if any.
+	 */
+	public double[] getBoundaryPosition() {
+		double time = this.getTimeToBoundary();
+		if (time==Double.POSITIVE_INFINITY)
+			return null;
+		double xpos = getXPosition()+getXVelocity()*time;
+		double ypos = getYPosition()+getYVelocity()*time;
+		if (xpos==getRadius())
+			return new double[]{0,ypos};
+		else if (xpos==getWorld().getWidth()-getRadius())
+			return new double[]{getWorld().getWidth(),ypos};
+		else if (ypos==getRadius())
+			return new double[]{xpos,0};
+		else 
+			return new double[]{xpos,getWorld().getHeight()};
+	}
+	
+	/**
+	 * Return the time until this ship will collide with the given ship.
+	 * 
+	 * @param	other
+	 * 			The second ship, with which the collision will happen.
+	 * @return	If the ships do not yet overlap, they will if they move for the returned amount of time.
+	 * 			If the ships will never collide, they are considered to collide after an infinite 
+	 * 			amount of time.
+	 * 			| if (! overlap(other))
+	 * 			| 	this.move(result)
+	 * 			| 	other.move(result)
+	 * 			| this.getDistanceBetween(other) == 0
+	 * @return	No collision between this ship and the other ship will occur within the returned amount
+	 * 			of time.
+	 * 			|
+	 * 			|
+	 * 			|
+	 * 			|
+	 * @throws	IllegalShipException
+	 * 			The ships already overlap.
+	 * 			| overlap(other)
+	 * @throws	IllegalShipException
+	 * 			At least one of the ships involved is ineffective or terminated.
+	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
+	 */
+	public double getTimeToCollision(Entity other) throws IllegalEntityException {
+		if (this.getWorld()!=other.getWorld())
+			throw new IllegalEntityException(other);
+		if (this.getWorld()==null)
+			return Double.POSITIVE_INFINITY;
+		if ((other == null)||(other.isTerminated()))
+			throw new IllegalEntityException(other);
+		if ((this == null)||(this.isTerminated()))
+			throw new IllegalEntityException(this);
+		if (this.overlap(other))
+			throw new IllegalEntityException(other);
+		double[] dr = {other.getXPosition() - this.getXPosition(),
+						other.getYPosition() - this.getYPosition()};
+		double[] dv = {other.getXVelocity() - this.getXVelocity(),
+						other.getYVelocity() - this.getYVelocity()};
+		double d = Math.pow(dv[0]*dr[0]+dv[1]*dr[1],2)-(dv[0]*dv[0]+dv[1]*dv[1])
+				*(dr[0]*dr[0]+dr[1]*dr[1]-Math.pow(this.getRadius()+other.getRadius(), 2));
+		if ((dv[0]*dr[0]+dv[1]*dr[1] >= 0) || (d <= 0))
+			return Double.POSITIVE_INFINITY;
+		else
+			return -(dv[0]*dr[0]+dv[1]*dr[1]+Math.sqrt(d))/(dv[0]*dv[0]+dv[1]*dv[1]);	
+	}
+	
+	/**
+	 * Return the position where this ship will collide with another ship.
+	 * 
+	 * @param	other
+	 * 			The ship with which this ship will collide.
+	 * @return	The position of collision if they collide. Null if they never will collide.
+	 * 			| dt = this.getTimeToCollision(other)
+	 * 			| if (dt != Double.POSITIVE_INFINITY)
+	 * 			| 	result == {other.getXPosition() - this.getXPosition() + dt*(other.getXVelocity() - this.getXVelocity()) *
+	 * 			| 		(this.getRadius() / other.getRadius()) + this.getXPosition(),
+	 *			| 		other.getYPosition() - this.getYPosition() + dt * (other.getYVelocity() - this.getYVelocity()) *
+	 *			| 		(this.getRadius() / other.getRadius()) + this.getYPosition()}
+	 *			| else
+	 *			| 	result == null
+	 * @throws	IllegalShipException
+	 * 			At least one of the ships involved is ineffective or terminated.
+	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
+	 */
+	public double[] getCollisionPosition(Entity other) throws IllegalEntityException {
+		if (this.getTimeToCollision(other) != Double.POSITIVE_INFINITY) {
+			double dt = this.getTimeToCollision(other);
+			double[] drc = {other.getXPosition() - this.getXPosition() + dt*(other.getXVelocity() - this.getXVelocity()),
+					other.getYPosition() - this.getYPosition() + dt*(other.getYVelocity() - this.getYVelocity())};
+			double[] c = {drc[0] * (this.getRadius() / (other.getRadius()+this.getRadius())) + this.getXPosition()
+					+ dt*this.getXVelocity(),
+					drc[1] * (this.getRadius() / (other.getRadius()+this.getRadius())) + this.getYPosition()
+					+dt*this.getYVelocity()};
+			return c;
+		}
+		else
+			return null;
+	}
+	
+	/**
+	 * Return whether this entity is terminated.
 	 */
 	public boolean isTerminated() {
 		return this.isTerminated;
+	}
+	
+	/**
+	 * Resolve the collision of this entity with another given entity.
+	 * 
+	 * @param 	other
+	 * 			The entity to collide with.
+	 */
+	public void collide(Entity other) {
+		if (this instanceof Bullet) {
+			if (((Bullet)this).getSource()==other)
+				((Ship)other).loadBullet((Bullet)this);
+			else
+				this.terminate();
+				other.terminate();
+		}
+		if (this instanceof Ship) {
+			if (other instanceof Bullet) {
+				if (((Ship)this).getBullets().contains(other))
+					((Ship) this).loadBullet((Bullet)other);
+				else
+					this.terminate();
+					other.terminate();
+			}
+			else {
+				double dvdr = (other.getXVelocity()-this.getXVelocity())*
+					(other.getXPosition()-this.getXPosition()) +
+					(other.getYVelocity()-this.getYVelocity())*
+					(other.getYPosition()-this.getYPosition());
+				double sigma = Math.sqrt(Math.pow(this.getXPosition()-other.getXPosition(), 2)+
+					Math.pow(this.getYPosition()-other.getYPosition(), 2));
+				double J = 2*((Ship)this).getTotalMass()*((Ship)other).getTotalMass()*
+						dvdr/(sigma*(((Ship)this).getTotalMass()+((Ship)other).getTotalMass()));
+				double JX = J*(other.getXPosition()-this.getXPosition())/sigma;
+				double JY = J*(other.getYPosition()-this.getYPosition())/sigma;
+				this.setVelocity(getXVelocity()+JX/((Ship)this).getTotalMass(), 
+						getYVelocity()+JY/((Ship)this).getTotalMass());
+				other.setVelocity(other.getXVelocity()+JX/((Ship)other).getTotalMass(), 
+						other.getYVelocity()+JY/((Ship)other).getTotalMass());
+			}
+		}	
+	}
+	
+	/**
+	 * Resolve the first collision of this entity with a boundary.
+	 */
+	public void collideBoundary() {
+		double[] pos = getBoundaryPosition();
+		if (pos!=null) {
+			if ((pos[0]==0)||(pos[0]==this.getWorld().getWidth()))
+				setVelocity(-getXVelocity(),getYVelocity());
+			else
+				setVelocity(getXVelocity(),-getYVelocity());
+		}
+		if (this instanceof Bullet)
+			((Bullet)this).setBounces(((Bullet)this).getBounces()+1);
 	}
 	
 	/**
@@ -210,6 +397,6 @@ public abstract class Entity {
 	public abstract World getWorld();
 	public abstract void setWorld(World world);
 	public abstract void move(double dt);
-	public abstract double getTimeToBoundary();
 	public abstract void terminate();
+	
 }

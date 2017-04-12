@@ -268,46 +268,39 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Return the time until the first collision of this bullet with the boundaries 
-	 * of its world, if any.
-	 * 
-	 * @return 	If this bullet is not located in a world/associated with a ship, infinity is returned.
-	 * 			| if ! this.hasPosition()
-	 * 			| 	result == Double.POSITIVE_INFINITY
-	 * @return	If this bullet has no speed, infinity is returned.
-	 * 			| if this.getSpeed() == 0
-	 * 			| 	result == Double.POSITIVE_INFINITY
-	 * @return 	TO DO
+	 * Return the munber of times this bullet has bounces off the boundaries of its world, if any.
 	 */
-	public double getTimeToBoundary() {
-		if ((this.getSpeed()==0)||(!hasPosition()))
-			return Double.POSITIVE_INFINITY;
+	public int getBounces() {
+		return this.bounces;
+	}
+	
+	/**
+	 * Set the number of times this bullet has bounces of the boundaries of its world to a given value.
+	 * If this given value exceeds the maximum number of times this bullet can bounce, this bullet
+	 * is terminated.
+	 */
+	public void setBounces(int bounces) {
+		if (bounces >= this.getMaxBounces())
+			this.terminate();
 		else
-			if (this.getShip()!=null)
-				return this.getShip().getTimeToBoundary();
-			double timeX;
-			if (this.getXVelocity()!=0) {
-				double timeX1 = (getWorld().getWidth()-this.getRadius()-this.getXPosition())/getXVelocity();
-				double timeX2 = (this.getRadius()-this.getXPosition())/getXVelocity();
-				if ((timeX1>=0)&&(timeX2>=0))
-					timeX = Math.min(timeX1, timeX2);
-				else
-					timeX = Math.max(timeX1, timeX2);
-			}
-			else 
-				timeX = Double.POSITIVE_INFINITY;
-			double timeY;
-			if (this.getYVelocity()!=0) {
-				double timeY1 = (getWorld().getHeight()-this.getRadius()-this.getYPosition())/getYVelocity();
-				double timeY2 = (this.getRadius()-this.getYPosition())/getYVelocity();
-				if ((timeY1>=0)&&(timeY2>=0))
-					timeY = Math.min(timeY1, timeY2);
-				else
-					timeY = Math.max(timeY1, timeY2);
-			}
-			else 
-				timeY = Double.POSITIVE_INFINITY;
-			return Math.min(timeX,timeY);
+			this.bounces = bounces;
+	}
+	
+	/**
+	 * Return the maximum number of times this bullet can bounce of the boundaries of its world.
+	 */
+	public int getMaxBounces() {
+		return this.maxBounces;
+	}
+	
+	/**
+	 * Set the maximum number of bounces of this bullet to a given value.
+	 */
+	public void setMaxBounces(int bounces) {
+		if (bounces<0)
+			this.maxBounces=0;
+		else
+			this.maxBounces=bounces;
 	}
 	
 	/**
@@ -354,6 +347,18 @@ public class Bullet extends Entity{
 	 * A variable registering the ship that fired this bullet. Null if none.
 	 */
 	private Ship source = null;
+	
+	/**
+	 * A variable registering the number of times this bullet has bounced off the boundaries
+	 * of its world.
+	 */
+	private int bounces = 0;
+	
+	/**
+	 * A variable registering the maximum number of times this bullet can bounce of the boundaries 
+	 * of its world. 
+	 */
+	private int maxBounces = 3;
 	
 	/**
 	 * A variable registering the maximum speed of a bullet.
