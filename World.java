@@ -75,15 +75,18 @@ public class World {
 	 * 			| ! isValidPosition(entity.getXPosition(),entity.getYposition())
 	 */
 	public void addEntity(Entity entity) throws IllegalEntityException {
-		entity.setWorld(this);
+		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null))
+			entity.setWorld(this);
 		if (!entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
-			entity.terminate();
+			entity.setWorld(null);
 		else if (entity instanceof Ship)
 			this.getShips().add((Ship) entity);
 		else if (entity instanceof Bullet)
 			this.getBullets().add((Bullet) entity);
-		double[] pos = {entity.getXPosition(),entity.getYPosition()};
-		this.getEntities().put(pos, entity);
+		if (entity.getWorld()!=null) {
+			double[] pos = {entity.getXPosition(),entity.getYPosition()};
+			this.getEntities().put(pos, entity);
+		}
 	}
 	
 	/**
@@ -215,12 +218,13 @@ public class World {
 			return entityC1.getCollisionPosition(entityC2);	
 		}
 	
-	
-	
 	/**
 	 * A method to evolve this world for a given duration.
+	 * @throws IllegalWorldException 
 	 */
-	public void evolve(double dt) throws IllegalEntityException {
+	public void evolve(double dt) throws IllegalEntityException, IllegalWorldException, IllegalDurationException {
+		if (dt<0)
+			throw new IllegalDurationException(dt);
 		double boundary = Double.POSITIVE_INFINITY;
 		Entity entityB = null;
 		double collision = Double.POSITIVE_INFINITY;
@@ -253,16 +257,19 @@ public class World {
 							Math.sin(((Ship) entity).getOrientation()));
 			}
 		}
-		else
+		else if (boundary < 0)
+			throw new IllegalWorldException(this);
+		else if (Math.min(boundary, collision)<dt) {
 			for (Entity entity: this.getAllEntities()) {
 				entity.move(Math.min(boundary, collision));
-				if (entity instanceof Ship)
+				if (entity instanceof Ship) {
 					entity.setVelocity(entity.getXVelocity()+
 							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
 							*Math.cos(((Ship) entity).getOrientation()), 
 							entity.getYVelocity()+Math.min(boundary, collision)
 							*((Ship)entity).getAcceleration()*
 							Math.sin(((Ship) entity).getOrientation()));
+				}
 			}
 			if (boundary<=collision) {
 				entityB.collideBoundary();
@@ -272,6 +279,7 @@ public class World {
 				entityC1.collide(entityC2);
 				this.evolve(dt-collision);
 			}
+		}
 	}
 	
 	/**

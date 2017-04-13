@@ -356,11 +356,11 @@ public class Ship extends Entity{
 		if ((bullet.getWorld()!=null)&&(bullet.getWorld()!=this.getWorld()))
 			throw new IllegalBulletException(bullet);
 		this.getBullets().add(bullet);
+		if (bullet.getWorld()!=null)
+			bullet.getWorld().removeEntity(bullet);
 		bullet.setShip(this);
 		bullet.setPosition(getXPosition(), getYPosition());
 		bullet.setVelocity(getXVelocity(), getYVelocity());
-		if (bullet.getWorld()!=null)
-			bullet.getWorld().removeEntity(bullet);
 	}	
 	
 	/**
@@ -551,7 +551,7 @@ public class Ship extends Entity{
 	 * 			The given duration of the movement is negative.
 	 * 			| dt < 0
 	 */
-	public void move(double dt) throws IllegalDurationException {
+	public void move(double dt) throws IllegalDurationException, IllegalPositionException {
 		if (dt < 0)
 			throw new IllegalDurationException(dt);
 		else if (dt > 0) {

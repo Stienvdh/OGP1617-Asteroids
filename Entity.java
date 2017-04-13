@@ -209,11 +209,11 @@ public abstract class Entity {
 			return null;
 		double xpos = getXPosition()+getXVelocity()*time;
 		double ypos = getYPosition()+getYVelocity()*time;
-		if (xpos==getRadius())
+		if (xpos<=getRadius())
 			return new double[]{0,ypos};
-		else if (xpos==getWorld().getWidth()-getRadius())
+		else if (xpos>=getWorld().getWidth()-getRadius())
 			return new double[]{getWorld().getWidth(),ypos};
-		else if (ypos==getRadius())
+		else if (ypos<=getRadius())
 			return new double[]{xpos,0};
 		else 
 			return new double[]{xpos,getWorld().getHeight()};
