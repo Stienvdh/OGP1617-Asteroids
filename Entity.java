@@ -41,6 +41,10 @@ public abstract class Entity {
 			throw new IllegalPositionException(xpos, ypos);
 		this.xPosition = xpos;
 		this.yPosition = ypos;
+		if (this instanceof Ship) {
+			for (Bullet bullet: ((Ship)this).getBullets())
+				bullet.setPosition(xpos, ypos);
+		}
 	}
 	
 	public abstract boolean isValidPosition(double xpos,double ypos);
@@ -86,6 +90,10 @@ public abstract class Entity {
 		else {
 			this.xVelocity = xvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed;
 			this.yVelocity = yvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed; }
+		if (this instanceof Ship) {
+			for (Bullet bullet: ((Ship)this).getBullets())
+				bullet.setVelocity(xvel, yvel);
+		}
 	}
 	
 	/**
@@ -129,7 +137,7 @@ public abstract class Entity {
 			throw new IllegalEntityException(other);
 		if ((this == null)||(this.isTerminated()))
 			throw new IllegalEntityException(this);
-		return (getDistanceBetween(other) <= 0);
+		return (getDistanceBetween(other) <= -0.01);
 	}
 	
 	/**
@@ -178,14 +186,14 @@ public abstract class Entity {
 		double X;
 		double Y;
 		if (this.getXVelocity()!=0) {
-			X = Math.max((getRadius()-getXPosition())/getXVelocity(),
-					(getWorld().getWidth()-getRadius()-getXPosition())/getXVelocity());
+			X = Math.max((0.99*getRadius()-getXPosition())/getXVelocity(),
+					(1.01*(getWorld().getWidth()-getRadius())-getXPosition())/getXVelocity());
 		}
 		else
 			X = Double.POSITIVE_INFINITY;
 		if (this.getYVelocity()!=0) {
-			Y = Math.max((getRadius()-getYPosition())/getYVelocity(),
-					(getWorld().getHeight()-getRadius()-getYPosition())/getYVelocity());
+			Y = Math.max((0.99*getRadius()-getYPosition())/getYVelocity(),
+					(1.01*(getWorld().getHeight()-getRadius())-getYPosition())/getYVelocity());
 		}
 		else
 			Y = Double.POSITIVE_INFINITY;
@@ -246,7 +254,7 @@ public abstract class Entity {
 		if ((this == null)||(this.isTerminated()))
 			throw new IllegalEntityException(this);
 		if (this.overlap(other))
-			throw new IllegalEntityException(other);
+			return 0;
 		double[] dr = {other.getXPosition() - this.getXPosition(),
 						other.getYPosition() - this.getYPosition()};
 		double[] dv = {other.getXVelocity() - this.getXVelocity(),
@@ -305,7 +313,7 @@ public abstract class Entity {
 	 * @param 	other
 	 * 			The entity to collide with.
 	 */
-	public void collide(Entity other) {
+	public void collide(Entity other){
 		if (this instanceof Bullet) {
 			if (((Bullet)this).getSource()==other)
 				((Ship)other).loadBullet((Bullet)this);
@@ -315,8 +323,11 @@ public abstract class Entity {
 		}
 		if (this instanceof Ship) {
 			if (other instanceof Bullet) {
-				if (((Ship)this).getBullets().contains(other))
+				if (((Bullet)other).getSource()==this) {
+					getWorld().removeEntity(other);
+					this.setWorld(null);
 					((Ship) this).loadBullet((Bullet)other);
+				}
 				else
 					this.terminate();
 					other.terminate();

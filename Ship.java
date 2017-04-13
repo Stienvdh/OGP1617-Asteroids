@@ -1,7 +1,8 @@
 package asteroids.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import be.kuleuven.cs.som.annotate.*;
 
@@ -73,8 +74,6 @@ public class Ship extends Entity{
 		setMassDensity(MIN_DENSITY);
 		setThrustForce(STANDARD_FORCE);
 		setWorld(null);
-		for (int I=0; I==14; I++)
-			this.loadBullet(new Bullet(xpos, ypos, xvel, yvel, 0.2*radius));
 	}
 	
 	/**
@@ -127,12 +126,13 @@ public class Ship extends Entity{
 				&& (((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
 			return false;
 		if (this.getWorld() != null) {
-			if (getTimeToBoundary()!=0) {
+			if ((xpos>0.99*getRadius())&&(xpos<1.1*(getWorld().getWidth()-getRadius()))&&
+					(ypos>0.99*getRadius())&&(ypos<1.1*(getWorld().getHeight()-getRadius()))) {
 				for (Entity entity: getWorld().getEntities().values()) {
-					if ((entity!=this)&&(!this.getBullets().contains(entity))&&
-							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-									Math.pow(ypos-entity.getYPosition(),2)))<=
-									(entity.getRadius()+getRadius())))
+					if ((entity!=this)&&
+							(Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+									Math.pow(ypos-entity.getYPosition(),2)))<
+									0.99*(entity.getRadius()+getRadius()))
 						return false;
 				}
 				return true;
@@ -261,9 +261,7 @@ public class Ship extends Entity{
 	 */
 	@Basic @Raw
 	public World getWorld() {
-		if (this.getWorld() != null)
-				return new World(this.world.getWidth(), this.world.getHeight());
-		return null;
+		return this.world;
 	}
 	
 	/**
@@ -271,6 +269,7 @@ public class Ship extends Entity{
 	 * 
 	 * @param 	world
 	 * 			The world, in which the ship has to be located.
+	 * @throws IllegalWorldException 
 	 * @post	If the ship does not belong to a world yet and if the given world already associates 
 	 * 			the ship with itself, the new world of this ship is the given world.
 	 * 			| if (old.getWorld() == null)&&(world.getEntities().contains(this))
@@ -330,8 +329,17 @@ public class Ship extends Entity{
 	/**
 	 * Return the bullets, loaded in this ship.
 	 */
-	public List<Bullet> getBullets() {
+	public Set<Bullet> getBullets() {
 		return this.bullets;
+	}
+	
+	/**
+	 * Remove the given bullet from the ship.
+	 */
+	public void removeBullet(Bullet bullet) throws IllegalBulletException {
+		if (!this.getBullets().contains(bullet))
+			throw new IllegalBulletException(bullet);
+		this.getBullets().remove(bullet);
 	}
 	
 	/**
@@ -340,6 +348,20 @@ public class Ship extends Entity{
 	public int getNbBullets() {
 		return this.getBullets().size();
 	}
+	
+	/**
+	 * Load this ship with a given bullet.
+	 */
+	public void loadBullet(Bullet bullet) throws IllegalBulletException {
+		if ((bullet.getWorld()!=null)&&(bullet.getWorld()!=this.getWorld()))
+			throw new IllegalBulletException(bullet);
+		this.getBullets().add(bullet);
+		bullet.setShip(this);
+		bullet.setPosition(getXPosition(), getYPosition());
+		bullet.setVelocity(getXVelocity(), getYVelocity());
+		if (bullet.getWorld()!=null)
+			bullet.getWorld().removeEntity(bullet);
+	}	
 	
 	/**
 	 * Load this ship with the given series of bullets.
@@ -354,14 +376,15 @@ public class Ship extends Entity{
 	 * 			| for at least one bullet in bullets:
 	 * 			| 	bullet.hasPosition()
 	 */
-	public void loadBullet(Bullet... bullets) throws IllegalBulletException {
+	public void loadBullet(Collection<Bullet> bullets) throws IllegalBulletException {
 		for (Bullet bullet: bullets) {
-			if (bullet.hasPosition())
+			if ((bullet.getWorld()!=null)&&(bullet.getWorld()!=this.getWorld()))
 				throw new IllegalBulletException(bullet);
 			this.getBullets().add(bullet);
 			bullet.setShip(this);
 			bullet.setPosition(getXPosition(), getYPosition());
 			bullet.setVelocity(getXVelocity(), getYVelocity());
+			this.getWorld().removeEntity(bullet);
 		}
 	}
 	
@@ -370,10 +393,11 @@ public class Ship extends Entity{
 	 */
 	public void fireBullet() {
 		if ((this.getNbBullets()>0)&&(this.getWorld()!=null)) {
-			Bullet bullet = this.getBullets().get(0);
+			Bullet bullet = (Bullet) this.getBullets().toArray()[0];
 			bullet.setShip(null);
+			bullet.setWorld(null);
 			bullet.setSource(this);
-			this.getBullets().remove(0);
+			this.getBullets().remove(bullet);
 			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
 				INITIAL_SPEED*Math.sin(getOrientation()));
 			double xpos = getXPosition()+(getRadius()+2*bullet.getRadius())*Math.cos(getOrientation());
@@ -388,6 +412,7 @@ public class Ship extends Entity{
 					bullet.collide(entity);
 				}
 			bullet.setPosition(xpos, ypos);
+			getWorld().addEntity(bullet);
 		}
 	}
 	
@@ -495,10 +520,9 @@ public class Ship extends Entity{
 	@Raw
 	public void terminate() {
 		this.isTerminated = true;
-		this.setWorld(null);
-		double[] pos = {this.getXPosition(),this.getYPosition()};
-		this.getWorld().getEntities().remove(pos);
-		this.getWorld().getShips().remove(this);
+		if (this.getWorld()!=null)
+			this.getWorld().removeEntity(this);
+			this.setWorld(null);
 		for (Bullet bullet: this.getBullets()) {
 			this.getBullets().remove(bullet);
 			bullet.setShip(null);
@@ -531,14 +555,10 @@ public class Ship extends Entity{
 		if (dt < 0)
 			throw new IllegalDurationException(dt);
 		else if (dt > 0) {
-			this.setVelocity(getXVelocity()+getAcceleration()*Math.cos(this.getOrientation())*dt, 
-					getYVelocity()+getAcceleration()*Math.sin(this.getOrientation())*dt);
 			this.setPosition(getXPosition()+getXVelocity()*dt,
 					getYPosition()+getYVelocity()*dt);
 		}
 		for (Bullet bullet: this.getBullets()) {
-			bullet.setVelocity(getXVelocity()+getAcceleration()*Math.cos(this.getOrientation())*dt, 
-					getYVelocity()+getAcceleration()*Math.sin(this.getOrientation())*dt);
 			bullet.setPosition(getXPosition()+getXVelocity()*dt, 
 					getYPosition()+getYVelocity()*dt);
 		}
@@ -597,7 +617,7 @@ public class Ship extends Entity{
 	 * A variable registering the bullets of a ship.
 	 *|| INVARIANTEN HIEROP HIER BESPREKEN
 	 */
-	private List<Bullet> bullets = new ArrayList<Bullet>();
+	private Set<Bullet> bullets = new HashSet<Bullet>();
 	
 	/**
 	 * A variable registering whether the thruster of this ship is enabled.

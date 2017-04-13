@@ -70,13 +70,14 @@ public class Bullet extends Entity{
 		if (! this.hasPosition())
 			return true;
 		if (this.getShip()!=null)
-			return getShip().isValidPosition(xpos, ypos);
-		if (getTimeToBoundary()!=0) {
+			return true;
+		if ((xpos>0.99*getRadius())&&(xpos<1.1*(getWorld().getWidth()-getRadius()))&&
+				(ypos>0.99*getRadius())&&(ypos<1.1*(getWorld().getHeight()-getRadius()))) {
 			for (Entity entity: getWorld().getEntities().values()) {
 				if ((entity!=this)&&
 						((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-								Math.pow(ypos-entity.getYPosition(),2)))<=
-								(entity.getRadius()+getRadius()))) {
+								Math.pow(ypos-entity.getYPosition(),2)))<
+								0.99*(entity.getRadius()+getRadius()))) {
 					return false;
 				}
 			return true;
@@ -181,7 +182,7 @@ public class Bullet extends Entity{
 	public void setWorld(World world) throws IllegalBulletException{
 		if (world==null)
 			this.world=null;
-		if (this.hasPosition())
+		else if (this.hasPosition())
 			throw new IllegalBulletException(this);
 		this.world = world;
 	}
@@ -261,7 +262,7 @@ public class Bullet extends Entity{
 	public void move(double dt) throws IllegalDurationException {
 		if (dt < 0)
 			throw new IllegalDurationException(dt);
-		if (this.getShip()!=null) {
+		if (this.getShip()==null) {
 			this.setPosition(getXPosition()+getXVelocity()*dt,
 								getYPosition()+getYVelocity()*dt);
 		}
@@ -321,9 +322,7 @@ public class Bullet extends Entity{
 	public void terminate() {
 		this.isTerminated = true;
 		if (this.getWorld()!=null) {
-			double[] pos = {this.getXPosition(),this.getYPosition()};
-			this.getWorld().getEntities().remove(pos);
-			this.getWorld().getBullets().remove(this);
+			this.getWorld().removeEntity(this);
 			this.setWorld(null);
 		}
 		if (this.getShip()!=null) {
