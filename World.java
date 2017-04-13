@@ -240,7 +240,7 @@ public class World {
 			}
 			for (Entity entity2: this.getEntities().values()) {
 				coll = entity1.getTimeToCollision(entity2);
-				if (coll<collision) {
+				if ((coll<collision)&&(coll>0)) {
 					collision = coll;
 					entityC1 = entity1;
 					entityC2 = entity2;
