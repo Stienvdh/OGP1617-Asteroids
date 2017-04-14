@@ -260,7 +260,7 @@ public class World {
 		else if (boundary < 0)
 			throw new IllegalWorldException(this);
 		else if (Math.min(boundary, collision)<dt) {
-			for (Entity entity: this.getAllEntities()) {
+/*			for (Entity entity: this.getAllEntities()) {
 				entity.move(Math.min(boundary, collision)/2);
 				if (entity instanceof Ship) {
 					entity.setVelocity(entity.getXVelocity()+
@@ -270,7 +270,7 @@ public class World {
 							*((Ship)entity).getAcceleration()*
 							Math.sin(((Ship) entity).getOrientation()));
 				}
-			}
+			}*/
 			if (boundary<=collision) {
 				entityB.collideBoundary();
 				this.evolve(dt-boundary);
