@@ -67,11 +67,11 @@ public class Bullet extends Entity{
 		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
 				||(((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
 			return false;
-		if (! this.hasPosition())
+		if (this.getWorld()==null)
 			return true;
 		if (this.getShip()!=null)
 			return true;
-		if ((xpos>0.99*getRadius())&&(xpos<1.01*(getWorld().getWidth()-getRadius()))&&
+		if ((xpos>0.99*getRadius())&&(xpos<1.01*(this.getWorld().getWidth()-getRadius()))&&
 				(ypos>0.99*getRadius())&&(ypos<1.1*(getWorld().getHeight()-getRadius()))) {
 			for (Entity entity: getWorld().getEntities().values()) {
 				if ((entity!=this)&&

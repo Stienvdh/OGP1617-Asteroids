@@ -353,11 +353,11 @@ public class Ship extends Entity{
 	 * Load this ship with a given bullet.
 	 */
 	public void loadBullet(Bullet bullet) throws IllegalBulletException {
-		if ((bullet.getWorld()!=null)&&(bullet.getWorld()!=this.getWorld()))
+		if ((this.getWorld()!=null)&&(bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld()))
 			throw new IllegalBulletException(bullet);
-		this.getBullets().add(bullet);
 		if (bullet.getWorld()!=null)
 			bullet.getWorld().removeEntity(bullet);
+		this.getBullets().add(bullet);
 		bullet.setSource(null);
 		bullet.setShip(this);
 		bullet.setPosition(getXPosition(), getYPosition());
@@ -379,13 +379,15 @@ public class Ship extends Entity{
 	 */
 	public void loadBullet(Collection<Bullet> bullets) throws IllegalBulletException {
 		for (Bullet bullet: bullets) {
-			if ((bullet.getWorld()!=null)&&(bullet.getWorld()!=this.getWorld()))
+			if ((this.getWorld()!=null)&&(bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld()))
 				throw new IllegalBulletException(bullet);
+			if (bullet.getWorld()!=null)
+				bullet.getWorld().removeEntity(bullet);
 			this.getBullets().add(bullet);
+			bullet.setSource(null);
 			bullet.setShip(this);
 			bullet.setPosition(getXPosition(), getYPosition());
 			bullet.setVelocity(getXVelocity(), getYVelocity());
-			this.getWorld().removeEntity(bullet);
 		}
 	}
 	
@@ -397,27 +399,32 @@ public class Ship extends Entity{
 			Bullet bullet = (Bullet) this.getBullets().toArray()[0];
 			bullet.setShip(null);
 			bullet.setWorld(null);
-			bullet.setSource(this);
+			bullet.setSource(null);
 			this.getBullets().remove(bullet);
 			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
 				INITIAL_SPEED*Math.sin(getOrientation()));
 			double xpos = getXPosition()+1.01*(getRadius()+bullet.getRadius())*Math.cos(getOrientation());
 			double ypos = getYPosition()+1.01*(getRadius()+bullet.getRadius())*Math.sin(getOrientation());
 			if ((xpos<0.99*bullet.getRadius())||
-				(xpos>1.01*(bullet.getWorld().getWidth()-bullet.getRadius()))||
+				(xpos>1.01*(this.getWorld().getWidth()-bullet.getRadius()))||
 				(ypos<0.99*bullet.getRadius())||
-				(ypos>1.01*(bullet.getWorld().getHeight()-bullet.getRadius())))
+				(ypos>1.01*(this.getWorld().getHeight()-bullet.getRadius())))
 				bullet.terminate();
 			else {
 				for (Entity entity: getWorld().getEntities().values()) {
-					if ((!bullet.isTerminated())&&(entity!=bullet)&&
+					if ((!bullet.isTerminated())&&(entity!=bullet)&&(entity!=this)&&
 							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
 							Math.pow(ypos-entity.getYPosition(),2)))<
-							(entity.getRadius()+bullet.getRadius())))
-						bullet.collide(entity);
+							(entity.getRadius()+bullet.getRadius()))) {
+						bullet.terminate();
+						entity.terminate();
 					}
-				bullet.setPosition(xpos, ypos);
-				getWorld().addEntity(bullet);
+				}
+				if (! bullet.isTerminated()) {
+					bullet.setSource(this);
+					bullet.setPosition(xpos, ypos);
+					getWorld().addEntity(bullet);
+				}
 			}
 		}
 	}

@@ -77,13 +77,13 @@ public class World {
 	public void addEntity(Entity entity) throws IllegalEntityException {
 		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null))
 			entity.setWorld(this);
-			if (!entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
+			if (! entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
 				entity.terminate();
-		if (entity instanceof Ship)
+		if ((! entity.isTerminated())&&(entity instanceof Ship))
 			this.getShips().add((Ship) entity);
-		else if (entity instanceof Bullet)
+		else if ((!entity.isTerminated())&&(entity instanceof Bullet))
 			this.getBullets().add((Bullet) entity);
-		if (entity.getWorld()!=null) {
+		if ((! entity.isTerminated())&&(entity.getWorld()!=null)) {
 			double[] pos = {entity.getXPosition(),entity.getYPosition()};
 			this.getEntities().put(pos, entity);
 		}
@@ -112,8 +112,10 @@ public class World {
 		this.getEntities().remove(pos, entity);
 		if (entity instanceof Ship)
 			this.getShips().remove(entity);
-		else if (entity instanceof Bullet)
+		if (entity instanceof Bullet) {
 			this.getBullets().remove(entity);
+			((Bullet)entity).setSource(null);
+		}
 		entity.setWorld(null);
 	}
 	
@@ -257,8 +259,6 @@ public class World {
 							Math.sin(((Ship) entity).getOrientation()));
 			}
 		}
-		else if (boundary < 0)
-			throw new IllegalWorldException(this);
 		else if (Math.min(boundary, collision)<dt) {
 /*			for (Entity entity: this.getAllEntities()) {
 				entity.move(Math.min(boundary, collision)/2);

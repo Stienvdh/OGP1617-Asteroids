@@ -321,10 +321,9 @@ public abstract class Entity {
 				this.terminate();
 				other.terminate();
 		}
-		if (this instanceof Ship) {
+		else if (this instanceof Ship) {
 			if (other instanceof Bullet) {
 				if (((Bullet)other).getSource()==this) {
-					getWorld().removeEntity(other);
 					((Ship) this).loadBullet((Bullet)other);
 				}
 				else
