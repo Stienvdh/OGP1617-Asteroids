@@ -77,9 +77,9 @@ public class World {
 	public void addEntity(Entity entity) throws IllegalEntityException {
 		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null))
 			entity.setWorld(this);
-		if (!entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
-			entity.terminate();
-		else if (entity instanceof Ship)
+			if (!entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
+				entity.terminate();
+		if (entity instanceof Ship)
 			this.getShips().add((Ship) entity);
 		else if (entity instanceof Bullet)
 			this.getBullets().add((Bullet) entity);
