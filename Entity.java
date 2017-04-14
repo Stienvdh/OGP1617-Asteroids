@@ -246,7 +246,7 @@ public abstract class Entity {
 	 */
 	public double getTimeToCollision(Entity other) throws IllegalEntityException {
 		if (this.getWorld()!=other.getWorld())
-			throw new IllegalEntityException(other);
+			return Double.POSITIVE_INFINITY;
 		if (this.getWorld()==null)
 			return Double.POSITIVE_INFINITY;
 		if ((other == null)||(other.isTerminated()))

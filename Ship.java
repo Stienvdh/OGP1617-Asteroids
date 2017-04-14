@@ -401,8 +401,8 @@ public class Ship extends Entity{
 			this.getBullets().remove(bullet);
 			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
 				INITIAL_SPEED*Math.sin(getOrientation()));
-			double xpos = getXPosition()+1.1*(getRadius()+bullet.getRadius())*Math.cos(getOrientation());
-			double ypos = getYPosition()+1.1*(getRadius()+bullet.getRadius())*Math.cos(getOrientation());
+			double xpos = getXPosition()+1.01*(getRadius()+bullet.getRadius())*Math.cos(getOrientation());
+			double ypos = getYPosition()+1.01*(getRadius()+bullet.getRadius())*Math.sin(getOrientation());
 			if ((xpos<0.99*bullet.getRadius())||
 				(xpos>1.01*(bullet.getWorld().getWidth()-bullet.getRadius()))||
 				(ypos<0.99*bullet.getRadius())||
@@ -528,9 +528,9 @@ public class Ship extends Entity{
 		this.isTerminated = true;
 		if (this.getWorld()!=null)
 			this.getWorld().removeEntity(this);
-			this.setWorld(null);
 		for (Bullet bullet: this.getBullets()) {
 			bullet.setShip(null);
+			bullet.terminate();
 		}
 		this.getBullets().clear();
 	}

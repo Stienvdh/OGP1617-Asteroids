@@ -78,7 +78,7 @@ public class World {
 		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null))
 			entity.setWorld(this);
 		if (!entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
-			entity.setWorld(null);
+			entity.terminate();
 		else if (entity instanceof Ship)
 			this.getShips().add((Ship) entity);
 		else if (entity instanceof Bullet)
