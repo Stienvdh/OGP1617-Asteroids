@@ -76,7 +76,7 @@ public class Bullet extends Entity{
 			for (Entity entity: getWorld().getEntities().values()) {
 				if ((entity!=this)&&
 						((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-								Math.pow(ypos-entity.getYPosition(),2)))<
+								Math.pow(ypos-entity.getYPosition(),2)))<=
 								0.99*(entity.getRadius()+getRadius()))) {
 					return false;
 				}

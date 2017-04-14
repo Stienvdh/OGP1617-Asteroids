@@ -261,7 +261,7 @@ public class World {
 			throw new IllegalWorldException(this);
 		else if (Math.min(boundary, collision)<dt) {
 			for (Entity entity: this.getAllEntities()) {
-				entity.move(Math.min(boundary, collision));
+				entity.move(Math.min(boundary, collision)/2);
 				if (entity instanceof Ship) {
 					entity.setVelocity(entity.getXVelocity()+
 							Math.min(boundary, collision)*((Ship)entity).getAcceleration()

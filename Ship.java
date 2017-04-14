@@ -131,7 +131,7 @@ public class Ship extends Entity{
 				for (Entity entity: getWorld().getEntities().values()) {
 					if ((entity!=this)&&
 							(Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-									Math.pow(ypos-entity.getYPosition(),2)))<
+									Math.pow(ypos-entity.getYPosition(),2)))<=
 									0.99*(entity.getRadius()+getRadius()))
 						return false;
 				}
@@ -401,19 +401,24 @@ public class Ship extends Entity{
 			this.getBullets().remove(bullet);
 			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
 				INITIAL_SPEED*Math.sin(getOrientation()));
-			double xpos = getXPosition()+(getRadius()+2*bullet.getRadius())*Math.cos(getOrientation());
-			double ypos = getYPosition()+(getRadius()+2*bullet.getRadius())*Math.cos(getOrientation());
-			if (bullet.getTimeToBoundary()==0)
+			double xpos = getXPosition()+1.1*(getRadius()+bullet.getRadius())*Math.cos(getOrientation());
+			double ypos = getYPosition()+1.1*(getRadius()+bullet.getRadius())*Math.cos(getOrientation());
+			if ((xpos<0.99*bullet.getRadius())||
+				(xpos>1.01*(bullet.getWorld().getWidth()-bullet.getRadius()))||
+				(ypos<0.99*bullet.getRadius())||
+				(ypos>1.01*(bullet.getWorld().getHeight()-bullet.getRadius())))
 				bullet.terminate();
-			for (Entity entity: getWorld().getEntities().values()) {
-				if ((!bullet.isTerminated())&&(entity!=bullet)&&
-						((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-						Math.pow(ypos-entity.getYPosition(),2)))<=
-						(entity.getRadius()+bullet.getRadius())))
-					bullet.collide(entity);
-				}
-			bullet.setPosition(xpos, ypos);
-			getWorld().addEntity(bullet);
+			else {
+				for (Entity entity: getWorld().getEntities().values()) {
+					if ((!bullet.isTerminated())&&(entity!=bullet)&&
+							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+							Math.pow(ypos-entity.getYPosition(),2)))<
+							(entity.getRadius()+bullet.getRadius())))
+						bullet.collide(entity);
+					}
+				bullet.setPosition(xpos, ypos);
+				getWorld().addEntity(bullet);
+			}
 		}
 	}
 	
@@ -525,9 +530,9 @@ public class Ship extends Entity{
 			this.getWorld().removeEntity(this);
 			this.setWorld(null);
 		for (Bullet bullet: this.getBullets()) {
-			this.getBullets().remove(bullet);
 			bullet.setShip(null);
 		}
+		this.getBullets().clear();
 	}
 	
 	/**

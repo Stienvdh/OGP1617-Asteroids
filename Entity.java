@@ -325,7 +325,6 @@ public abstract class Entity {
 			if (other instanceof Bullet) {
 				if (((Bullet)other).getSource()==this) {
 					getWorld().removeEntity(other);
-					this.setWorld(null);
 					((Ship) this).loadBullet((Bullet)other);
 				}
 				else
@@ -345,8 +344,8 @@ public abstract class Entity {
 				double JY = J*(other.getYPosition()-this.getYPosition())/sigma;
 				this.setVelocity(getXVelocity()+JX/((Ship)this).getTotalMass(), 
 						getYVelocity()+JY/((Ship)this).getTotalMass());
-				other.setVelocity(other.getXVelocity()+JX/((Ship)other).getTotalMass(), 
-						other.getYVelocity()+JY/((Ship)other).getTotalMass());
+				other.setVelocity(other.getXVelocity()-JX/((Ship)other).getTotalMass(), 
+						other.getYVelocity()-JY/((Ship)other).getTotalMass());
 			}
 		}	
 	}
