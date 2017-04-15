@@ -8,12 +8,31 @@ public class Bullet extends Entity{
 	 * Create a new bullet with given position, velocity and radius.
 	 * 
 	 * @param	xpos
-	 * 			The position of this bullet along the x-axis.
+	 * 			The position for this bullet along the x-axis.
 	 * @param	ypos 
-	 * 			The position of this bullet along the y-axis.
-	 * @post	The position of this bullet is the given position.
+	 * 			The position for this bullet along the y-axis.
+	 * @param	xvel
+	 * 			The velocity for this bullet along the x-axis.
+	 * @param	yvel
+	 * 			The velocity for this bullet along the y-axis.
+	 * @param	radius
+	 * 			The radius for this ship.
+	 * @post	The new position for this new bullet is equal to the given position.
 	 * 			| new.getXPosition() == xpos
 	 * 			| new.getYPosition() == ypos
+	 * @post	The new velocity for this new bullet is equal to the given velocity.
+	 * 			| new.getXVelocity() == xvel
+	 * 			| new.getYVelocity() == yvel
+	 * @post	The new bullet is not located in a world.
+	 * 			| new.getWorld() == null
+	 * @post	The new bullet has no owner.
+	 * 			| new.getShip() == null
+	 * @post	The new bullet has not been shot by a ship.
+	 * 			| new.getSource() == null
+	 * @post	The new maximum speed for this new bullet is equal to its upper bound.
+	 * 			| new.getMaxSpeed() == MAX_SPEED
+	 * @post	The new radius for this new bullet is equal to the given radius.
+	 * 			| new.getRadius() == radius
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
 	 * 			| ! isValidPosition(xpos,ypos)
@@ -40,28 +59,19 @@ public class Bullet extends Entity{
 	 * 			| if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
 				|	||(((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
 				|	then result == false
-	 * @return	If this bullet is not associated with a world, nor with a ship, it is positioned
-	 * 			in an unbounded two-dimensional space.
-	 * 			| if (! hasPosition())
-	 * 			| 	result == true
-	 * @return	If this bullet is associated with a world, this method returns true if and only
-	 * 			if the bullet is located within bounds of its world and does not overlap with another
+	 * @return	If this bullet is not associated with a world, this method returns true. If it's associated
+	 * 			with a world the method returns true if and only if the bullet is located within bounds of its
+	 * 			world and does not overlap with another
 	 * 			entity in its world.
-	 * 			| if this.getWorld() != null
-	 * 			| 	result == (this.getRadius()<xpos<this.getWorld().getWidth()-getRadius())&&
-	 * 			| 		(this.getRadius()<ypos<this.getWorld().getHeight()-getRadius())&&
-	 * 			| 		(for each entity in this.getWorld().getEntities(): !this.overlap(entity))
-	 * @return	If this bullet is associated with a ship, this method returns true if and only if 
-	 * 			this bullet is located within bounds of its mother world and does not overlap with 
-	 * 			another entity in its mother world. If this bullet is loaded in a ship, the method
-	 * 			returns true.
+	 * 			| if this.getWorld() == null
+	 * 			|	result == true
+	 * 			|	else
+	 * 			| 		result == (this.getRadius()<xpos<this.getWorld().getWidth()-getRadius())&&
+	 * 			| 			(this.getRadius()<ypos<this.getWorld().getHeight()-getRadius())&&
+	 * 			| 			(for each entity in this.getWorld().getEntities(): !this.overlap(entity))
+	 * @return	If this bullet is associated with a ship, this method returns true.
 	 * 			| if this.getShip() != null
-	 * 			| 	if this.getShip().getBullets().contains(this)
-	 * 			| 		result == true
-	 * 			| 	else 
-	 * 			| 		result == (this.getRadius()<xpos<this.getMotherWorld().getWidth()-getRadius())&&
-	 * 			| 		(this.getRadius()<ypos<this.getMotherWorld().getHeight()-getRadius())&&
-	 * 			| 		(for each entity in this.getMotherWorld().getEntities(): !this.overlap(entity)
+	 * 			| 	result == true
 	 */
 	public boolean isValidPosition(double xpos, double ypos) {
 		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
@@ -269,7 +279,7 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Return the munber of times this bullet has bounces off the boundaries of its world, if any.
+	 * Return the number of times this bullet has bounces off the boundaries of its world, if any.
 	 */
 	public int getBounces() {
 		return this.bounces;
@@ -318,6 +328,8 @@ public class Bullet extends Entity{
 	 * 			| 	if old.getShip().getBullets().contains(old)
 	 * 			| 		! old.getShip().getBullets().contains(old)
 	 * 			| 	new.getShip() == null
+	 * @post	If this bullet was shot by a ship, it is not anymore.
+	 * 			|new.getSource() == null
 	 */
 	public void terminate() {
 		this.isTerminated = true;
