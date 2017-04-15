@@ -6,6 +6,17 @@ import java.util.Set;
 
 public class World {
 	
+	/**
+	 * Initialize this new world with given width and height.
+	 * 
+	 * @param 	width
+	 * 			The width of this new world.
+	 * @param 	height
+	 * 			The height of this new world.
+	 * @post	The width of this new ship is equal to the given width.
+	 * 			| new.getWidth() == width
+	 * 			| new.getHeight() == height
+	 */
 	public World(double width, double height) {
 		this.setSize(width,height);
 	}
@@ -51,7 +62,7 @@ public class World {
 	/**
 	 * Return the entities, located in this world.
 	 */
-	public HashMap<double[],Entity> getEntities() {
+	public HashMap<Entity,double[]> getEntities() {
 		return this.entities;
 	}
 	
@@ -60,32 +71,30 @@ public class World {
 	 * 
 	 * @param 	entity
 	 * 			The entity, that has to be added to this world.
-	 * @throws	IllegalWorldException 
-	 * 			The given entity is already located in a world/ship.
-	 * 			| hasPosition()
 	 * @post	The world contains the given entity.
 	 * 			| new.getEntities().contains(entity)
 	 * @post	The given entity is located in this world. 
 	 * 			| (new entity).getWorld() == this
-	 * @throws	IllegalEntityException
-	 * 			The given entity is already associated with another world or ship.
-	 * 			| entity.hasPosition()
-	 * @throws 	IllegalEntityException
-	 * 			The given entity does not have a valid position in this world.
-	 * 			| ! isValidPosition(entity.getXPosition(),entity.getYposition())
+	 * 			| (new entity).hasPosition()
+	 * @post	If the given entity does not have a valid position in this world, the entity is
+	 * 			terminated.
+	 * 			| if (! (old entity).isValidPosition(entity.getXPosition(),
+	 * 			| 	(old entity).getYPosition()))
+	 * 			| 	(new entity).isTerminated()
 	 */
 	public void addEntity(Entity entity) throws IllegalEntityException {
-		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null))
+		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null)) {
 			entity.setWorld(this);
 			if (! entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
 				entity.terminate();
+		}
 		if ((! entity.isTerminated())&&(entity instanceof Ship))
 			this.getShips().add((Ship) entity);
 		else if ((!entity.isTerminated())&&(entity instanceof Bullet))
 			this.getBullets().add((Bullet) entity);
 		if ((! entity.isTerminated())&&(entity.getWorld()!=null)) {
 			double[] pos = {entity.getXPosition(),entity.getYPosition()};
-			this.getEntities().put(pos, entity);
+			this.getEntities().put(entity, pos);
 		}
 	}
 	
@@ -95,21 +104,16 @@ public class World {
 	 * @param	entity
 	 * 			The entity to remove from this world.
 	 * @post	This world does not contain the given entity.
-	 * 			| ! this.getEntities().contains(entity)
+	 * 			| (! new.getEntities().contains(entity))
 	 * 			| if entity instanceof Ship
-	 * 			| 	! new.getShips().contains(entity)
+	 * 			| 	(! new.getShips().contains(entity))
 	 * 			| if entity instanceof Bullet
-	 * 			| 	! new.getBullets().contains(entity)
+	 * 			| 	(! new.getBullets().contains(entity))
 	 * @post	This entity is no longer associated with this world.
 	 * 			| (new entity).getWorld() == null
-	 * @throws	IllegalEntityException
-	 * 			This world does not contain the given entity.
-	 * 			| ! this.getEntities().containsValue(entity)
-	 * @throws IllegalWorldException 
 	 */
 	public void removeEntity(Entity entity) throws IllegalEntityException {
-		double[] pos = {entity.getXPosition(),entity.getYPosition()};
-		this.getEntities().remove(pos, entity);
+		this.getEntities().remove(entity);
 		if (entity instanceof Ship)
 			this.getShips().remove(entity);
 		if (entity instanceof Bullet) {
@@ -118,7 +122,6 @@ public class World {
 		}
 		entity.setWorld(null);
 	}
-	
 	
 	/**
 	 * Return, if any, the entity whose center coincides with the given position. 
@@ -136,10 +139,11 @@ public class World {
 	 */
 	public Entity getEntityAt(double xpos,double ypos) {
 		double[] pos = {xpos,ypos};
-		if (this.getEntities().containsKey(pos))
-				return this.getEntities().get(pos);
-		else
-			return null;
+		for (Entity entity: getEntities().keySet()) {
+			if (getEntities().get(entity)==pos)
+				return entity;
+		}
+		return null;
 	}
 	
 	/**
@@ -151,12 +155,24 @@ public class World {
 	
 	/**
 	 * Terminate this world.
-	 * @throws IllegalWorldException 
+	 *
+	 * @post	The state of this world is terminated.
+	 * 			| new.isTerminated()
+	 * @post	This world does not contain any entities.
+	 * 			| (for each entity: old.getEntities())
+	 * 			| 	entity.getWorld() == null
+	 * 			| 	entity.getSource() == null
+	 * 			| new.getEntities().size() == 0
+	 * 			| new.getShips().size() == 0
+	 * 			| new.getBullets().size() == 0
 	 */
 	public void terminate() {
 		this.isTerminated=true;
-		for (Entity entity: this.getEntities().values())
+		for (Entity entity: this.getEntities().keySet()) {
+			if (entity instanceof Bullet)
+				((Bullet) entity).setSource(null);
 			entity.setWorld(null);
+		}
 		this.entities.clear();
 		this.ships.clear();
 		this.bullets.clear();
@@ -164,18 +180,20 @@ public class World {
 	
 	/**
 	 * Return the time until the first collision in this world.
+	 * 
+	 * @result 	
 	 */
 	public double getTimeFirstCollision() {
 		double boundary = Double.POSITIVE_INFINITY;
 		double collision = Double.POSITIVE_INFINITY;
 		double bound = Double.POSITIVE_INFINITY;
 		double coll = Double.POSITIVE_INFINITY;
-		for (Entity entity1: this.getEntities().values()) {
+		for (Entity entity1: this.getEntities().keySet()) {
 			bound = entity1.getTimeToBoundary();
 			if (bound < boundary) {
 				boundary = bound;
 			}
-			for (Entity entity2: this.getEntities().values()) {
+			for (Entity entity2: this.getEntities().keySet()) {
 				coll = entity1.getTimeToCollision(entity2);
 				if (coll<collision) {
 					collision = coll;
@@ -196,13 +214,13 @@ public class World {
 		Entity entityC2 = null;
 		double bound = Double.POSITIVE_INFINITY;
 		double coll = Double.POSITIVE_INFINITY;
-		for (Entity entity1: this.getEntities().values()) {
+		for (Entity entity1: this.getEntities().keySet()) {
 			bound = entity1.getTimeToBoundary();
 			if (bound < boundary) {
 				boundary = bound;
 				entityB = entity1;
 			}
-			for (Entity entity2: this.getEntities().values()) {
+			for (Entity entity2: this.getEntities().keySet()) {
 				coll = entity1.getTimeToCollision(entity2);
 				if (coll<collision) {
 					collision = coll;
@@ -222,7 +240,6 @@ public class World {
 	
 	/**
 	 * A method to evolve this world for a given duration.
-	 * @throws IllegalWorldException 
 	 */
 	public void evolve(double dt) throws IllegalEntityException, IllegalWorldException, IllegalDurationException {
 		if (dt<0)
@@ -234,13 +251,13 @@ public class World {
 		Entity entityC2 = null;
 		double bound = Double.POSITIVE_INFINITY;
 		double coll = Double.POSITIVE_INFINITY;
-		for (Entity entity1: this.getEntities().values()) {
+		for (Entity entity1: this.getEntities().keySet()) {
 			bound = entity1.getTimeToBoundary();
 			if (bound < boundary) {
 				boundary = bound;
 				entityB = entity1;
 			}
-			for (Entity entity2: this.getEntities().values()) {
+			for (Entity entity2: this.getEntities().keySet()) {
 				coll = entity1.getTimeToCollision(entity2);
 				if ((coll<collision)&&(coll>0)) {
 					collision = coll;
@@ -271,7 +288,7 @@ public class World {
 							Math.sin(((Ship) entity).getOrientation()));
 				}
 			}*/
-			if (boundary<=collision) {
+			if (boundary<collision) {
 				entityB.collideBoundary();
 				this.evolve(dt-boundary);
 			}
@@ -286,10 +303,7 @@ public class World {
 	 * Return the entities in this world.
 	 */
 	public Set<Entity> getAllEntities() {
-		Set<Entity> set = new HashSet<Entity>();
-		for (Entity entity: this.getEntities().values())
-			set.add(entity);
-		return set;
+		return getEntities().keySet();
 	}
 	
 	/**
@@ -319,7 +333,7 @@ public class World {
 	/**
 	 * A variable registering the entities, located in this world, and the position of their center.
 	 */
-	public HashMap<double[],Entity> entities = new HashMap<double[],Entity>();
+	public HashMap<Entity,double[]> entities = new HashMap<Entity,double[]>();
 	
 	/**
 	 * A variable registering the ships, located in this world.

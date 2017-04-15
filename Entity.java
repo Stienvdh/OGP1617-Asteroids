@@ -317,18 +317,20 @@ public abstract class Entity {
 		if (this instanceof Bullet) {
 			if (((Bullet)this).getSource()==other)
 				((Ship)other).loadBullet((Bullet)this);
-			else
+			else {
 				this.terminate();
 				other.terminate();
+			}
 		}
 		else if (this instanceof Ship) {
 			if (other instanceof Bullet) {
 				if (((Bullet)other).getSource()==this) {
 					((Ship) this).loadBullet((Bullet)other);
 				}
-				else
+				else {
 					this.terminate();
 					other.terminate();
+				}
 			}
 			else {
 				double dvdr = (other.getXVelocity()-this.getXVelocity())*

@@ -152,7 +152,7 @@ public class Ship extends Entity{
 		if (this.getWorld() != null) {
 			if ((xpos>0.99*getRadius())&&(xpos<1.01*(getWorld().getWidth()-getRadius()))&&
 					(ypos>0.99*getRadius())&&(ypos<1.01*(getWorld().getHeight()-getRadius()))) {
-				for (Entity entity: getWorld().getEntities().values()) {
+				for (Entity entity: getWorld().getEntities().keySet()) {
 					if ((entity!=this)&&
 							(Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
 									Math.pow(ypos-entity.getYPosition(),2)))<=
@@ -348,8 +348,9 @@ public class Ship extends Entity{
 	 */
 	public double getTotalMass() {
 		double totalMass = this.getMass();
-		for (Bullet bullet: this.getBullets())
+		for (Bullet bullet: this.getBullets()) {
 			totalMass = totalMass + bullet.getMass();
+		}
 		return totalMass;
 	}
 	
@@ -518,7 +519,7 @@ public class Ship extends Entity{
 				(ypos>1.01*(this.getWorld().getHeight()-bullet.getRadius())))
 				bullet.terminate();
 			else {
-				for (Entity entity: getWorld().getEntities().values()) {
+				for (Entity entity: getWorld().getEntities().keySet()) {
 					if ((!bullet.isTerminated())&&(entity!=bullet)&&(entity!=this)&&
 							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
 							Math.pow(ypos-entity.getYPosition(),2)))<
