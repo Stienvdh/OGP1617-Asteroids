@@ -424,6 +424,8 @@ public class Ship extends Entity{
 		bullet.setShip(this);
 		bullet.setPosition(getXPosition(), getYPosition());
 		bullet.setVelocity(getXVelocity(), getYVelocity());
+		bullet.setBounces(0);
+		this.getBulletsFired().remove(bullet);
 	}	
 	
 	/**
@@ -464,6 +466,8 @@ public class Ship extends Entity{
 			bullet.setShip(this);
 			bullet.setPosition(getXPosition(), getYPosition());
 			bullet.setVelocity(getXVelocity(), getYVelocity());
+			bullet.setBounces(0);
+			this.getBulletsFired().remove(bullet);
 		}
 	}
 	
@@ -501,6 +505,9 @@ public class Ship extends Entity{
 	 *			|			0.99*(entity.getRadius()+(new removed bullet).getRadius())))
 	 *			|		(new removed bullet).isTerminated()
 	 *			|		(new entity).isTerminated()
+	 * @post	This ship has fired a bullet.
+	 * 			| (new removed bullet).getSource() == new
+	 * 			| new.getBulletsFired().contains((new removed bullet))
 	 */
 	public void fireBullet() {
 		if ((this.getNbBullets()>0)&&(this.getWorld()!=null)) {
@@ -532,9 +539,17 @@ public class Ship extends Entity{
 					bullet.setSource(this);
 					bullet.setPosition(xpos, ypos);
 					getWorld().addEntity(bullet);
+					this.getBulletsFired().add(bullet);
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Return the bullets fired by this ship.
+	 */
+	public Set<Bullet> getBulletsFired() {
+		return this.bulletsFired;
 	}
 	
 	/**
@@ -641,18 +656,25 @@ public class Ship extends Entity{
 	 * 			| for each bullet in old.getBullets():
 	 * 			| 	(new bullet).getShip() == null
 	 * 			| 	! new.getBullets().contains(bullet)
+	 * 			| 	! new.getBulletsFired().contains(this)
 	 * 			| 	(new bullet).isTerminated()
+	 * 			| 	(new bullet).getSource() == null
+	 * 			| 	(new bullet).getWorld() == old.getWorld()
 	 */
 	@Raw
 	public void terminate() {
 		this.isTerminated = true;
+		World world = getWorld();
 		if (this.getWorld()!=null)
 			this.getWorld().removeEntity(this);
 		for (Bullet bullet: this.getBullets()) {
 			bullet.setShip(null);
 			bullet.terminate();
+			bullet.setSource(null);
+			bullet.setWorld(world);
 		}
 		this.getBullets().clear();
+		this.getBulletsFired().clear();
 	}
 	
 	/**
@@ -741,6 +763,11 @@ public class Ship extends Entity{
 	 * A variable registering whether the thruster of this ship is enabled.
 	 */
 	private boolean thruster = false; 
+	
+	/**
+	 * A variable registering the bullets this ship fired.
+	 */
+	private Set<Bullet> bulletsFired = new HashSet<Bullet>();
 	
 	/**
 	 * A variable registering the force the active thruster of this ship exerts.
