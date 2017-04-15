@@ -11,11 +11,11 @@ import be.kuleuven.cs.som.annotate.*;
  * and an orientation.
  * 
  * @invar	Each ship has a valid position.
- * 			| isValidPosition(getXPosition(), getYPosition())
+ * 			| isValidPosition(getXPosition(), getYPosition())
  * @invar	Each ship has a valid radius.
- * 			| isValidRadius(getRadius())
+ * 			| isValidRadius(getRadius())
  * @invar	Each ship has a valid orientation.
- * 			| isValidOrientation(getOrientation())
+ * 			| isValidOrientation(getOrientation())
  */
 public class Ship extends Entity{
 	
@@ -33,32 +33,32 @@ public class Ship extends Entity{
 	 * @param	mass
 	 * 			The mass for this ship
 	 * @pre		This ship can have the given orientation as orientation.
-	 * 			| isValidOrientation(orientation)
+	 * 			| isValidOrientation(orientation)
 	 * @post	The new position for this new ship is equal to the given position.
-	 * 			| new.getXPosition() == xpos
+	 * 			| new.getXPosition() == xpos
 	 * 			| new.getYPosition() == ypos
 	 * @post	The new velocity for this new ship is equal to the given velocity.
-	 * 			| new.getXVelocity() == xvel
+	 * 			| new.getXVelocity() == xvel
 	 * 			| new.getYVelocity() == yvel
 	 * @post	The new radius for this new ship is equal to the given radius.
-	 * 			| new.getRadius() == radius
+	 * 			| new.getRadius() == radius
 	 * @post	The new orientation for this new ship is equal to the given orientation.
-	 * 			| new.getOrientation() == orientation
+	 * 			| new.getOrientation() == orientation
 	 * @post	The new mass for this new ship is equal to the given mass.
-	 * 			| new.getMass() == mass
+	 * 			| new.getMass() == mass
 	 * @post	The new mass density for this new ship is equal to its lower bound.
-	 * 			| new.getMassDensity() == MIN_DENSITY
+	 * 			| new.getMassDensity() == MIN_DENSITY
 	 * @post	The new thrust force for this new ship is equal to its standard value.
-	 * 			| new.getThrustForce() == STANDARD_FORCE
+	 * 			| new.getThrustForce() == STANDARD_FORCE
 	 * @post	The new maximum speed for this new ship is equal to its upper bound.
-	 * 			| new.getMaxSpeed() == MAX_SPEED
+	 * 			| new.getMaxSpeed() == MAX_SPEED
 	 * @post	The new ship is not located in a world.
-	 * 			| new.getWorld() == null
+	 * 			| new.getWorld() == null
 	 * @post	The thruster of the new ship is not activated.
-	 * 			| new.thrusterEnabled() == false 
+	 * 			| new.thrusterEnabled() == false 
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
-	 * 			| (! isValidPosition(xpos, ypos))
+	 * 			| (! isValidPosition(xpos, ypos))
 	 * @throws 	IllegalRadiusException
 	 * 			The given radius does not exceed MIN_RADIUS.
 	 * 			| (! isValidRadius(radius))
@@ -84,30 +84,30 @@ public class Ship extends Entity{
 	 * 
 	 * @post	The new position for this new ship is equal to the middle of the unbounded
 	 * 			two-dimensional space.
-	 * 			| new.getXPosition() == 0
+	 * 			| new.getXPosition() == 0
 	 * 			| new.getYPosition() == 0
 	 * @post	The new velocity for this new ship is equal to 0.
-	 * 			| new.getXVelocity() == 0
+	 * 			| new.getXVelocity() == 0
 	 * 			| new.getYVelocity() == 0
 	 * @post	The new radius for this new ship is equal to MIN_RADIUS.
-	 * 			| new.getRadius() == MIN_RADIUS
+	 * 			| new.getRadius() == MIN_RADIUS
 	 * @post	The new orientation for this new ship is equal to 0.
-	 * 			| new.getOrientation() == 0
+	 * 			| new.getOrientation() == 0
 	 * @post	The mass of this new ship is equal to (4/3)*(Math.PI)*Math.pow(MIN_RADIUS, 3)*MIN_DENSITY)
-	 * 			| new.getMass() == (4/3)*(Math.PI)*Math.pow(MIN_RADIUS, 3)*MIN_DENSITY)
+	 * 			| new.getMass() == (4/3)*(Math.PI)*Math.pow(MIN_RADIUS, 3)*MIN_DENSITY)
 	 * @post	The new mass density for this new ship is equal to its lower bound.
-	 * 			| new.getMassDensity() == MIN_DENSITY
+	 * 			| new.getMassDensity() == MIN_DENSITY
 	 * @post	The new thrust force for this new ship is equal to its standard value.
-	 * 			| new.getThrustForce() == STANDARD_FORCE
+	 * 			| new.getThrustForce() == STANDARD_FORCE
 	 * @post	The new maximum speed for this new ship is equal to its upper bound.
-	 * 			| new.getMaxSpeed() == MAX_SPEED
+	 * 			| new.getMaxSpeed() == MAX_SPEED
 	 * @post	The new ship is not located in a world.
-	 * 			| new.getWorld() == null
+	 * 			| new.getWorld() == null
 	 * @post	The thruster of the new ship is not activated.
-	 * 			| new.thrusterEnabled() == false 
+	 * 			| new.thrusterEnabled() == false 
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
-	 * 			| (! isValidPosition(xpos, ypos))
+	 * 			| (! isValidPosition(xpos, ypos))
 	 * @throws 	IllegalRadiusException
 	 * 			The given radius does not exceed MIN_RADIUS.
 	 * 			| (! isValidRadius(radius))
@@ -128,16 +128,16 @@ public class Ship extends Entity{
 	 * 			If the ship is associated with a certain world, it must be positioned within its bounds and it
 	 * 			cannot overlap with any other entity, located in that world in order to have a valid
 	 * 			position.
-	 * 			| if (! xpos == Double.POSITIVE_INFINITY)&&(! xpos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(xpos))
-	 *			| 	&& (! ypos == Double.POSITIVE_INFINITY)&&(! ypos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(ypos))
+	 * 			| if (! xpos == Double.POSITIVE_INFINITY)&&(! xpos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(xpos))
+	 *			| 	&& (! ypos == Double.POSITIVE_INFINITY)&&(! ypos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(ypos))
 	 *			|	if (this.getWorld() != null) 
 	 *			|		if (this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius()))&&
 	 *			|			(this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius()))
-	 *			| 			if (for each entity in getWorld().getAllEntities():
-	 *			| 				Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-	 *			| 					Math.pow(ypos-entity.getYPosition(),2)))>
+	 *			| 			if (for each entity in getWorld().getAllEntities():
+	 *			| 				Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+	 *			| 					Math.pow(ypos-entity.getYPosition(),2)))>
 	 *			| 					0.99*(entity.getRadius()+getRadius()))
-	 *			| 			then result == true
+	 *			| 			then result == true
 	 *			|		else
 	 *			|			result == false
 	 *			| 	else
@@ -175,7 +175,7 @@ public class Ship extends Entity{
 	 * 			maximum speed of this ship is the given speed. Otherwise, the new maximum speed of
 	 * 			this ship is MAX_SPEED.
 	 * 			| if maxSpeed <= MAX_SPEED
-	 * 			| 	new.getMaxSpeed == maxSpeed
+	 * 			| 	new.getMaxSpeed == maxSpeed
 	 * 			| else
 	 * 			| 	new.getMaxSpeed == MAX_SPEED
 	 * @post	If the current velocity of this ship exceeds its maximum value, the velocity of
@@ -207,7 +207,7 @@ public class Ship extends Entity{
 	 * @param	acc
 	 * 			The new acceleration of this ship
 	 * @post	The new acceleration of this ship is equal to the given acceleration.
-	 * 			| new.getAcceleration == acc
+	 * 			| new.getAcceleration == acc
 	 */
 	@Raw
 	public void setAcceleration(double acc) {
@@ -258,7 +258,7 @@ public class Ship extends Entity{
 	 * @param	orientation
 	 * 			The new orientation of the ship.
 	 * @pre		This ship can have the given orientation as orientation.
-	 * 			| isValidOrientation(orientation)
+	 * 			| isValidOrientation(orientation)
 	 * @post	The new orientation for this ship is the given orientation.
 	 * 			| new.getOrientation == orientation
 	 */
@@ -274,7 +274,7 @@ public class Ship extends Entity{
 	 * @param 	orientation
 	 * 			The orientation to check.
 	 * @return	True if and only if the orientation is a value between zero and 2*PI.
-	 * 			| result == (0 <= orientation <= 2*PI)
+	 * 			| result == (0 <= orientation <= 2*PI)
 	 */
 	@Raw
 	public boolean isValidOrientation(double orientation) {
@@ -296,11 +296,11 @@ public class Ship extends Entity{
 	 * 			The world, in which the ship has to be located.
 	 * @post	If the ship does not belong to a world yet, the new world of this ship 
 	 * 			is the given world.
-	 * 			| if (old.getWorld() == null)
+	 * 			| if (old.getWorld() == null)
 	 *			|	new.world == world;		
 	 * @post	If the given world is null, the world of this ship is null.
-	 * 			| if (world==null)
-	 * 			| 	new.world == null;
+	 * 			| if (world==null)
+	 * 			| 	new.world == null;
 	 */
 	@Raw
 	public void setWorld(World world) {
@@ -342,9 +342,9 @@ public class Ship extends Entity{
 	 * @result	The resulted mass is equal to the sum of the mass of the ship and the sum
 	 * 			of the masses of the bullets the ship has loaded.
 	 *			| totalMass = this.getMass()
-	 *			| for (Bullet bullet: this.getBullets())
+	 *			| for (Bullet bullet: this.getBullets())
 				|	totalMass = totalMass + bullet.getMass()
-				| result == totalMass
+				| result == totalMass
 	 */
 	public double getTotalMass() {
 		double totalMass = this.getMass();
@@ -369,10 +369,10 @@ public class Ship extends Entity{
 	 * @post	This ship does not have the given bullet loaded.
 	 * 			| ! new.getBullets().contains(bullet)
 	 * @post	The given bullet is no longer associated with any ship.
-	 * 			| (new bullet).getShip() == null
+	 * 			| (new bullet).getShip() == null
 	 * @throws	IllegalBulletException
 	 * 			This ship does not contain the given bullet.
-	 * 			| ! this.getBullets().contains(bullet)
+	 * 			| ! this.getBullets().contains(bullet)
 	 */
 	public void removeBullet(Bullet bullet) throws IllegalBulletException {
 		if (!this.getBullets().contains(bullet))
@@ -385,7 +385,7 @@ public class Ship extends Entity{
 	 * Return the total number of bullets, loaded in this ship.
 	 * 
 	 * @result	The returned integer is equal to the number of bullets, loaded in this ship.
-	 * 			| result == this.getBullets().size()
+	 * 			| result == this.getBullets().size()
 	 */
 	public int getNbBullets() {
 		return this.getBullets().size();
@@ -397,22 +397,22 @@ public class Ship extends Entity{
 	 * @param	bullet
 	 * 			The bullet to load this ship with.
 	 * @post	This ship is loaded with the given bullet.
-	 * 			| new.getBullets().contains(bullet)
-	 * 			| new.getNbBullets() == old.getNbBullets() + 1
+	 * 			| new.getBullets().contains(bullet)
+	 * 			| new.getNbBullets() == old.getNbBullets() + 1
 	 * @post	The given bullet is loaded in the given ship.
-	 * 			| (new bullet).getShip() == new
-	 * 			| (new bullet).getXPosition() == old.getXPosition()
-	 * 			| (new bullet).getYPosition() == old.getYPosition()
-	 * 			| (new bullet).getXVelocity() == old.getXVelocity()
-	 * 			| (new bullet).getYVelocity() == old.getYVelocity()
+	 * 			| (new bullet).getShip() == new
+	 * 			| (new bullet).getXPosition() == old.getXPosition()
+	 * 			| (new bullet).getYPosition() == old.getYPosition()
+	 * 			| (new bullet).getXVelocity() == old.getXVelocity()
+	 * 			| (new bullet).getYVelocity() == old.getYVelocity()
 	 * @post	If the given bullet was associated with a world, it no longer is.
-	 * 			| if ((old bullet).getWorld()!=null)
+	 * 			| if ((old bullet).getWorld()!=null)
 	 *			|	(new bullet).getWorld() == null
 	 * @throws	IllegalBulletException
 	 * 			This ship and the given bullet both belong to a world, and these worlds are
 	 * 			not the same.
-	 * 			| (this.getWorld()!=null)&&(bullet.getWorld()!=null)
-	 * 			| 	&&(this.getWorld()!=bullet.getWorld())
+	 * 			| (this.getWorld()!=null)&&(bullet.getWorld()!=null)
+	 * 			| 	&&(this.getWorld()!=bullet.getWorld())
 	 */
 	public void loadBullet(Bullet bullet) throws IllegalBulletException {
 		if ((this.getWorld()!=null)&&(bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld()))
@@ -434,26 +434,26 @@ public class Ship extends Entity{
 	 * @param	bullet
 	 * 			The bullets to load this ship with.
 	 * @post	This ship is loaded with the given bullets.
-	 * 			| for each (bullet: bullets)
-	 * 			|  	new.getBullets().contains(bullet)
-	 * 			| new.getNbBullets() == old.getNbBullets() + bullets.size()
+	 * 			| for each (bullet: bullets)
+	 * 			|  	new.getBullets().contains(bullet)
+	 * 			| new.getNbBullets() == old.getNbBullets() + bullets.size()
 	 * @post	The given bullet is loaded in the given ship.
-	 * 			| for each (bullet: bullets)
-	 * 			| 	(new bullet).getShip() == new
-	 * 			| 	(new bullet).getXPosition() == old.getXPosition()
-	 * 			| 	(new bullet).getYPosition() == old.getYPosition()
-	 * 			| 	(new bullet).getXVelocity() == old.getXVelocity()
-	 * 			| 	(new bullet).getYVelocity() == old.getYVelocity()
+	 * 			| for each (bullet: bullets)
+	 * 			| 	(new bullet).getShip() == new
+	 * 			| 	(new bullet).getXPosition() == old.getXPosition()
+	 * 			| 	(new bullet).getYPosition() == old.getYPosition()
+	 * 			| 	(new bullet).getXVelocity() == old.getXVelocity()
+	 * 			| 	(new bullet).getYVelocity() == old.getYVelocity()
 	 * @post	If a given bullet was associated with a world, it no longer is.
-	 * 			| for each (bullet: bullets)
-	 * 			| 	if ((old bullet).getWorld()!=null)
+	 * 			| for each (bullet: bullets)
+	 * 			| 	if ((old bullet).getWorld()!=null)
 	 *			|		(new bullet).getWorld() == null
 	 * @throws	IllegalBulletException
 	 * 			This ship and a given bullet both belong to a world, and these worlds are
 	 * 			not the same.
-	 * 			| for a (bullet: bullets)
-	 * 			| 	(this.getWorld()!=null)&&(bullet.getWorld()!=null)
-	 * 			| 	&&(this.getWorld()!=bullet.getWorld())
+	 * 			| for a (bullet: bullets)
+	 * 			| 	(this.getWorld()!=null)&&(bullet.getWorld()!=null)
+	 * 			| 	&&(this.getWorld()!=bullet.getWorld())
 	 */
 	public void loadBullet(Collection<Bullet> bullets) throws IllegalBulletException {
 		for (Bullet bullet: bullets) {
@@ -477,28 +477,28 @@ public class Ship extends Entity{
 	 * @post	This ship has one less bullet loaded.
 	 * 			| new.getNbBullets() == old.getNbBullets() - 1
 	 * @post	The fired bullet has this ship as its source.
-	 * 			| (new removed bullet).getSource() == new;
-	 * 			| (new removed bullet).getWorld() == new.getWorld();
+	 * 			| (new removed bullet).getSource() == new;
+	 * 			| (new removed bullet).getWorld() == new.getWorld();
 	 * @post	The speed of the fired bullet is equal to INITIAL_SPEED.
-	 * 			| (new removed bullet).getXVelocity() == INITIAL_SPEED*Math.cos(old.getOrientation())
-	 * 			| (new removed bullet).getYVelocity() == INITIAL_SPEED*Math.sin(old.getOrientation())
+	 * 			| (new removed bullet).getXVelocity() == INITIAL_SPEED*Math.cos(old.getOrientation())
+	 * 			| (new removed bullet).getYVelocity() == INITIAL_SPEED*Math.sin(old.getOrientation())
 	 * @post	The fired bullet is positioned next to this ship.
-	 * 			| (new removed bullet).getXPosition() == old.getXPosition()+(old.getRadius()+
-	 * 			| 	2*(old removed bullet).getRadius())*Math.cos(old.getOrientation())
+	 * 			| (new removed bullet).getXPosition() == old.getXPosition()+(old.getRadius()+
+	 * 			| 	2*(old removed bullet).getRadius())*Math.cos(old.getOrientation())
 	 * 			| (new removed bullet).getYPosition() == old.getYPosition()+(old.getRadius()+
-	 * 			| 	2*(old removed bullet).getRadius())*Math.sin(old.getOrientation())
+	 * 			| 	2*(old removed bullet).getRadius())*Math.sin(old.getOrientation())
 	 * @post	If the new position of the fired bullet is out of bounds of its world, 
 	 * 			the fired bullet is terminated.
-	 * 			| if (((new removed bullet).getXPosition()<0.99*(new removed bullet).getRadius())||
+	 * 			| if (((new removed bullet).getXPosition()<0.99*(new removed bullet).getRadius())||
 	 *			|	((new removed bullet).getXPosition()>1.01*(old.getWorld().getWidth()-
-	 *			| 	(new removed bullet).getRadius()))||
+	 *			| 	(new removed bullet).getRadius()))||
 	 *			|	((new removed bullet).getYPosition()<0.99*(new removed bullet).getRadius())||
 	 *			|	((new removed bullet).getYPosition()>1.01*(old.getWorld().getHeight()-
 	 *			|	(new removed bullet).getRadius())))
-	 *			| 	then (new removed bullet).isTerminated()
+	 *			| 	then (new removed bullet).isTerminated()
 	 * @post	If the fired bullet overlaps with another entity in its world, the bullet and the
 	 * 			other entity are terminated.
-	 * 			| for (entity: getWorld().getEntities().values())
+	 * 			| for (entity: getWorld().getEntities().values())
 	 *			|	if ((entity!=(new removed bullet))&&(entity!=old)&&
 	 *			|			((Math.sqrt(Math.pow((new removed bullet).getXPosition()-entity.getXPosition(),2)+
 	 *			|			Math.pow((new removed bullet).getYPosition-entity.getYPosition(),2)))<
@@ -506,8 +506,8 @@ public class Ship extends Entity{
 	 *			|		(new removed bullet).isTerminated()
 	 *			|		(new entity).isTerminated()
 	 * @post	This ship has fired a bullet.
-	 * 			| (new removed bullet).getSource() == new
-	 * 			| new.getBulletsFired().contains((new removed bullet))
+	 * 			| (new removed bullet).getSource() == new
+	 * 			| new.getBulletsFired().contains((new removed bullet))
 	 */
 	public void fireBullet() {
 		if ((this.getNbBullets()>0)&&(this.getWorld()!=null)) {
@@ -566,10 +566,10 @@ public class Ship extends Entity{
 	 * @param	massDensity
 	 * @post	If the given density exceeds its minimal value, the new mass density of this ship
 	 * 			is equal to the given value. Otherwise, the mass density of this ship is set to its minimal value.
-	 * 			| if (massDensity > MIN_DENSITY)
-	 * 			| 	new.getMassDensity == massDensity
-	 * 			| else
-	 * 			| 	new.getMassDensity == MIN_DENSITY
+	 * 			| if (massDensity > MIN_DENSITY)
+	 * 			| 	new.getMassDensity == massDensity
+	 * 			| else
+	 * 			| 	new.getMassDensity == MIN_DENSITY
 	 * @post	The mass of this ship is adjusted to the new mass density of this ship.
 	 */
 	public void setMassDensity(double massDensity) {
@@ -593,7 +593,7 @@ public class Ship extends Entity{
 	 * @param	force
 	 * 			The new thrust force of this ship.
 	 * @post	The new thrust force of this ship is equal to the given thrust force.
-	 * 			| new.getThrustForce == force
+	 * 			| new.getThrustForce == force
 	 */
 	public void setThrustForce(double force) {
 		this.thrustForce = force;
@@ -624,7 +624,7 @@ public class Ship extends Entity{
 	 * Return whether this ship is located in a world.
 	 * 
 	 * @result	Returns true if and only if this ship is located in a world.
-	 * 			| result == (this.getWorld()!=0)
+	 * 			| result == (this.getWorld()!=0)
 	 */
 	public boolean hasPosition() {
 		return this.getWorld() != null;
@@ -636,8 +636,8 @@ public class Ship extends Entity{
 	 * @post	The thruster of the ship is disabled.
 	 * 			| ! new.thrusterEnabled()
 	 * @post	The acceleration of this ship is set to zero.
-	 * 			| new.getXAcceleration == 0
-	 * 			| new.getYAcceleration == 0
+	 * 			| new.getXAcceleration == 0
+	 * 			| new.getYAcceleration == 0
 	 */
 	public void thrustOff() {
 		this.thruster = false;
@@ -650,28 +650,30 @@ public class Ship extends Entity{
 	 * @post	The new state of this ship is terminated.
 	 * 			| new.isTerminated()
 	 * @post	This ship is no longer associated with its world, if any. 
-	 * 			| new.getWorld() == null
-	 * 			| ! old.getWorld().contains(this)
+	 * 			| new.getWorld() == null
+	 * 			| ! old.getWorld().contains(this)
 	 * @post	This ship does not load any bullets.
-	 * 			| for each bullet in old.getBullets():
-	 * 			| 	(new bullet).getShip() == null
-	 * 			| 	! new.getBullets().contains(bullet)
-	 * 			| 	! new.getBulletsFired().contains(this)
-	 * 			| 	(new bullet).isTerminated()
-	 * 			| 	(new bullet).getSource() == null
-	 * 			| 	(new bullet).getWorld() == old.getWorld()
+	 * 			| for each bullet in old.getBullets():
+	 * 			| 	(new bullet).getShip() == null
+	 * 			| 	! new.getBullets().contains(bullet)
+	 * 			| 	! new.getBulletsFired().contains(this)
+	 * 			| 	(new bullet).isTerminated()
+	 * 			| 	(new bullet).getSource() == null
+	 * 			| 	(new bullet).getWorld() == old.getWorld()
 	 */
 	@Raw
 	public void terminate() {
 		this.isTerminated = true;
 		World world = getWorld();
+		for (Bullet bullet: this.getBulletsFired()) {
+			bullet.setSource(null);
+			bullet.setWorld(world);
+		}
 		if (this.getWorld()!=null)
 			this.getWorld().removeEntity(this);
 		for (Bullet bullet: this.getBullets()) {
 			bullet.setShip(null);
 			bullet.terminate();
-			bullet.setSource(null);
-			bullet.setWorld(world);
 		}
 		this.getBullets().clear();
 		this.getBulletsFired().clear();
@@ -688,8 +690,8 @@ public class Ship extends Entity{
 	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
 	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
 	 * @post	Each bullet loaded in this ship is moved along with this ship.
-	 * 			| for (bullet: old.getBullets()
-	 * 			| 	new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
+	 * 			| for (bullet: old.getBullets()
+	 * 			| 	new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
 	 * 			| 	new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
 	 * @throws 	IllegalDurationException
 	 * 			The given duration of the movement is negative.
