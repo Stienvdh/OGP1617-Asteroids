@@ -408,6 +408,8 @@ public class Ship extends Entity{
 	 * @post	If the given bullet was associated with a world, it no longer is.
 	 * 			| if ((old bullet).getWorld()!=null)
 	 *			|	(new bullet).getWorld() == null
+	 * @post	This ship no longer fired this bullet.
+	 * 			| ! new.getBulletsFired().contains(bullet)
 	 * @throws	IllegalBulletException
 	 * 			This ship and the given bullet both belong to a world, and these worlds are
 	 * 			not the same.
@@ -448,6 +450,9 @@ public class Ship extends Entity{
 	 * 			| for each (bullet: bullets)
 	 * 			| 	if ((old bullet).getWorld()!=null)
 	 *			|		(new bullet).getWorld() == null
+	 * @post	This ship does not fire the given bullets anymore.
+	 * 			| for each (bullet: bullets)
+	 * 			|	 ! new.contains(new bullet)
 	 * @throws	IllegalBulletException
 	 * 			This ship and a given bullet both belong to a world, and these worlds are
 	 * 			not the same.

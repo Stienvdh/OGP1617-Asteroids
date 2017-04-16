@@ -181,7 +181,13 @@ public class World {
 	/**
 	 * Return the time until the first collision in this world.
 	 * 
-	 * @result 	
+	 * @return	The time until the first collision, that will occur in this world, of an entity 
+	 * 			within that world with either a boundary of that world or another entity 
+	 * 			in that world.
+	 * 			| for (entity1: getAllEntities())
+	 * 			| 	result <= entity1.getTimeToBoundary()
+	 * 			| 		for (entity2: getAllEntities())
+	 * 			| 			result <= entity1.getTimeToCollision(entity2)
 	 */
 	public double getTimeFirstCollision() {
 		double boundary = Double.POSITIVE_INFINITY;
@@ -205,6 +211,18 @@ public class World {
 	
 	/**
 	 * Return the position of the first collision in this world.
+	 * 
+	 * @return	The position, where the first collision of an entity within this world
+	 * 			with either a boundary of this world or another entity in that world.
+	 * 			| getAllEntities().move(getTimeFirstCollision)
+	 * 			| for (entity: getAllEntities())
+	 * 			|	if (! entity1.isValidPosition(entity1.getXPosition(),entity1.getYPosition())
+	 * 			| 		if (entity1.getTimeToBoundary()==0)
+	 * 			| 			result == entity1.getBoundaryPosition()
+	 * 			| 		for (entity2: getAllEntities())
+	 * 			| 			if (entity2!=entity1)&&(!entity2.isValidPosition(
+	 * 			|				entity2.getXPosition(),entity2.getYPosition())
+	 * 			| 				result == entity1.getCollisionPosition(entity2)
 	 */
 	public double[] getFirstCollisionPosition() {
 		double boundary = Double.POSITIVE_INFINITY;
@@ -277,8 +295,8 @@ public class World {
 			}
 		}
 		else if (Math.min(boundary, collision)<dt) {
-/*			for (Entity entity: this.getAllEntities()) {
-				entity.move(Math.min(boundary, collision)/2);
+			for (Entity entity: this.getAllEntities()) {
+				entity.move(Math.min(boundary, collision)/3);
 				if (entity instanceof Ship) {
 					entity.setVelocity(entity.getXVelocity()+
 							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
@@ -287,7 +305,7 @@ public class World {
 							*((Ship)entity).getAcceleration()*
 							Math.sin(((Ship) entity).getOrientation()));
 				}
-			}*/
+			}
 			if (boundary<collision) {
 				entityB.collideBoundary();
 				this.evolve(dt-boundary);
