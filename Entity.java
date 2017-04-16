@@ -22,18 +22,24 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Set the position of this entity to a given position.
+	 * Set the position of this entity to a given position. If the entity is a ship with
+	 * loaded bullets, this method also sets their positions to the given position.
 	 * 
 	 * @param	xpos
 	 * 			The position of this entity along the x-axis.
 	 * @param	ypos
 	 * 			The position of this entity along the y-axis.
 	 * @post	The new position of this entity is equal to the given position.
-	 * 			| new.getXPosition() == xpos
-	 * 			| new.getYPosition() == ypos
+	 * 			| new.getXPosition() == xpos
+	 * 			| new.getYPosition() == ypos
+	 * @post	If the entity is a ship, the positions of the bullets are equal the given
+	 * 			position.
+	 * 			|if (this instanceof Ship)
+	 * 			|	for (Bullet bullet: ((Ship)this).getBullets())
+	 * 			|		this.setPosition(xpos,ypos)
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
-	 * 			| ! isValidPosition()
+	 * 			| ! isValidPosition()
 	 */
 	@Basic @Raw
 	public void setPosition(double xpos, double ypos) {
@@ -66,7 +72,8 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Set the velocity of this entity to a given velocity.
+	 * Set the velocity of this entity to a given velocity. If the entity is a ship with
+	 * loaded bullets, this method also sets their velocities to the given velocity.
 	 * 
 	 * @param	xvel
 	 * 			The new velocity of this entity along the x-axis.
@@ -81,6 +88,11 @@ public abstract class Entity {
 	 * 			| else
 	 * 			| 	(new.getXVelocity == xvel/sqrt(xvel^2 + yvel^2)*old.getMaxSpeed() &&
 	 * 			|		new.getYVelocity == yvel/sqrt(xvel^2 + yvel^2)*old.getMaxSpeed());
+	  * @post	If the entity is a ship, the velocities of the bullets are equal the given
+	 * 			velocity.
+	 * 			|if (this instanceof Ship)
+	 * 			|	for (Bullet bullet: ((Ship)this).getBullets())
+	 * 			|		this.setVelocity(xpos,ypos)
 	 */
 	@Raw
 	public void setVelocity(double xvel, double yvel) {
@@ -113,7 +125,7 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Return the radius of this ship.
+	 * Return the radius of this entity.
 	 */
 	@Basic @Raw
 	public double getRadius() {
@@ -130,7 +142,7 @@ public abstract class Entity {
 	 * 			| result == (getDistanceBetween(this,other) <= 0)
 	 * @throws 	IllegalEntityException
 	 * 			At least one of the ships involved is ineffective or terminated.
-	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
+	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
 	 */
 	public boolean overlap(Entity other) throws IllegalArgumentException{
 		if ((other == null)||(other.isTerminated()))
@@ -147,15 +159,15 @@ public abstract class Entity {
 	 * 			The entity with which this entity will collide.
 	 * @return	The distance between two entities is the distance between its centers minus the radiuses of both 
 	 * 			entities. The distance can thus be negative. The distance between an entity and itself is zero.
-	 * 			| if (this == other)
-	 *			| 	then result == 0
-	 *			| else
+	 * 			| if (this == other)
+	 *			| 	then result == 0
+	 *			| else
 	 *			|	result == (Math.sqrt(Math.pow(this.getXPosition()-other.getXPosition(),2)
 	 *			|	+ Math.pow(this.getYPosition()-other.getYPosition(),2))
 	 *			|	- this.getRadius() - other.getRadius())
 	 * @throws 	IllegalEntityException
 	 * 			At least one of the entities involved is ineffective or terminated.
-	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
+	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
 	 */
 	public double getDistanceBetween(Entity other) throws IllegalShipException {
 		if ((other == null)||(other.isTerminated()))
@@ -174,11 +186,22 @@ public abstract class Entity {
 	 * 
 	 * @return 	If this ship is not located in a world, positive infinity is returned.
 	 * 			| if this.getWorld() == null
-	 * 			| 	result == Double.POSITIVE_INFINITY
+	 * 			| 	result == Double.POSITIVE_INFINITY	
+	 * @return	If the ship doesn't have a x velocity, it will never reach vertical boundaries
+	 * 			so positive infinity is returned.
+	 * 			| if (this.getXVelocity()==0)
+	 * 			|	result == Double.POSITIVE_INFINITY
+	 * @return	If the ship doesn't have a y velocity, it will never reach horizontal boundaries
+	 * 			so positive infinity is returned.
+	 * 			| if (this.getYVelocity()==0)
+	 * 			|	result == Double.POSITIVE_INFINITY
 	 * @return 	If this ship is located in a world, the first collision of this ship with the 
 	 * 			boundaries of that world will happen after the returned time. Other entities in 
 	 * 			this world are not taken into account.
-	 * 			| 
+	 * 			| result == Math.min(Math.max((0.99*getRadius()-getXPosition())/getXVelocity(),
+	 * 			|	(1.01*(getWorld().getWidth()-getRadius())-getXPosition())/getXVelocity()),
+	 * 			|	Math.max((0.99*getRadius()-getYPosition())/getYVelocity(),
+	 * 			|	(1.01*(getWorld().getHeight()-getRadius())-getYPosition())/getYVelocity())
 	 */
 	public double getTimeToBoundary() {
 		if (this.getWorld()==null)
@@ -202,6 +225,19 @@ public abstract class Entity {
 	
 	/**
 	 * Return where this entity will collide with a boundary of its world, if any.
+	 * 
+	 * @return	If the time to the boundary is infinity, null is returned.
+	 * 			| if (this.getTimeToBoundary()==Double.POSITIVE_INFINITY)
+	 * 			|	result == null
+	 * @return	If the entity will reach a boundary, this position is returned.
+	 * 			| if (xpos<=getRadius())
+	 * 			|	result == {0,getYPosition()+getYVelocity()*getTimeToBoundary()};
+	 * 			| if (xpos>=getWorld().getWidth()-getRadius())
+	 * 			|	result == {getWorld().getWidth(),getYPosition()+getYVelocity()*getTimeToBoundary()};
+	 * 			| if (ypos<=getRadius())
+	 * 			|	result == {getXPosition()+getXVelocity()*getTimeToBoundary(),0};
+	 * 			| else
+	 * 			|	result == {getXPosition()+getYVelocity()*getTimeToBoundary(),getWorld().getHeight()};		
 	 */
 	public double[] getBoundaryPosition() {
 		double time = this.getTimeToBoundary();
@@ -228,21 +264,21 @@ public abstract class Entity {
 	 * 			If the ships will never collide, they are considered to collide after an infinite 
 	 * 			amount of time.
 	 * 			| if (! overlap(other))
-	 * 			| 	this.move(result)
-	 * 			| 	other.move(result)
-	 * 			| this.getDistanceBetween(other) == 0
+	 * 			| 	this.move(result)
+	 * 			| 	other.move(result)
+	 * 			| this.getDistanceBetween(other) == 0
 	 * @return	No collision between this ship and the other ship will occur within the returned amount
 	 * 			of time.
 	 * 			|
 	 * 			|
 	 * 			|
 	 * 			|
-	 * @throws	IllegalShipException
+	 * @throws	IllegalEntityException
 	 * 			The ships already overlap.
 	 * 			| overlap(other)
-	 * @throws	IllegalShipException
+	 * @throws	IllegalEntityException
 	 * 			At least one of the ships involved is ineffective or terminated.
-	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
+	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
 	 */
 	public double getTimeToCollision(Entity other) throws IllegalEntityException {
 		if (this.getWorld()!=other.getWorld())
@@ -254,7 +290,7 @@ public abstract class Entity {
 		if ((this == null)||(this.isTerminated()))
 			throw new IllegalEntityException(this);
 		if (this.overlap(other))
-			return 0;
+			throw new IllegalEntityException(this);
 		double[] dr = {other.getXPosition() - this.getXPosition(),
 						other.getYPosition() - this.getYPosition()};
 		double[] dv = {other.getXVelocity() - this.getXVelocity(),
@@ -268,10 +304,10 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Return the position where this ship will collide with another ship.
+	 * Return the position where this entity will collide with another entity.
 	 * 
 	 * @param	other
-	 * 			The ship with which this ship will collide.
+	 * 			The entity with which this entity will collide.
 	 * @return	The position of collision if they collide. Null if they never will collide.
 	 * 			| dt = this.getTimeToCollision(other)
 	 * 			| if (dt != Double.POSITIVE_INFINITY)
@@ -281,9 +317,6 @@ public abstract class Entity {
 	 *			| 		(this.getRadius() / other.getRadius()) + this.getYPosition()}
 	 *			| else
 	 *			| 	result == null
-	 * @throws	IllegalShipException
-	 * 			At least one of the ships involved is ineffective or terminated.
-	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
 	 */
 	public double[] getCollisionPosition(Entity other) throws IllegalEntityException {
 		if (this.getTimeToCollision(other) != Double.POSITIVE_INFINITY) {
@@ -312,6 +345,27 @@ public abstract class Entity {
 	 * 
 	 * @param 	other
 	 * 			The entity to collide with.
+	 * @post	If this entity and the other entity are both bullets, the method will
+	 * 			terminate them.
+	 * 			| if (this instanceof Bullet && other istanceof Bullet)
+	 * 			| 	terminate this
+	 * 			|	terminate other
+	 * @post	If one of the entities is a ship and the other is a bullet that is not
+	 * 			fired by that ship, the method will terminate them. If the bullet is
+	 * 			fired by the ship, the bullet will be loaded into the ship.
+	 * 			| if ((this instanceof Bullet && other instanceof Ship && this.getSource != other)
+	 * 			| || (other instanceof Bullet && this instanceof Ship && other.getSource != this))
+	 * 			| 	terminate this
+	 * 			|	terminate other
+	 * 			| else
+	 * 			|	if (this instanceof ship)
+	 * 			|		this.loadbullet(other)
+	 * 			|	else if (this instanceof bullet)
+	 * 			|		other.loadbullet(this)
+	 * @post	If the two entities are ships, they will bounce off each other.
+	 * 			| if (this instanceof ship && other instanceof Ship)
+	 * 			|	see code
+	 * 
 	 */
 	public void collide(Entity other){
 		if (this instanceof Bullet) {
@@ -353,6 +407,20 @@ public abstract class Entity {
 	
 	/**
 	 * Resolve the first collision of this entity with a boundary.
+	 * 
+	 * @post	If the collision position on the boundary of the entity is not null,
+	 * 			the velocity of the entity will be altered. If the entity collides
+	 * 			with a vertical boundary, his X velocity is been reversed.
+	 * 			If he hits a horizontal boundary, his Y velocity is been reversed.
+	 * 			| if (pos!=null)
+	 * 			|	if ((pos[0]==0)||(pos[0]==this.getWorld().getWidth()))
+	 * 			|		setVelocity(-getXVelocity(),getYVelocity())
+	 * 			|	else
+	 * 			|		setVelocity(getXVelocity(),-getYVelocity())
+	 * @post	If the entity is a bullet, the amount of bounces done increases by
+	 * 			one.
+	 * 			| if (this instanceof Bullet)
+	 * 			|	this.setBounces(this.getBounces()+1)
 	 */
 	public void collideBoundary() {
 		double[] pos = getBoundaryPosition();
@@ -397,7 +465,7 @@ public abstract class Entity {
 	protected double radius;
 	
 	/**
-	 * A variable registering whether this bullet is terminated.
+	 * A variable registering whether this entity is terminated.
 	 */
 	protected boolean isTerminated;
 	
