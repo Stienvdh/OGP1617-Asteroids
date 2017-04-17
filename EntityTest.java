@@ -201,28 +201,28 @@ public class EntityTest {
 	}
 	
 	@Test
-	public void testCollide1() throws ModelException {
+	public void testCollide_CaseNonSourceShipAndBullet() throws ModelException {
 		ship.collide(bullet);
 		assert ship.isTerminated();
 		assert bullet.isTerminated();
 	}
 	
 	@Test
-	public void testCollide2() throws ModelException {
+	public void testCollide_CaseBulletAndBullet() throws ModelException {
 		bullet2.collide(bullet);
 		assert bullet2.isTerminated();
 		assert bullet.isTerminated();
 	}
 	
 	@Test
-	public void testCollide3() throws ModelException {
+	public void testCollide_CaseNoCollision() throws ModelException {
 		ship.collide(ship2);
 		assert ! ship.isTerminated();
 		assert ! ship2.isTerminated();
 	}
 	
 	@Test
-	public void testCollide4() throws ModelException {
+	public void testCollide_CaseSourceShipAndBullet() throws ModelException {
 		bullet.setWorld(null);
 		bullet.setSource(ship);
 		ship.collide(bullet);
@@ -230,14 +230,14 @@ public class EntityTest {
 	}
 	
 	@Test
-	public void testCollide5() throws ModelException {
+	public void testCollide_CaseLoadedShipAndBullet() throws ModelException {
 		ship.loadBullet(bullet);
 		ship.collide(bullet2);
 		assert bullet.isTerminated();
 	}
 	
 	@Test
-	public void testCollideBoundary() throws ModelException {
+	public void testCollideBoundaryShip() throws ModelException {
 		Ship ship = facade.createShip(100,400,-10,20,30,Math.PI,50);
 		ship.collideBoundary();
 		assertEquals(-10, ship.getXVelocity(), EPSILON);

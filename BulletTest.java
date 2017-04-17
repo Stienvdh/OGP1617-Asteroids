@@ -74,9 +74,4 @@ public class BulletTest {
 	public void testMove_IllegalCaseNegativeDuration() throws ModelException {
 		bullet.move(-1);
 	}
-	
-	
-	
-	
-
 }

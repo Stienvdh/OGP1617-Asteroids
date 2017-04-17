@@ -138,9 +138,8 @@ public class World {
 	 * 			| 	result == null
 	 */
 	public Entity getEntityAt(double xpos,double ypos) {
-		double[] pos = {xpos,ypos};
 		for (Entity entity: getEntities().keySet()) {
-			if (getEntities().get(entity)==pos)
+			if ((getEntities().get(entity)[0]==xpos)&&(getEntities().get(entity)[1]==ypos))
 				return entity;
 		}
 		return null;
@@ -250,7 +249,7 @@ public class World {
 		if (Math.min(boundary, collision)==Double.POSITIVE_INFINITY) {
 			return null;
 		}
-		if (boundary>collision)
+		if (boundary<collision)
 			return entityB.getBoundaryPosition();
 		else
 			return entityC1.getCollisionPosition(entityC2);	
@@ -295,17 +294,17 @@ public class World {
 			}
 		}
 		else if (Math.min(boundary, collision)<dt) {
-//			for (Entity entity: this.getAllEntities()) {
-//				entity.move(Math.min(boundary, collision)/3);
-//				if (entity instanceof Ship) {
-//					entity.setVelocity(entity.getXVelocity()+
-//							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
-//							*Math.cos(((Ship) entity).getOrientation()), 
-//							entity.getYVelocity()+Math.min(boundary, collision)
-//							*((Ship)entity).getAcceleration()*
-//							Math.sin(((Ship) entity).getOrientation()));
-//				}
-//			}
+/*			for (Entity entity: this.getAllEntities()) {
+				entity.move(Math.min(boundary, collision)/3);
+				if (entity instanceof Ship) {
+					entity.setVelocity(entity.getXVelocity()+
+							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
+							*Math.cos(((Ship) entity).getOrientation()), 
+							entity.getYVelocity()+Math.min(boundary, collision)
+							*((Ship)entity).getAcceleration()*
+							Math.sin(((Ship) entity).getOrientation()));
+				}
+			}*/
 			if (boundary<collision) {
 				entityB.collideBoundary();
 				this.evolve(dt-boundary);

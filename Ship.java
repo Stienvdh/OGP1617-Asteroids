@@ -536,8 +536,8 @@ public class Ship extends Entity{
 							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
 							Math.pow(ypos-entity.getYPosition(),2)))<
 							0.99*(entity.getRadius()+bullet.getRadius()))) {
-						bullet.terminate();
-						entity.terminate();
+						bullet.isTerminated=true;
+						entity.isTerminated=true;
 					}
 				}
 				if (! bullet.isTerminated()) {

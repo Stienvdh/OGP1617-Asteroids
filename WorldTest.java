@@ -89,7 +89,7 @@ public class WorldTest {
 	public void testTimeToFirstCollision_LegalCaseBoundary() {
 		Ship ship = new Ship(100,100,-10,0,10,0,100);
 		world.addEntity(ship);
-		assert world.getTimeFirstCollision()==9.01;
+		assert world.getTimeFirstCollision()==9;
 	}
 	
 	@Test
