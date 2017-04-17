@@ -227,7 +227,7 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public void setRadius(double radius) throws IllegalRadiusException{
-		if (radius <= MIN_RADIUS)
+		if (radius < MIN_RADIUS)
 			throw new IllegalRadiusException(radius);
 		this.radius = radius;
 	}
@@ -523,8 +523,8 @@ public class Ship extends Entity{
 			bullet.setSource(null);
 			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
 				INITIAL_SPEED*Math.sin(getOrientation()));
-			double xpos = getXPosition()+(getRadius()+2*bullet.getRadius())*Math.cos(getOrientation());
-			double ypos = getYPosition()+(getRadius()+2*bullet.getRadius())*Math.sin(getOrientation());
+			double xpos = getXPosition()+(getRadius()+1.5*bullet.getRadius())*Math.cos(getOrientation());
+			double ypos = getYPosition()+(getRadius()+1.5*bullet.getRadius())*Math.sin(getOrientation());
 			if ((xpos<0.99*bullet.getRadius())||
 				(xpos>1.01*(this.getWorld().getWidth()-bullet.getRadius()))||
 				(ypos<0.99*bullet.getRadius())||

@@ -3,6 +3,10 @@ package asteroids.model;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 
+/**
+ * @invar	Each entity has a valid position.
+ * 			| entity.isValidPosition(getXPosition(),getYPosition())
+ */
 public abstract class Entity {
 	
 	/**
@@ -283,14 +287,14 @@ public abstract class Entity {
 	 * 			| (other == null) || (other.isTerminated()) || (this == null) || (this.isTerminated())
 	 */
 	public double getTimeToCollision(Entity other) throws IllegalEntityException {
-		if (this.getWorld()!=other.getWorld())
-			return Double.POSITIVE_INFINITY;
-		if (this.getWorld()==null)
-			return Double.POSITIVE_INFINITY;
 		if ((other == null)||(other.isTerminated()))
 			throw new IllegalEntityException(other);
 		if ((this == null)||(this.isTerminated()))
 			throw new IllegalEntityException(this);
+		if (this.getWorld()!=other.getWorld())
+			return Double.POSITIVE_INFINITY;
+		if (this.getWorld()==null)
+			return Double.POSITIVE_INFINITY;
 		if (this.overlap(other))
 			throw new IllegalEntityException(this);
 		double[] dr = {other.getXPosition() - this.getXPosition(),

@@ -295,17 +295,17 @@ public class World {
 			}
 		}
 		else if (Math.min(boundary, collision)<dt) {
-			for (Entity entity: this.getAllEntities()) {
-				entity.move(Math.min(boundary, collision)/3);
-				if (entity instanceof Ship) {
-					entity.setVelocity(entity.getXVelocity()+
-							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
-							*Math.cos(((Ship) entity).getOrientation()), 
-							entity.getYVelocity()+Math.min(boundary, collision)
-							*((Ship)entity).getAcceleration()*
-							Math.sin(((Ship) entity).getOrientation()));
-				}
-			}
+//			for (Entity entity: this.getAllEntities()) {
+//				entity.move(Math.min(boundary, collision)/3);
+//				if (entity instanceof Ship) {
+//					entity.setVelocity(entity.getXVelocity()+
+//							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
+//							*Math.cos(((Ship) entity).getOrientation()), 
+//							entity.getYVelocity()+Math.min(boundary, collision)
+//							*((Ship)entity).getAcceleration()*
+//							Math.sin(((Ship) entity).getOrientation()));
+//				}
+//			}
 			if (boundary<collision) {
 				entityB.collideBoundary();
 				this.evolve(dt-boundary);

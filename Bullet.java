@@ -91,15 +91,19 @@ public class Bullet extends Entity{
 			return true;
 		if ((xpos>0.99*getRadius())&&(xpos<1.01*(this.getWorld().getWidth()-getRadius()))&&
 				(ypos>0.99*getRadius())&&(ypos<1.01*(getWorld().getHeight()-getRadius()))) {
-			for (Entity entity: getWorld().getEntities().keySet()) {
-				if ((entity!=this)&&
-						((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-								Math.pow(ypos-entity.getYPosition(),2)))<=
-								0.99*(entity.getRadius()+getRadius()))) {
-					return false;
+			if (getWorld().getAllEntities().size()>0) {
+				for (Entity entity: getWorld().getEntities().keySet()) {
+					if ((entity!=this)&&
+							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+									Math.pow(ypos-entity.getYPosition(),2)))<=
+									0.99*(entity.getRadius()+getRadius()))) {
+						return false;
+					}
 				}
-			return true;
+				return true;
 			}
+			else
+				return true;
 		}
 		return false;
 	}
