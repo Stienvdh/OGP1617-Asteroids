@@ -210,14 +210,14 @@ public abstract class Entity {
 		double X;
 		double Y;
 		if (this.getXVelocity()!=0) {
-			X = Math.max((0.99*getRadius()-getXPosition())/getXVelocity(),
-					(1.01*(getWorld().getWidth()-getRadius())-getXPosition())/getXVelocity());
+			X = Math.max((getRadius()-getXPosition())/getXVelocity(),
+					((getWorld().getWidth()-getRadius())-getXPosition())/getXVelocity());
 		}
 		else
 			X = Double.POSITIVE_INFINITY;
 		if (this.getYVelocity()!=0) {
-			Y = Math.max((0.99*getRadius()-getYPosition())/getYVelocity(),
-					(1.01*(getWorld().getHeight()-getRadius())-getYPosition())/getYVelocity());
+			Y = Math.max((getRadius()-getYPosition())/getYVelocity(),
+					((getWorld().getHeight()-getRadius())-getYPosition())/getYVelocity());
 		}
 		else
 			Y = Double.POSITIVE_INFINITY;
