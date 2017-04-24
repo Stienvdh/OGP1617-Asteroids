@@ -118,55 +118,6 @@ public class Ship extends Entity{
 	}
 	
 	/**
-	 * Checks whether the given position is a valid position
-	 * 
-	 * @param 	xpos
-	 * 			The position along the x-axis to check.
-	 * @param 	ypos
-	 * 			The position along the y-axis to check.
-	 * @return	True if and only if neither xpos, nor ypos is negative or positive infinity or not a number.
-	 * 			If the ship is associated with a certain world, it must be positioned within its bounds and it
-	 * 			cannot overlap with any other entity, located in that world in order to have a valid
-	 * 			position.
-	 * 			| if (! xpos == Double.POSITIVE_INFINITY)&&(! xpos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(xpos))
-	 *			| 	&& (! ypos == Double.POSITIVE_INFINITY)&&(! ypos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(ypos))
-	 *			|	if (this.getWorld() != null) 
-	 *			|		if (this.getRadius()<xpos)&&(xpos<(this.getWorld().getWidth()-this.getRadius()))&&
-	 *			|			(this.getRadius()<ypos)&&(ypos<(this.getWorld().getHeight()-this.getRadius()))
-	 *			| 			if (for each entity in getWorld().getAllEntities():
-	 *			| 				Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-	 *			| 					Math.pow(ypos-entity.getYPosition(),2)))>
-	 *			| 					0.99*(entity.getRadius()+getRadius()))
-	 *			| 			then result == true
-	 *			|		else
-	 *			|			result == false
-	 *			| 	else
-	 *			|		result == true
-	 *			| else
-	 *			| 	result == false
-	 */
-	public boolean isValidPosition(double xpos, double ypos) {
-		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
-				&& (((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
-			return false;
-		if (this.getWorld() != null) {
-			if ((xpos>0.99*getRadius())&&(xpos<1.01*(getWorld().getWidth()-getRadius()))&&
-					(ypos>0.99*getRadius())&&(ypos<1.01*(getWorld().getHeight()-getRadius()))) {
-				for (Entity entity: getWorld().getEntities().keySet()) {
-					if ((entity!=this)&&
-							(Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-									Math.pow(ypos-entity.getYPosition(),2)))<=
-									0.99*(entity.getRadius()+getRadius()))
-						return false;
-				}
-				return true;
-			}
-			return false;
-			}
-		return true;
-	}
-	
-	/**
 	 * Set the maximum speed of this ship to a given speed.
 	 * 
 	 * @param 	maxSpeed	
@@ -279,14 +230,6 @@ public class Ship extends Entity{
 	@Raw
 	public boolean isValidOrientation(double orientation) {
 		return ((0<=orientation)&&(orientation<=2*Math.PI));
-	}
-	
-	/**
-	 * Return the world with which this ship is associated. Null if none.
-	 */
-	@Basic @Raw
-	public World getWorld() {
-		return this.world;
 	}
 	
 	/**
@@ -685,33 +628,6 @@ public class Ship extends Entity{
 	}
 	
 	/**
-	 * Move the ship for a given amount of time according to its current position, velocity, 
-	 * and orientation.
-	 * 
-	 * @param 	dt
-	 * 			The duration of the movement.
-	 * @post	The new position of the ship is the position it reaches if starts from its old position
-	 * 			and its orientation and acceleration do not change during the movement.
-	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
-	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
-	 * @post	Each bullet loaded in this ship is moved along with this ship.
-	 * 			| for (bullet: old.getBullets()
-	 * 			| 	new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
-	 * 			| 	new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
-	 * @throws 	IllegalDurationException
-	 * 			The given duration of the movement is negative.
-	 * 			| dt < 0
-	 */
-	public void move(double dt) throws IllegalDurationException, IllegalPositionException {
-		if (dt < 0)
-			throw new IllegalDurationException(dt);
-		else if (dt > 0) {
-			this.setPosition(getXPosition()+getXVelocity()*dt,
-					getYPosition()+getYVelocity()*dt);
-		}
-	}
-	
-	/**
 	 * Turn the ship by a given angle.
 	 * 
 	 * @param 	angle
@@ -746,11 +662,6 @@ public class Ship extends Entity{
 	private double orientation;
 	
 	/**
-	 * A variable registering the world of a ship.
-	 */
-	private World world = null;
-	
-	/**
 	 * A variable registering the mass of this ship.
 	 */
 	private double mass;
@@ -762,7 +673,6 @@ public class Ship extends Entity{
 	
 	/**
 	 * A variable registering the bullets of a ship.
-	 *|| INVARIANTEN HIEROP HIER BESPREKEN
 	 */
 	private Set<Bullet> bullets = new HashSet<Bullet>();
 	

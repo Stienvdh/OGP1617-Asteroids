@@ -294,8 +294,8 @@ public class World {
 			}
 		}
 		else if (Math.min(boundary, collision)<dt) {
-/*			for (Entity entity: this.getAllEntities()) {
-				entity.move(Math.min(boundary, collision)/3);
+			/*for (Entity entity: this.getAllEntities()) {
+				entity.move(Math.min(boundary, collision));
 				if (entity instanceof Ship) {
 					entity.setVelocity(entity.getXVelocity()+
 							Math.min(boundary, collision)*((Ship)entity).getAcceleration()

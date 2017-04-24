@@ -81,31 +81,13 @@ public class Bullet extends Entity{
 	 * 			| if this.getShip() != null
 	 * 			| 	result == true
 	 */
+	@Override
 	public boolean isValidPosition(double xpos, double ypos) {
-		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
-				||(((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
-			return false;
 		if (this.getWorld()==null)
 			return true;
 		if (this.getShip()!=null)
 			return true;
-		if ((xpos>0.99*getRadius())&&(xpos<1.01*(this.getWorld().getWidth()-getRadius()))&&
-				(ypos>0.99*getRadius())&&(ypos<1.01*(getWorld().getHeight()-getRadius()))) {
-			if (getWorld().getAllEntities().size()>0) {
-				for (Entity entity: getWorld().getEntities().keySet()) {
-					if ((entity!=this)&&
-							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
-									Math.pow(ypos-entity.getYPosition(),2)))<=
-									0.99*(entity.getRadius()+getRadius()))) {
-						return false;
-					}
-				}
-				return true;
-			}
-			else
-				return true;
-		}
-		return false;
+		return super.isValidPosition(xpos, ypos);
 	}
 	
 	/**
@@ -179,6 +161,7 @@ public class Bullet extends Entity{
 	/**
 	 * Return the world, in which this bullet is located. Null if none.
 	 */
+	@Override
 	public World getWorld() {
 		if (this.world!=null)
 			return this.world;
@@ -272,29 +255,6 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Move this bullet for a given amount of time according to its current position, velocity 
-	 * and orientation.
-	 * 
-	 * @param 	dt
-	 * 			The duration of the movement.
-	 * @post	The new position of the bullet is the position it reaches if starts from its old position
-	 * 			and its orientation and velocity do not change during the movement.
-	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
-	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
-	 * @throws 	IllegalDurationException
-	 * 			The given duration of the movement is negative.
-	 * 			| dt < 0
-	 */
-	public void move(double dt) throws IllegalDurationException {
-		if (dt < 0)
-			throw new IllegalDurationException(dt);
-		if (this.getShip()==null) {
-			this.setPosition(getXPosition()+getXVelocity()*dt,
-								getYPosition()+getYVelocity()*dt);
-		}
-	}
-	
-	/**
 	 * Return the number of times this bullet has bounced off the boundaries of its world, if any.
 	 */
 	public int getBounces() {
@@ -380,6 +340,30 @@ public class Bullet extends Entity{
 			this.getSource().getBulletsFired().remove(this);
 		}
 		setSource(null);
+	}
+	
+	/**
+	 * Move this bullet for a given amount of time according to its current position, velocity 
+	 * and orientation.
+	 * 
+	 * @param 	dt
+	 * 			The duration of the movement.
+	 * @post	The new position of the bullet is the position it reaches if starts from its old position
+	 * 			and its orientation and velocity do not change during the movement.
+	 * 			| new.getXPosition() == old.getXPosition() + dt*old.getXVelocity()
+	 * 			| new.getYPosition() == old.getYPosition() + dt*old.getYVelocity()
+	 * @throws 	IllegalDurationException
+	 * 			The given duration of the movement is negative.
+	 * 			| dt < 0
+	 */
+	@Override
+	public void move(double dt) throws IllegalDurationException {
+		if (dt < 0)
+			throw new IllegalDurationException(dt);
+		if (this.getShip()==null) {
+			this.setPosition(getXPosition()+getXVelocity()*dt,
+								getYPosition()+getYVelocity()*dt);
+		}
 	}
 	
 	/**
