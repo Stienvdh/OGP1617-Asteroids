@@ -1,5 +1,9 @@
 package asteroids.model;
 
+import asteroids.model.exceptions.IllegalDurationException;
+import asteroids.model.exceptions.IllegalEntityException;
+import asteroids.model.exceptions.IllegalPositionException;
+import asteroids.model.exceptions.IllegalShipException;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 
@@ -8,6 +12,13 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| entity.isValidPosition(getXPosition(),getYPosition())
  */
 public abstract class Entity {
+	
+	public Entity(double xpos, double ypos, double xvel, double yvel, double radius) {
+		setWorld(null);
+		setPosition(xpos, ypos);
+		setVelocity(xvel, yvel);
+		setRadius(radius);
+	}
 	
 	/**
 	 * Return the position of this entity along the x-axis.
@@ -52,10 +63,6 @@ public abstract class Entity {
 			throw new IllegalPositionException(xpos, ypos);
 		this.xPosition = xpos;
 		this.yPosition = ypos;
-		if (this instanceof Ship) {
-			for (Bullet bullet: ((Ship)this).getBullets())
-				bullet.setPosition(xpos, ypos);
-		}
 	}
 	
 
@@ -156,10 +163,6 @@ public abstract class Entity {
 		else {
 			this.xVelocity = xvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed;
 			this.yVelocity = yvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed; }
-		if (this instanceof Ship) {
-			for (Bullet bullet: ((Ship)this).getBullets())
-				bullet.setVelocity(xvel, yvel);
-		}
 	}
 	
 	/**
@@ -338,9 +341,9 @@ public abstract class Entity {
 	 */
 	public double getTimeToCollision(Entity other) throws IllegalEntityException {
 		if ((other == null)||(other.isTerminated()))
-			throw new IllegalEntityException(other);
+			return Double.POSITIVE_INFINITY;
 		if ((this == null)||(this.isTerminated()))
-			throw new IllegalEntityException(this);
+			return Double.POSITIVE_INFINITY;
 		if (this.getWorld()!=other.getWorld())
 			return Double.POSITIVE_INFINITY;
 		if (this.getWorld()==null)
@@ -527,6 +530,56 @@ public abstract class Entity {
 	}
 	
 	/**
+	 * Set the world of this ship to the given world.
+	 * 
+	 * @param 	world
+	 * 			The world, in which the ship has to be located.
+	 * @post	If the ship does not belong to a world yet, the new world of this ship 
+	 * 			is the given world.
+	 * 			| if (old.getWorld() == null)
+	 *			|	new.world == world;		
+	 * @post	If the given world is null, the world of this ship is null.
+	 * 			| if (world==null)
+	 * 			| 	new.world == null;
+	 */
+	@Raw
+	public void setWorld(World world) {
+		if ((this.getWorld()==null)||(world==null))
+				this.world = world;
+	}
+	
+	/**
+	 * Set the maximum speed of this bullet to a given speed.
+	 * 
+	 * @param 	maxSpeed	
+	 * 			The new maximum speed of this bullet.
+	 * @post	If the given speed does not exceed the maximum speed of a bullet, the new
+	 * 			maximum speed of this bullet is the given speed. Otherwise, the new maximum speed of
+	 * 			this bullet is MAX_SPEED.
+	 * 			| if maxSpeed <= MAX_SPEED
+	 * 			| 	new.getMaxSpeed == maxSpeed
+	 * 			| else
+	 * 			| 	new.getMaxSpeed == MAX_SPEED
+	 * @post	If the current velocity of this bullet exceeds its maximum value, the velocity of
+	 * 			this bullet is set to its maximum value. 
+	 * 			| if (old.getSpeed() > new.getMaxSpeed())
+	 *			| 	new.getXVelocity == new.getMaxSpeed()*Math.cos(old.getOrientation()), 
+	 *			| 	new.getYVelocity == new.getMaxSpeed()*Math.sin(old.getOrientation());
+	 */
+	@Raw
+	public void setMaxSpeed(double maxSpeed) {
+		if (Math.abs(maxSpeed) > MAX_SPEED)
+			this.maxSpeed = MAX_SPEED;
+		else
+			this.maxSpeed = maxSpeed;
+		this.setVelocity(this.getXVelocity(), this.getYVelocity());
+	}
+	
+	public double getMassDensity() {
+		return this.massDensity;
+	}
+	
+	/**
 	 * A variable registering the position of this entity along the x-axis.
 	 */
 	private double xPosition;
@@ -549,7 +602,7 @@ public abstract class Entity {
 	/**
 	 * A variable registering the maximum speed of this entity.
 	 */
-	protected double maxSpeed;
+	protected double maxSpeed = MAX_SPEED;
 	
 	/**
 	 * A variable registering the radius of this entity.
@@ -566,12 +619,20 @@ public abstract class Entity {
 	 */
 	protected World world;
 	
-	public abstract void setMaxSpeed(double maxSpeed);
+	/**
+	 * A variable registering the mass density of this entity.
+	 */
+	protected double massDensity;
+	
+	/**
+	 * A variable registering the maximum speed of an entity.
+	 */
+	protected static double MAX_SPEED = 300000;
+
 	public abstract void setRadius(double radius);
 	public abstract double getMass();
-	public abstract double getMassDensity();
-	public abstract void setWorld(World world);
 	public abstract void terminate();
+	public abstract void setMassDensity(double massDensity);
 	
 }
 

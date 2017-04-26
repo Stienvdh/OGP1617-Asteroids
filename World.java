@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import asteroids.model.exceptions.IllegalDurationException;
+import asteroids.model.exceptions.IllegalEntityException;
+import asteroids.model.exceptions.IllegalWorldException;
+
 public class World {
 	
 	/**
@@ -286,11 +290,6 @@ public class World {
 		if (Math.min(boundary, collision)>=dt) {
 			for (Entity entity: this.getAllEntities()) {
 				entity.move(dt);
-				if (entity instanceof Ship)
-					entity.setVelocity(entity.getXVelocity()+dt*((Ship)entity).getAcceleration()
-							*Math.cos(((Ship) entity).getOrientation()), 
-							entity.getYVelocity()+dt*((Ship)entity).getAcceleration()*
-							Math.sin(((Ship) entity).getOrientation()));
 			}
 		}
 		else if (Math.min(boundary, collision)<dt) {

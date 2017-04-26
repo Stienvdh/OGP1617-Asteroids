@@ -1,6 +1,9 @@
 package asteroids.model;
 
-import be.kuleuven.cs.som.annotate.Raw;
+import asteroids.model.exceptions.IllegalBulletException;
+import asteroids.model.exceptions.IllegalDurationException;
+import asteroids.model.exceptions.IllegalPositionException;
+import asteroids.model.exceptions.IllegalRadiusException;
 
 /**
  * @invar	Each bullet has a valid position.	
@@ -48,13 +51,10 @@ public class Bullet extends Entity{
 	 */
 	public Bullet(double xpos, double ypos, double xvel, double yvel, double radius) 
 			throws IllegalPositionException {
-		setWorld(null);
+		super(xpos,ypos,xvel,yvel,radius);
 		setShip(null);
 		setSource(null);
-		setPosition(xpos, ypos);
-		setMaxSpeed(MAX_SPEED);
-		setVelocity(xvel, yvel);
-		setRadius(radius);
+		setMassDensity(DENSITY);
 	}
 	
 	/**
@@ -91,33 +91,6 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Set the maximum speed of this bullet to a given speed.
-	 * 
-	 * @param 	maxSpeed	
-	 * 			The new maximum speed of this bullet.
-	 * @post	If the given speed does not exceed the maximum speed of a bullet, the new
-	 * 			maximum speed of this bullet is the given speed. Otherwise, the new maximum speed of
-	 * 			this bullet is MAX_SPEED.
-	 * 			| if maxSpeed <= MAX_SPEED
-	 * 			| 	new.getMaxSpeed == maxSpeed
-	 * 			| else
-	 * 			| 	new.getMaxSpeed == MAX_SPEED
-	 * @post	If the current velocity of this bullet exceeds its maximum value, the velocity of
-	 * 			this bullet is set to its maximum value. 
-	 * 			| if (old.getSpeed() > new.getMaxSpeed())
-	 *			| 	new.getXVelocity == new.getMaxSpeed()*Math.cos(old.getOrientation()), 
-	 *			| 	new.getYVelocity == new.getMaxSpeed()*Math.sin(old.getOrientation());
-	 */
-	@Raw
-	public void setMaxSpeed(double maxSpeed) {
-		if (Math.abs(maxSpeed) > MAX_SPEED)
-			this.maxSpeed = MAX_SPEED;
-		else
-			this.maxSpeed = maxSpeed;
-		this.setVelocity(this.getXVelocity(), this.getYVelocity());
-	}
-	
-	/**
 	 * Return the mass of this bullet.
 	 */
 	public double getMass() {
@@ -129,6 +102,13 @@ public class Bullet extends Entity{
 	 */
 	public double getMassDensity() {
 		return DENSITY;
+	}
+	
+	/**
+	 * Set the mass density of this bullet to a given value.
+	 */
+	public void setMassDensity(double massDensity) {
+		this.massDensity=DENSITY;
 	}
 	
 	/**
@@ -184,6 +164,7 @@ public class Bullet extends Entity{
 	 * 			This bullet is already located in a world/loaded by as ship/fired by a ship.
 	 * 			| this.hasPosition()
 	 */
+	@Override
 	public void setWorld(World world) throws IllegalBulletException{
 		if (world==null)
 			this.world=null;
@@ -361,8 +342,7 @@ public class Bullet extends Entity{
 		if (dt < 0)
 			throw new IllegalDurationException(dt);
 		if (this.getShip()==null) {
-			this.setPosition(getXPosition()+getXVelocity()*dt,
-								getYPosition()+getYVelocity()*dt);
+			super.move(dt);
 		}
 	}
 	
@@ -392,11 +372,6 @@ public class Bullet extends Entity{
 	 * of its world. 
 	 */
 	private int maxBounces = 3;
-	
-	/**
-	 * A variable registering the maximum speed of a bullet.
-	 */
-	private static double MAX_SPEED = 300000;
 	
 	/**
 	 * A variable registering the minimum radius of a bullet.

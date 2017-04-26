@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import asteroids.model.exceptions.IllegalBulletException;
+import asteroids.model.exceptions.IllegalDurationException;
+import asteroids.model.exceptions.IllegalPositionException;
+import asteroids.model.exceptions.IllegalRadiusException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -67,11 +71,7 @@ public class Ship extends Entity{
 	public Ship(double xpos, double ypos, double xvel, double yvel,double radius, double orientation, 
 			double mass) 
 			throws IllegalRadiusException, IllegalPositionException {
-		setWorld(null);
-		setPosition(xpos, ypos);
-		setMaxSpeed(MAX_SPEED);
-		setVelocity(xvel, yvel);
-		setRadius(radius);
+		super(xpos,ypos,xvel,yvel,radius);
 		setOrientation(orientation);
 		setMassDensity(MIN_DENSITY);
 		setMass(mass);
@@ -118,38 +118,27 @@ public class Ship extends Entity{
 	}
 	
 	/**
-	 * Set the maximum speed of this ship to a given speed.
-	 * 
-	 * @param 	maxSpeed	
-	 * 			The new maximum speed of this ship.
-	 * @post	If the given speed does not exceed the maximum speed of a ship, the new
-	 * 			maximum speed of this ship is the given speed. Otherwise, the new maximum speed of
-	 * 			this ship is MAX_SPEED.
-	 * 			| if maxSpeed <= MAX_SPEED
-	 * 			| 	new.getMaxSpeed == maxSpeed
-	 * 			| else
-	 * 			| 	new.getMaxSpeed == MAX_SPEED
-	 * @post	If the current velocity of this ship exceeds its maximum value, the velocity of
-	 * 			this ship is set to its maximum value. 
-	 * 			| if (old.getSpeed() > new.getMaxSpeed())
-	 *			| 	new.getXVelocity == new.getMaxSpeed()*Math.cos(old.getOrientation(), 
-	 *			| 	new.getYVelocity == new.getMaxSpeed()*Math.sin(old.getOrientation();
-	 */
-	@Raw
-	public void setMaxSpeed(double maxSpeed) {
-		if (Math.abs(maxSpeed) > MAX_SPEED)
-			this.maxSpeed = MAX_SPEED;
-		else
-			this.maxSpeed = maxSpeed;
-		this.setVelocity(this.getXVelocity(), this.getYVelocity());;
-	}
-	
-	/**
 	 * Return the acceleration of this ship.
 	 */
 	@Basic @Raw
 	public double getAcceleration() {
 		return this.acceleration;
+	}
+	
+	@Override
+	public void setVelocity(double xvel, double yvel) {
+		super.setVelocity(xvel, yvel);
+		for (Bullet bullet: getBullets()) {
+			bullet.setVelocity(xvel, yvel);
+		}
+	}
+	
+	@Override
+	public void setPosition(double xpos, double ypos) {
+		super.setPosition(xpos, ypos);
+		for (Bullet bullet: getBullets()) {
+			bullet.setPosition(xpos, ypos);
+		}
 	}
 	
 	/**
@@ -230,25 +219,6 @@ public class Ship extends Entity{
 	@Raw
 	public boolean isValidOrientation(double orientation) {
 		return ((0<=orientation)&&(orientation<=2*Math.PI));
-	}
-	
-	/**
-	 * Set the world of this ship to the given world.
-	 * 
-	 * @param 	world
-	 * 			The world, in which the ship has to be located.
-	 * @post	If the ship does not belong to a world yet, the new world of this ship 
-	 * 			is the given world.
-	 * 			| if (old.getWorld() == null)
-	 *			|	new.world == world;		
-	 * @post	If the given world is null, the world of this ship is null.
-	 * 			| if (world==null)
-	 * 			| 	new.world == null;
-	 */
-	@Raw
-	public void setWorld(World world) {
-		if ((this.getWorld()==null)||(world==null))
-				this.world = world;
 	}
 	
 	/**
@@ -520,6 +490,7 @@ public class Ship extends Entity{
 	 * 			| 	new.getMassDensity == MIN_DENSITY
 	 * @post	The mass of this ship is adjusted to the new mass density of this ship.
 	 */
+	@Override
 	public void setMassDensity(double massDensity) {
 		if (massDensity > MIN_DENSITY)
 			this.massDensity = massDensity;
@@ -651,6 +622,17 @@ public class Ship extends Entity{
 		setOrientation(getOrientation()+angle);
 	}
 	
+	@Override
+	public void move(double dt) throws IllegalDurationException {
+		super.move(dt);
+		for (Bullet bullet: getBullets()) {
+			bullet.setPosition(getXPosition()+dt*getXVelocity(), 
+					getYPosition() + dt*getYVelocity());
+		}
+		setVelocity(getXVelocity()+dt*getAcceleration()*Math.cos(getOrientation()), 
+				getYVelocity()+dt*getAcceleration()*Math.sin(getOrientation()));
+	}
+	
 	/**
 	 * A variable registering the acceleration of this ship.
 	 */
@@ -665,11 +647,6 @@ public class Ship extends Entity{
 	 * A variable registering the mass of this ship.
 	 */
 	private double mass;
-	
-	/**
-	 * A variable registering the mass density of this entity.
-	 */
-	protected double massDensity = MIN_DENSITY;
 	
 	/**
 	 * A variable registering the bullets of a ship.
@@ -692,11 +669,6 @@ public class Ship extends Entity{
 	private double thrustForce = STANDARD_FORCE;
 	
 	/**
-	 * A variable registering the maximum speed of a ship.
-	 */
-	private static double MAX_SPEED = 300000;
-	
-	/**
 	 * A variable registering the minimum radius of a ship.
 	 */
 	private static double MIN_RADIUS = 10;
@@ -715,6 +687,5 @@ public class Ship extends Entity{
 	 * A variable registering the initial speed of a bullet when fired.
 	 */
 	private static final double INITIAL_SPEED = 250;
-	
 	
 }
