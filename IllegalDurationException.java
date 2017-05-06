@@ -1,4 +1,4 @@
-package asteroids.model;
+package asteroids.model.exceptions;
 
 /** 
  * A class of exceptions signaling an illegal duration of a movement.

@@ -1,4 +1,6 @@
-package asteroids.model;
+package asteroids.model.exceptions;
+
+import asteroids.model.Ship;
 
 /** 
  * A class of exceptions signaling an illegal ship as argument.

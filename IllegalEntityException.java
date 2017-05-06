@@ -1,4 +1,6 @@
-package asteroids.model;
+package asteroids.model.exceptions;
+
+import asteroids.model.Entity;
 
 /** 
  * A class of exceptions signaling an illegal entity argument.

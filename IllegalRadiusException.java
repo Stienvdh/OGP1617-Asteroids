@@ -1,4 +1,4 @@
-package asteroids.model;
+package asteroids.model.exceptions;
 
 /** 
  * A class of exceptions signaling an illegal radius of a ship.

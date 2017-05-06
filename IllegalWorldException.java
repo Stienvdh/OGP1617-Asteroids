@@ -1,4 +1,6 @@
-package asteroids.model;
+package asteroids.model.exceptions;
+
+import asteroids.model.World;
 
 public class IllegalWorldException extends Exception {
 

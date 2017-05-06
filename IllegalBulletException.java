@@ -1,4 +1,6 @@
-package asteroids.model;
+package asteroids.model.exceptions;
+
+import asteroids.model.Bullet;
 
 /** 
  * A class of exceptions signaling an illegal bullet argument.
