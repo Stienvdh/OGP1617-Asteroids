@@ -166,8 +166,12 @@ public class Bullet extends Entity{
 	 */
 	@Override
 	public void setWorld(World world) throws IllegalBulletException{
-		if (world==null)
+		if (world==null) {
 			this.world=null;
+			if (getSource()!=null) {
+				this.setSource(null);
+			}
+		}
 		else if (this.hasPosition())
 			throw new IllegalBulletException(this);
 		this.world = world;

@@ -128,16 +128,20 @@ public class Ship extends Entity{
 	@Override
 	public void setVelocity(double xvel, double yvel) {
 		super.setVelocity(xvel, yvel);
-		for (Bullet bullet: getBullets()) {
-			bullet.setVelocity(xvel, yvel);
+		if (getBullets()!=null) {
+			for (Bullet bullet: getBullets()) {
+				bullet.setVelocity(xvel, yvel);
+			}
 		}
 	}
 	
 	@Override
 	public void setPosition(double xpos, double ypos) {
 		super.setPosition(xpos, ypos);
-		for (Bullet bullet: getBullets()) {
-			bullet.setPosition(xpos, ypos);
+		if (getBullets()!=null) {
+			for (Bullet bullet: getBullets()) {
+				bullet.setPosition(xpos, ypos);
+			}
 		}
 	}
 	

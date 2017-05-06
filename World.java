@@ -1,7 +1,6 @@
 package asteroids.model;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
 import asteroids.model.exceptions.IllegalDurationException;
@@ -87,15 +86,11 @@ public class World {
 	 * 			| 	(new entity).isTerminated()
 	 */
 	public void addEntity(Entity entity) throws IllegalEntityException {
-		if ((! (entity instanceof Bullet))||(((Bullet)entity).getSource()==null)) {
+		if (((! (entity instanceof Bullet)))||(((Bullet)entity).getSource()==null)) {
 			entity.setWorld(this);
 			if (! entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
 				entity.terminate();
 		}
-		if ((! entity.isTerminated())&&(entity instanceof Ship))
-			this.getShips().add((Ship) entity);
-		else if ((!entity.isTerminated())&&(entity instanceof Bullet))
-			this.getBullets().add((Bullet) entity);
 		if ((! entity.isTerminated())&&(entity.getWorld()!=null)) {
 			double[] pos = {entity.getXPosition(),entity.getYPosition()};
 			this.getEntities().put(entity, pos);
@@ -118,12 +113,6 @@ public class World {
 	 */
 	public void removeEntity(Entity entity) throws IllegalEntityException {
 		this.getEntities().remove(entity);
-		if (entity instanceof Ship)
-			this.getShips().remove(entity);
-		if (entity instanceof Bullet) {
-			this.getBullets().remove(entity);
-			((Bullet)entity).setSource(null);
-		}
 		entity.setWorld(null);
 	}
 	
@@ -177,8 +166,6 @@ public class World {
 			entity.setWorld(null);
 		}
 		this.entities.clear();
-		this.ships.clear();
-		this.bullets.clear();
 	}
 	
 	/**
@@ -321,21 +308,7 @@ public class World {
 	public Set<Entity> getAllEntities() {
 		return getEntities().keySet();
 	}
-	
-	/**
-	 * Return the ships, located in this world.
-	 */
-	public HashSet<Ship> getShips() {
-		return this.ships;
-	}
-	
-	/**
-	 * Return the bullets, located in this world.
-	 */
-	public HashSet<Bullet> getBullets() {
-		return this.bullets;
-	}
-	
+
 	/**
 	 * A variable registering the width of this world.
 	 */
@@ -350,16 +323,6 @@ public class World {
 	 * A variable registering the entities, located in this world, and the position of their center.
 	 */
 	public HashMap<Entity,double[]> entities = new HashMap<Entity,double[]>();
-	
-	/**
-	 * A variable registering the ships, located in this world.
-	 */
-	public HashSet<Ship> ships = new HashSet<Ship>();
-	
-	/**
-	 * A variable registering the bullets, located in this world.
-	 */
-	public HashSet<Bullet> bullets = new HashSet<Bullet>();
 	
 	/**
 	 * A variable registering whether this world is terminated.
