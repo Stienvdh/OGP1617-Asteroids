@@ -10,7 +10,7 @@ public class AssignmentStatement extends ProgramStatement {
 	
 	public void setSides(ProgramExpression left, ProgramExpression right) {
 		this.leftSide = left;
-		if (left.isValidAssignment(right)) {
+		if (isValidAssignment(left, right)) {
 			this.rightSide = right;
 		}
 		else
@@ -23,6 +23,12 @@ public class AssignmentStatement extends ProgramStatement {
 	
 	public ProgramExpression getRightSide() {
 		return this.rightSide;
+	}
+	
+	public boolean isValidAssignment(ProgramExpression left, ProgramExpression right) {
+		if (left.getValue().getClass() == right.getValue().getClass())
+			return true;
+		return false;	
 	}
 	
 	public void execute() {

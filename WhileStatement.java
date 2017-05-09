@@ -32,7 +32,7 @@ public class WhileStatement extends ProgramStatement {
 	@Override
 	public void execute() {
 		while (getCondition().getValue()) {
-			execute(getBlock());
+			getBlock().execute();
 		}
 	}
 	
