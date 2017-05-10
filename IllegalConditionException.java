@@ -1,6 +1,6 @@
-package asteroids.model.exceptions;
+package asteroids.model.programs.exceptions;
 
-import asteroids.model.programs.ProgramExpression;
+import asteroids.model.programs.expressions.ProgramExpression;
 
 /** 
  * A class of exceptions signaling an illegal executionTime of a movement.
