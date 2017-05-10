@@ -3,6 +3,7 @@ package asteroids.model;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import asteroids.model.exceptions.IllegalBulletException;
 import asteroids.model.exceptions.IllegalDurationException;
@@ -229,7 +230,7 @@ public class Ship extends Entity{
 	 * Return the mass of this ship.
 	 */
 	@Basic @Raw
-	public double getMass() {
+	public double getShipMass() {
 		return this.mass;
 	}
 	
@@ -263,8 +264,9 @@ public class Ship extends Entity{
 				|	totalMass = totalMass + bullet.getMass()
 				| result == totalMass
 	 */
-	public double getTotalMass() {
-		double totalMass = this.getMass();
+	@Override
+	public double getMass() {
+		double totalMass = this.getShipMass();
 		for (Bullet bullet: this.getBullets()) {
 			totalMass = totalMass + bullet.getMass();
 		}
@@ -540,7 +542,7 @@ public class Ship extends Entity{
 	 */
 	public void thrustOn() {
 		this.thruster = true;
-		this.setAcceleration(this.getThrustForce()/this.getTotalMass());
+		this.setAcceleration(this.getThrustForce()/this.getMass());
 	}
 	
 	/**
@@ -637,6 +639,13 @@ public class Ship extends Entity{
 				getYVelocity()+dt*getAcceleration()*Math.sin(getOrientation()));
 	}
 	
+	public static Set<Ship> getAllShips(World world) {
+		Set<Ship> set = new HashSet<Ship>();
+		Stream<Entity> stream = world.getAllEntities().stream().filter(entity -> (entity instanceof Ship));
+		stream.forEach(ship -> set.add((Ship)ship));
+		return set;
+	}
+	
 	/**
 	 * A variable registering the acceleration of this ship.
 	 */
@@ -685,7 +694,7 @@ public class Ship extends Entity{
 	/** 
 	 * A variable registering the standard force the active thruster of a ship exerts.
 	 */
-	private static final double STANDARD_FORCE = 1.1*Math.pow(10, 21);
+	private static final double STANDARD_FORCE = 1.1*Math.pow(10, 18);
 	
 	/**
 	 * A variable registering the initial speed of a bullet when fired.

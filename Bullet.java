@@ -1,5 +1,9 @@
 package asteroids.model;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import asteroids.model.exceptions.IllegalBulletException;
 import asteroids.model.exceptions.IllegalDurationException;
 import asteroids.model.exceptions.IllegalPositionException;
@@ -348,6 +352,13 @@ public class Bullet extends Entity{
 		if (this.getShip()==null) {
 			super.move(dt);
 		}
+	}
+	
+	public static Set<Bullet> getAllBullets(World world) {
+		Set<Bullet> set = new HashSet<Bullet>();
+		Stream<Entity> stream = world.getAllEntities().stream().filter(entity -> (entity instanceof Bullet));
+		stream.forEach(bullet -> set.add((Bullet)bullet));
+		return set;
 	}
 	
 	/**

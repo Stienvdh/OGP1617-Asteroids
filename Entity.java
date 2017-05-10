@@ -436,7 +436,7 @@ public abstract class Entity {
 				other.terminate();
 			}
 		}
-		else if (this instanceof Ship) {
+		else {
 			if (other instanceof Bullet) {
 				if (((Bullet)other).getSource()==this) {
 					((Ship) this).loadBullet((Bullet)other);
@@ -453,14 +453,14 @@ public abstract class Entity {
 					(other.getYPosition()-this.getYPosition());
 				double sigma = Math.sqrt(Math.pow(this.getXPosition()-other.getXPosition(), 2)+
 					Math.pow(this.getYPosition()-other.getYPosition(), 2));
-				double J = 2*((Ship)this).getTotalMass()*((Ship)other).getTotalMass()*
-						dvdr/(sigma*(((Ship)this).getTotalMass()+((Ship)other).getTotalMass()));
+				double J = 2*(this).getMass()*(other).getMass()*
+						dvdr/(sigma*(this.getMass()+(other.getMass())));
 				double JX = J*(other.getXPosition()-this.getXPosition())/sigma;
 				double JY = J*(other.getYPosition()-this.getYPosition())/sigma;
-				this.setVelocity(getXVelocity()+JX/((Ship)this).getTotalMass(), 
-						getYVelocity()+JY/((Ship)this).getTotalMass());
-				other.setVelocity(other.getXVelocity()-JX/((Ship)other).getTotalMass(), 
-						other.getYVelocity()-JY/((Ship)other).getTotalMass());
+				this.setVelocity(getXVelocity()+JX/this.getMass(), 
+						getYVelocity()+JY/this.getMass());
+				other.setVelocity(other.getXVelocity()-JX/other.getMass(), 
+						other.getYVelocity()-JY/other.getMass());
 			}
 		}	
 	}

@@ -1,5 +1,9 @@
 package asteroids.model;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import asteroids.model.exceptions.IllegalRadiusException;
 
 public class Planetoid extends MinorPlanet {
@@ -40,6 +44,13 @@ public class Planetoid extends MinorPlanet {
 		if (distance >= 0) {
 			this.totalDistance = distance;
 		}
+	}
+	
+	public static Set<Planetoid> getAllPlanetoids(World world) {
+		Set<Planetoid> set = new HashSet<Planetoid>();
+		Stream<Entity> stream = world.getAllEntities().stream().filter(entity -> (entity instanceof Planetoid));
+		stream.forEach(planetoid -> set.add((Planetoid)planetoid));
+		return set;
 	}
 	
 	/**

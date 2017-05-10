@@ -243,14 +243,12 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Ship> getWorldShips(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return Ship.getAllShips(world);
 	}
 
 	@Override
 	public Set<? extends Bullet> getWorldBullets(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return Bullet.getAllBullets(world);
 	}
 
 	@Override
@@ -377,8 +375,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Asteroid> getWorldAsteroids(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return Asteroid.getAllAsteroids(world);
 	}
 
 	@Override
@@ -393,8 +390,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Planetoid> getWorldPlanetoids(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return Planetoid.getAllPlanetoids(world);
 	}
 
 	@Override
