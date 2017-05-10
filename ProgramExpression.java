@@ -1,15 +1,9 @@
-package asteroids.model.programs;
+package asteroids.model.programs.expressions;
 
-public class ProgramExpression extends ProgramLine {
+import asteroids.model.programs.ProgramLine;
 
-	public Object getValue() {
-		return this.value;
-	}
+public interface ProgramExpression<S> extends ProgramLine {
 	
-	public void setValue(Object value) {
-		this.value = value;
-	}
-	
-	private Object value;
+	public S getValue();
 	
 }
