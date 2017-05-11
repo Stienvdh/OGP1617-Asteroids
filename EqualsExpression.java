@@ -2,7 +2,7 @@ package asteroids.model.programs.expressions;
 
 public class EqualsExpression extends BinaryBooleanExpression {
 
-	public EqualsExpression(ProgramExpression<?> leftOperand, ProgramExpression<?> rightOperand) {
+	public EqualsExpression(ProgramExpression leftOperand, ProgramExpression rightOperand) {
 		super(leftOperand, rightOperand);
 	}
 

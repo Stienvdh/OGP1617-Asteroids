@@ -1,22 +1,20 @@
 package asteroids.model.programs.expressions;
 
-import asteroids.model.Entity;
-
-public abstract class UnaryEntityExpression implements UnaryExpression<Entity>, EntityExpression {
+public abstract class UnaryEntityExpression extends EntityExpression implements UnaryExpression{
 	
-	public UnaryEntityExpression(ProgramExpression<? extends Entity> operand) {
+	public UnaryEntityExpression(EntityExpression operand) {
 		setOperand(operand);
 	}
 
 	@Override
-	public ProgramExpression<? extends Entity> getOperand() {
+	public ProgramExpression getOperand() {
 		return this.operand;
 	}
 	
-	public void setOperand(ProgramExpression<? extends Entity> operand) {
+	public void setOperand(ProgramExpression operand) {
 		this.operand = operand;
 	}
 	
-	private ProgramExpression<? extends Entity> operand;
+	private ProgramExpression operand;
 
 }

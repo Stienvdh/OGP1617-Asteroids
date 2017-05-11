@@ -1,5 +1,7 @@
 package asteroids.model.programs.expressions;
 
-public interface DoubleExpression extends ProgramExpression<Double> {
+public abstract class DoubleExpression extends ProgramExpression {
 
+	public abstract Double getValue();
+	
 }

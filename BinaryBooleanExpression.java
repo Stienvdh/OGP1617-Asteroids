@@ -1,41 +1,28 @@
 package asteroids.model.programs.expressions;
 
-import asteroids.model.programs.Program;
-
-public abstract class BinaryBooleanExpression implements BooleanExpression, BinaryExpression<Boolean> {
+public abstract class BinaryBooleanExpression extends BooleanExpression implements BinaryExpression {
 	
-	public BinaryBooleanExpression(ProgramExpression<?> leftOperand, ProgramExpression<?> rightOperand) {
+	public BinaryBooleanExpression(ProgramExpression leftOperand, ProgramExpression rightOperand) {
 		setOperands(leftOperand, rightOperand);
 	}
 
-	public void setOperands(ProgramExpression<?> left, ProgramExpression<?> right) {
-		this.leftOperand = (ProgramExpression<?>) left;
-		this.rightOperand = (ProgramExpression<?>) right;
-	}
-	
-	@Override 
-	public Program getProgram() {
-		return this.program;
-	}
-	
-	@Override 
-	public void setProgram(Program program) {
-		this.program = program;
+	@Override
+	public void setOperands(ProgramExpression left, ProgramExpression right) {
+		this.leftOperand = (ProgramExpression) left;
+		this.rightOperand = (ProgramExpression) right;
 	}
 
 	@Override
-	public ProgramExpression<?> getLeftOperand() {
+	public ProgramExpression getLeftOperand() {
 		return leftOperand;
 	}
 
 	@Override
-	public ProgramExpression<?> getRightOperand() {
+	public ProgramExpression getRightOperand() {
 		return rightOperand;
 	}
 
-	private ProgramExpression<?> leftOperand;
-	private	ProgramExpression<?> rightOperand;
-	
-	private Program program = null;
+	private ProgramExpression leftOperand;
+	private	ProgramExpression rightOperand;
 	
 }

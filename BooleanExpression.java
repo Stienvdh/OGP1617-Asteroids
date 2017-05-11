@@ -1,5 +1,7 @@
 package asteroids.model.programs.expressions;
 
-public interface BooleanExpression extends ProgramExpression<Boolean> {
+public abstract class BooleanExpression extends ProgramExpression {
+	
+	public abstract Boolean getValue();
 	
 }
