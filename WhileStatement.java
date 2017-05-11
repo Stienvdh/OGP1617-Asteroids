@@ -1,31 +1,27 @@
-package asteroids.model.programs;
+package asteroids.model.programs.statements;
 
-import asteroids.model.exceptions.IllegalConditionException;
+import asteroids.model.programs.expressions.BooleanExpression;
 
 public class WhileStatement extends ProgramStatement {
 	
-	public WhileStatement(ProgramExpression condition, ProgramStatement block) {
+	public WhileStatement(BooleanExpression condition, BlockStatement block) {
 		setCondition(condition);
 		setBlock(block);
 	}
 	
-	public ProgramExpression getCondition() {
+	public BooleanExpression getCondition() {
 		return this.condition;
 	}
 	
-	public void setCondition(ProgramExpression condition) {
-		if (condition.getValue()==true||condition.getValue()==false) {
-			this.condition = condition;
-		}
-		else
-			throw new IllegalConditionException(condition);
+	public void setCondition(BooleanExpression condition) {
+		this.condition = condition;
 	}
 	
 	public ProgramStatement getBlock() {
 		return this.block;
 	}
 	
-	public void setBlock(ProgramStatement block) {
+	public void setBlock(BlockStatement block) {
 		this.block = block;
 	}
 
@@ -36,7 +32,7 @@ public class WhileStatement extends ProgramStatement {
 		}
 	}
 	
-	private ProgramExpression condition;
-	private ProgramStatement block;
+	private BooleanExpression condition;
+	private BlockStatement block;
 	
 }

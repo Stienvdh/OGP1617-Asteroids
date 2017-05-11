@@ -1,27 +1,15 @@
-package asteroids.model.programs;
+package asteroids.model.programs.statements;
 
-import asteroids.model.exceptions.IllegalExpressionException;
+import asteroids.model.programs.expressions.BooleanExpression;
 
 public class IfThenElseStatement extends ProgramStatement{
+
+	public IfThenElseStatement(BooleanExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
+	 	setParts(ifPart, thenPart, elsePart);
+	 }
 	
-	public IfThenElseStatement(ProgramExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
-		setParts(ifPart, thenPart, elsePart);
-	}
-	
-	public ProgramExpression getIfPart() {
+	public BooleanExpression getIfPart() {
 		return this.ifPart;
-	}
-	
-	public void setParts(ProgramExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
-		if (! (ifPart.getValue().getClass() == boolean.class))
-			throw new IllegalExpressionException(ifPart);
-//		else if (! (thenPart.getValue()==true||thenPart.getValue()==false))
-//			throw new IllegalExpressionException(thenPart);
-//		else if (! (elsePart.getValue()==true||elsePart.getValue()==false))
-//			throw new IllegalExpressionException(elsePart);
-		this.ifPart = ifPart;
-		this.thenPart = thenPart;
-		this.elsePart = elsePart;
 	}
 	
 	public ProgramStatement getThenPart() {
@@ -32,15 +20,23 @@ public class IfThenElseStatement extends ProgramStatement{
 		return this.elsePart;
 	}
 	
-	public void execute() {
-		if (ifPart.getValue() == true)
-			getThenPart().execute();
-		else
-			getElsePart().execute();
+	public void setParts(BooleanExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
+		this.ifPart = ifPart;
+		this.thenPart = thenPart;
+		this.elsePart = elsePart;
 	}
 	
-	private ProgramExpression ifPart;
+	@Override
+	public void execute() {
+		if (ifPart.getValue())
+			getThenPart().execute();
+		else
+			if (getElsePart()!=null)
+				getElsePart().execute();
+	}
+	
+	private BooleanExpression ifPart;
 	private ProgramStatement thenPart;
 	private ProgramStatement elsePart;
-	
+
 }

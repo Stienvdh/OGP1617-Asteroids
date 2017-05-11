@@ -1,41 +1,63 @@
-package asteroids.model.programs;
+package asteroids.model.programs.statements;
 
-import asteroids.model.exceptions.IllegalAssignmentException;
+import asteroids.model.programs.Program;
+import asteroids.model.programs.exceptions.IllegalExpressionException;
+import asteroids.model.programs.expressions.ProgramExpression;
 
 public class AssignmentStatement extends ProgramStatement {
 	
-	public AssignmentStatement(ProgramExpression leftSide, ProgramExpression rightSide) {
-		setSides(leftSide, rightSide);
+	public AssignmentStatement(String variableName, ProgramExpression value) {
+		setVariable(variableName, value);
 	}
 	
-	public void setSides(ProgramExpression left, ProgramExpression right) {
-		this.leftSide = left;
-		if (isValidAssignment(left, right)) {
-			this.rightSide = right;
+	public void setVariable(String name, ProgramExpression value) {
+		this.variableName = name;
+		if (isValidAssignment(name, value)) {
+			this.value = value;
 		}
 		else
-			throw new IllegalAssignmentException(left, right);
+			throw new IllegalExpressionException(value);
 	}
 	
-	public ProgramExpression getLeftSide() {
-		return this.leftSide;
+	public String getVariableName() {
+		return this.variableName;
 	}
 	
-	public ProgramExpression getRightSide() {
-		return this.rightSide;
-	}
-	
-	public boolean isValidAssignment(ProgramExpression left, ProgramExpression right) {
-		if (left.getValue().getClass() == right.getValue().getClass())
-			return true;
-		return false;	
+	public ProgramExpression getVariableValue() {
+		return this.value;
 	}
 	
 	public void execute() {
-		getLeftSide().setValue(getRightSide().getValue());
+		if (getProgram()!=null) {
+			getProgram().getVariableStack().put(getVariableName(), getVariableValue());
+		}
 	}
 	
-	private ProgramExpression leftSide;
-	private ProgramExpression rightSide;
+	public boolean isValidAssignment(String name, ProgramExpression value) {
+		if (getProgram()!=null) {
+			if (getProgram().getVariableStack().containsKey(name)) {
+					if (getProgram().getVariableStack().get(name).getClass()
+							==value.getValue().getClass())
+						return true; 
+					else
+						return false;	
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public Program getProgram() {
+		return this.program;
+	}
+
+	@Override
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
+	private Program program;
+	private String variableName;
+	private ProgramExpression value;
 	
 }

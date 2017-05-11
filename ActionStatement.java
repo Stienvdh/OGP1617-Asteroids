@@ -1,5 +1,7 @@
-package asteroids.model.programs;
+package asteroids.model.programs.statements;
 
-public class ActionStatement {
+public abstract class ActionStatement extends ProgramStatement {
 
+	public abstract void execute();
+	
 }

@@ -1,10 +1,20 @@
-package asteroids.model.programs;
+package asteroids.model.programs.statements;
 
-public abstract class ProgramStatement extends ProgramLine{
+import asteroids.model.programs.Program;
+import asteroids.model.programs.ProgramLine;
+
+public abstract class ProgramStatement implements ProgramLine {
 	
-	public ProgramStatement() {
+	public Program getProgram() {
+		return this.program;
+	}
+	
+	public void setProgram(Program program) {
+		this.program = program;
 	}
 	
 	public abstract void execute();
+	
+	private Program program;
 	
 }
