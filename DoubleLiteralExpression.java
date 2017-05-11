@@ -1,5 +1,7 @@
 package asteroids.model.programs.expressions;
 
+import asteroids.model.programs.Program;
+
 public class DoubleLiteralExpression implements DoubleExpression {
 
 	public DoubleLiteralExpression(Double value) {
@@ -15,6 +17,17 @@ public class DoubleLiteralExpression implements DoubleExpression {
 		this.value = value;
 	}
 	
+	@Override 
+	public Program getProgram() {
+		return this.program;
+	}
+	
+	@Override 
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
 	private Double value;
+	private Program program;
 	
 }

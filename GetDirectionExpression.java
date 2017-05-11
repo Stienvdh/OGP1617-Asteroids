@@ -4,8 +4,8 @@ import asteroids.model.Ship;
 
 public class GetDirectionExpression extends UnaryDoubleExpression {
 
-	public GetDirectionExpression(ProgramExpression<Ship> operand) {
-		super(operand);
+	public GetDirectionExpression() {
+		super(new SelfExpression());
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package asteroids.model.programs.expressions;
 
-public abstract class UnaryDoubleExpression implements UnaryExpression<Double>, DoubleExpression{
+import asteroids.model.programs.Program;
 
+public abstract class UnaryDoubleExpression implements UnaryExpression<Double>, DoubleExpression{
+	
 	public UnaryDoubleExpression(ProgramExpression<?> operand) {
 		setOperand(operand);
 	}
@@ -15,6 +17,17 @@ public abstract class UnaryDoubleExpression implements UnaryExpression<Double>, 
 		this.operand = operand;
 	}
 	
+	@Override 
+	public Program getProgram() {
+		return this.program;
+	}
+	
+	@Override 
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
 	public ProgramExpression<?> operand;
+	private Program program;
 
 }

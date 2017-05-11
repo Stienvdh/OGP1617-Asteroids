@@ -1,18 +1,45 @@
-package asteroids.model.programs;
+package asteroids.model.programs.expressions;
 
-public class ReadVariableExpression extends ProgramExpression {
+import asteroids.model.programs.Program;
+
+public class ReadVariableExpression<S> implements UnaryExpression<S> {
 	
-	public ReadVariableExpression(ProgramExpression variable) {
-		setVariable(variable);
+	public ReadVariableExpression(String variableName) {
+		setVariableName(variableName);
+	}
+	
+	public String getVariableName() {
+		return this.variableName;
+	}
+	
+	public void setVariableName(String name) {
+		this.variableName = name;
 	}
 
-	public void setVariable(ProgramExpression variable) {
-		this.variable = variable;
+	@SuppressWarnings("unchecked")
+	public S getValue() {
+		if (getProgram() != null) {
+			if (getProgram().getVariableStack().containsKey(getVariableName()))
+				return (S) getProgram().getVariableStack().get(getVariableName());
+		}
+		return null;
 	}
 	
-	public ProgramExpression getVariable() {
-		return this.variable;
+	@Override 
+	public Program getProgram() {
+		return this.program;
 	}
 	
-	private ProgramExpression variable;
+	@Override 
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
+	private Program program;
+	private String variableName;
+	@Override
+	public ProgramExpression<?> getOperand() {
+		return null;
+	}
+
 }

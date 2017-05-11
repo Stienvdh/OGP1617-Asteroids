@@ -1,8 +1,9 @@
 package asteroids.model.programs.expressions;
 
 import asteroids.model.Entity;
+import asteroids.model.programs.Program;
 
-public abstract class SimpleEntityExpression<S extends Entity> implements EntityExpression {
+public class SimpleEntityExpression<S extends Entity> implements EntityExpression {
 
 	public SimpleEntityExpression(S entity) {
 		setValue(entity);
@@ -17,6 +18,17 @@ public abstract class SimpleEntityExpression<S extends Entity> implements Entity
 		this.value = (S) entity;
 	}
 	
+	@Override 
+	public Program getProgram() {
+		return this.program;
+	}
+	
+	@Override 
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
 	public S value;
+	private Program program;
 
 }

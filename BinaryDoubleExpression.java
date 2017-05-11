@@ -1,5 +1,7 @@
 package asteroids.model.programs.expressions;
 
+import asteroids.model.programs.Program;
+
 public abstract class BinaryDoubleExpression implements DoubleExpression, BinaryExpression<Double> {
 	
 	public BinaryDoubleExpression(ProgramExpression<?> leftOperand, ProgramExpression<?> rightOperand) {
@@ -21,7 +23,18 @@ public abstract class BinaryDoubleExpression implements DoubleExpression, Binary
 		return this.rightOperand;
 	}
 	
+	@Override 
+	public Program getProgram() {
+		return this.program;
+	}
+	
+	@Override 
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
 	private ProgramExpression<?> leftOperand;
 	private ProgramExpression<?> rightOperand;
+	private Program program;
 
 }
