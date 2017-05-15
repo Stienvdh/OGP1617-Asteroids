@@ -3,7 +3,7 @@ package asteroids.model;
 public class ClosestEntity<T extends Entity> {
 	
 	public ClosestEntity(Ship ship, Class<T> type) {
-		double minDistance = 0;
+		double minDistance = Double.POSITIVE_INFINITY;
 		T closestEntity = null;
 		if (ship.getWorld()!=null) {
 			for (T entity:

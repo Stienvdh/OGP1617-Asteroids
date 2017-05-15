@@ -1,11 +1,11 @@
-package asteroids.model.programs;
+package asteroids.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import asteroids.model.Ship;
+import asteroids.model.programs.ProgramFunction;
 import asteroids.model.programs.expressions.ProgramExpression;
 import asteroids.model.programs.statements.ProgramStatement;
 
@@ -70,7 +70,6 @@ public class Program {
 	}
 	
 	private Ship ship;
-
 	private Map<String, ProgramExpression> variableStack = new HashMap<String, ProgramExpression>();
 	private Map<String, ProgramFunction> functionStack = new HashMap<String, ProgramFunction>();
 	private List<Object> printStack = new ArrayList<Object>();
