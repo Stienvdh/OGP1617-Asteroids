@@ -25,13 +25,12 @@ public abstract class MinorPlanet extends Entity {
 		this.radius = radius;
 	}
 
-	public double getTotalMass() {
+	@Override
+	public double getMass() {
 		return 4/3*Math.PI*Math.pow(getRadius(),3)*getMassDensity();
 	}
-
-	@Override
-	abstract public void terminate();
 	
+	public abstract void terminate();
 	abstract public void collideShip(Ship ship);
 	
 	/**

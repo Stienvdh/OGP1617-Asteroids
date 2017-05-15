@@ -451,14 +451,14 @@ public abstract class Entity {
 				(other.getYPosition()-this.getYPosition());
 			double sigma = Math.sqrt(Math.pow(this.getXPosition()-other.getXPosition(), 2)+
 				Math.pow(this.getYPosition()-other.getYPosition(), 2));
-			double J = 2*this.getTotalMass()*other.getTotalMass()*
-					dvdr/(sigma*(this.getTotalMass()+other.getTotalMass()));
+			double J = 2*this.getMass()*other.getMass()*
+					dvdr/(sigma*(this.getMass()+other.getMass()));
 			double JX = J*(other.getXPosition()-this.getXPosition())/sigma;
 			double JY = J*(other.getYPosition()-this.getYPosition())/sigma;
-			this.setVelocity(getXVelocity()+JX/this.getTotalMass(), 
-					getYVelocity()+JY/this.getTotalMass());
-			other.setVelocity(other.getXVelocity()-JX/other.getTotalMass(), 
-					other.getYVelocity()-JY/other.getTotalMass());
+			this.setVelocity(getXVelocity()+JX/this.getMass(), 
+					getYVelocity()+JY/this.getMass());
+			other.setVelocity(other.getXVelocity()-JX/other.getMass(), 
+					other.getYVelocity()-JY/other.getMass());
 			}
 		else if (this instanceof Ship && other instanceof MinorPlanet) {
 			((MinorPlanet)other).collideShip(((Ship)this));
@@ -467,8 +467,6 @@ public abstract class Entity {
 			((MinorPlanet)this).collideShip(((Ship)other));
 		}
 	}
-
-	
 	
 	/**
 	 * Resolve the first collision of this entity with a boundary.
@@ -635,7 +633,7 @@ public abstract class Entity {
 	protected static double MAX_SPEED = 300000;
 
 	public abstract void setRadius(double radius);
-	public abstract double getTotalMass();
+	public abstract double getMass();
 	public abstract void terminate();
 	public abstract void setMassDensity(double massDensity);
 	

@@ -93,7 +93,7 @@ public class Bullet extends Entity{
 	/**
 	 * Return the mass of this bullet.
 	 */
-	public double getTotalMass() {
+	public double getMass() {
 		return (4/3)*Math.PI*Math.pow(this.getRadius(),3)*this.getMassDensity();
 	}
 	

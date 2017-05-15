@@ -26,4 +26,5 @@ public class Asteroid extends MinorPlanet {
 	 * A variable registering the minimum mass density of this asteroid.
 	 */
 	protected static double DENSITY = 2.65*Math.pow(10, 12);
+	
 }

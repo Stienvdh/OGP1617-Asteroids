@@ -43,6 +43,7 @@ public class Planetoid extends MinorPlanet {
 		}
 	}
 	
+	@Override
 	public void collideShip(Ship ship) {
 		double randomx = ship.getRadius()*0.99 + (new Random().nextDouble() * (ship.getWorld().getWidth() - 2*ship.getRadius()*0.99));
 		double randomy = ship.getRadius()*0.99 + (new Random().nextDouble() * (ship.getWorld().getHeight() - 2*ship.getRadius()*0.99));
@@ -52,6 +53,7 @@ public class Planetoid extends MinorPlanet {
 			ship.terminate();
 	}
 	
+	@Override
 	public void terminate() {
 		if (this.getRadius() >= 30) {
 			double randomAngle = new Random().nextDouble()*2*Math.PI;

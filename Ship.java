@@ -8,11 +8,14 @@ import asteroids.model.exceptions.IllegalBulletException;
 import asteroids.model.exceptions.IllegalDurationException;
 import asteroids.model.exceptions.IllegalPositionException;
 import asteroids.model.exceptions.IllegalRadiusException;
+import asteroids.model.programs.exceptions.IllegalExpressionException;
+import asteroids.model.programs.expressions.DoubleLiteralExpression;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
  * A class of space ships involving a position, a velocity, a radius
  * and an orientation.
+ * @param <type>
  * 
  * @invar	Each ship has a valid position.
  * 			| isValidPosition(getXPosition(), getYPosition())
@@ -229,7 +232,7 @@ public class Ship extends Entity{
 	 * Return the mass of this ship.
 	 */
 	@Basic @Raw
-	public double getMass() {
+	public double getShipMass() {
 		return this.mass;
 	}
 	
@@ -263,10 +266,11 @@ public class Ship extends Entity{
 				|	totalMass = totalMass + bullet.getMass()
 				| result == totalMass
 	 */
-	public double getTotalMass() {
-		double totalMass = this.getMass();
+	@Override
+	public double getMass() {
+		double totalMass = this.getShipMass();
 		for (Bullet bullet: this.getBullets()) {
-			totalMass = totalMass + bullet.getTotalMass();
+			totalMass = totalMass + bullet.getMass();
 		}
 		return totalMass;
 	}
@@ -540,7 +544,7 @@ public class Ship extends Entity{
 	 */
 	public void thrustOn() {
 		this.thruster = true;
-		this.setAcceleration(this.getThrustForce()/this.getTotalMass());
+		this.setAcceleration(this.getThrustForce()/this.getMass());
 	}
 	
 	/**
@@ -617,12 +621,8 @@ public class Ship extends Entity{
 	 *			| new.getOrientation() == old.getOrientation() + angle
 	 */
 	public void turn(double angle) {
-		while ((this.getOrientation()) + angle >= 2 * Math.PI) {
-			angle -= 2 * Math.PI;
-		}
-		while ((this.getOrientation() + angle) < 0) {
-			angle += 2 * Math.PI;
-		}
+		if ((angle<-2*Math.PI)||(angle>2*Math.PI))
+			throw new IllegalExpressionException(new DoubleLiteralExpression(angle));
 		setOrientation(getOrientation()+angle);
 	}
 	
@@ -635,6 +635,15 @@ public class Ship extends Entity{
 		}
 		setVelocity(getXVelocity()+dt*getAcceleration()*Math.cos(getOrientation()), 
 				getYVelocity()+dt*getAcceleration()*Math.sin(getOrientation()));
+	}
+	
+	public Program getProgram() {
+		return this.program;
+	}
+	
+	public void setProgram(Program program) {
+		this.program = program;
+		program.setShip(this);
 	}
 	
 	/**
@@ -677,6 +686,11 @@ public class Ship extends Entity{
 	 */
 	private static double MIN_RADIUS = 10;
 	
+	/**
+	 * A variable registering the program of a ship.
+	 */
+	private Program program;
+	
 	/** 
 	 * A variable registering the minimum density of a ship.
 	 */
@@ -685,7 +699,7 @@ public class Ship extends Entity{
 	/** 
 	 * A variable registering the standard force the active thruster of a ship exerts.
 	 */
-	private static final double STANDARD_FORCE = 1.1*Math.pow(10, 21);
+	private static final double STANDARD_FORCE = 1.1*Math.pow(10, 18);
 	
 	/**
 	 * A variable registering the initial speed of a bullet when fired.
