@@ -1,5 +1,7 @@
 package asteroids.model.programs.expressions;
 
+import asteroids.model.Program;
+
 public abstract class BinaryBooleanExpression extends BooleanExpression implements BinaryExpression {
 	
 	public BinaryBooleanExpression(ProgramExpression leftOperand, ProgramExpression rightOperand) {
@@ -20,6 +22,13 @@ public abstract class BinaryBooleanExpression extends BooleanExpression implemen
 	@Override
 	public ProgramExpression getRightOperand() {
 		return rightOperand;
+	}
+	
+	@Override
+	public void setProgram(Program program) {
+		super.setProgram(program);
+		getLeftOperand().setProgram(program);
+		getRightOperand().setProgram(program);
 	}
 
 	private ProgramExpression leftOperand;

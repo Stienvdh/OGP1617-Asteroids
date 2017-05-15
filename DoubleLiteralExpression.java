@@ -1,6 +1,6 @@
 package asteroids.model.programs.expressions;
 
-import asteroids.model.programs.Program;
+import asteroids.model.Program;
 
 public class DoubleLiteralExpression extends UnaryDoubleExpression {
 

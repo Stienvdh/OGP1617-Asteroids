@@ -11,13 +11,13 @@ public class ChangeSignExpression extends UnaryDoubleExpression {
 	
 	@Override
 	public void setOperand(ProgramExpression operand) {
-		if (! (operand instanceof DoubleExpression)) 
-			throw new IllegalExpressionException(operand);
 		super.setOperand(operand);
 	}
 
 	@Override
 	public Double getValue() {
+		if (! (getOperand() instanceof DoubleExpression)) 
+			throw new IllegalExpressionException(getOperand());
 		return (-1)*((DoubleExpression)getOperand()).getValue();
 	}
 

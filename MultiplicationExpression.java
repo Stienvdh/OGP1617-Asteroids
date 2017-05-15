@@ -11,15 +11,15 @@ public class MultiplicationExpression extends BinaryDoubleExpression {
 	
 	@Override
 	public void setOperands(ProgramExpression left, ProgramExpression right) {
-		if (! (left instanceof DoubleExpression))
-			throw new IllegalExpressionException(left);
-		if (! (right instanceof DoubleExpression))
-			throw new IllegalExpressionException(left);
 		super.setOperands(left, right);
 	}
 	
 	@Override
 	public Double getValue() {
+		if (! (getLeftOperand() instanceof DoubleExpression))
+			throw new IllegalExpressionException(getLeftOperand());
+		if (! (getRightOperand() instanceof DoubleExpression))
+			throw new IllegalExpressionException(getRightOperand());
 		return (Double)getLeftOperand().getValue()*(Double)getRightOperand().getValue();
 	}
 

@@ -6,6 +6,7 @@ public class SelfExpression extends SimpleEntityExpression {
 
 	public SelfExpression() {
 		super(null);
+		super.setValue(getShip());
 	}
 	
 	@Override

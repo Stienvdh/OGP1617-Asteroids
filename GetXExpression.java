@@ -12,13 +12,13 @@ public class GetXExpression extends UnaryDoubleExpression {
 	
 	@Override
 	public void setOperand(ProgramExpression operand) {
-		if (! (operand instanceof EntityExpression))
-			throw new IllegalExpressionException(operand);
 		super.setOperand(operand);
 	}
 
 	@Override
 	public Double getValue() {
+		if ((! (getOperand() instanceof EntityExpression))||(getOperand().getValue()==null))
+			throw new IllegalExpressionException(getOperand());
 		return ((Entity)getOperand().getValue()).getXPosition();
 	}
 	

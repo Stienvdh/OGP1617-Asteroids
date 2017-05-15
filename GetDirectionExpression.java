@@ -6,6 +6,7 @@ public class GetDirectionExpression extends UnaryDoubleExpression {
 
 	public GetDirectionExpression() {
 		super(new SelfExpression());
+		getOperand().setProgram(getProgram());
 	}
 
 	@Override

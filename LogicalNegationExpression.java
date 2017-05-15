@@ -10,13 +10,13 @@ public class LogicalNegationExpression extends UnaryBooleanExpression {
 	
 	@Override
 	public void setOperand(ProgramExpression operand) {
-		if (! (operand instanceof BooleanExpression)) {
-			throw new IllegalExpressionException(operand);
-		}
+		super.setOperand(operand);
 	}
 
 	@Override
 	public Boolean getValue() {
+		if (! (getOperand() instanceof BooleanExpression)) 
+			throw new IllegalExpressionException(getOperand());
 		return (! (Boolean)getOperand().getValue());
 	}
 }
