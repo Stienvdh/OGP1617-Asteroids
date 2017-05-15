@@ -2,7 +2,15 @@ package asteroids.model.programs;
 
 import java.util.List;
 
+import asteroids.model.Asteroid;
+import asteroids.model.Bullet;
+import asteroids.model.ClosestEntity;
+import asteroids.model.Entity;
+import asteroids.model.MinorPlanet;
+import asteroids.model.Planetoid;
+import asteroids.model.Program;
 import asteroids.model.Ship;
+import asteroids.model.programs.exceptions.IllegalExpressionException;
 import asteroids.model.programs.expressions.*;
 import asteroids.model.programs.statements.*;
 import asteroids.part3.programs.IProgramFactory;
@@ -24,12 +32,12 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramStatement createAssignmentStatement(String variableName, ProgramExpression value, SourceLocation sourceLocation) {
-		return new AssignmentStatement(variableName, (ProgramExpression) value);
+		return new AssignmentStatement(variableName, value);
 	}
 
 	@Override
 	public ProgramStatement createWhileStatement(ProgramExpression condition, ProgramStatement body, SourceLocation sourceLocation) {
-		return new WhileStatement((BooleanExpression) condition, (BlockStatement) body);
+		return new WhileStatement(condition, body);
 	}
 
 	@Override
@@ -39,12 +47,12 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramStatement createReturnStatement(ProgramExpression value, SourceLocation sourceLocation) {
-		return new ReturnStatement((ProgramExpression) value);
+		return new ReturnStatement(value);
 	}
 
 	@Override
 	public ProgramStatement createIfStatement(ProgramExpression condition, ProgramStatement ifBody, ProgramStatement elseBody, SourceLocation sourceLocation) {
-		return new IfThenElseStatement((BooleanExpression) condition, ifBody, elseBody);
+		return new IfThenElseStatement(condition, ifBody, elseBody);
 	}
 
 	@Override
@@ -75,12 +83,12 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramExpression createChangeSignExpression(ProgramExpression expression, SourceLocation sourceLocation) {
-		return new ChangeSignExpression((DoubleExpression)expression);
+		return new ChangeSignExpression(expression);
 	}
 
 	@Override
 	public ProgramExpression createNotExpression(ProgramExpression expression, SourceLocation sourceLocation) {
-		return new LogicalNegationExpression((BooleanExpression) expression);
+		return new LogicalNegationExpression(expression);
 	}
 
 	@Override
@@ -100,69 +108,93 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramExpression createShipExpression(SourceLocation location) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SimpleEntityExpression(null) {
+			@Override
+			public Entity getValue() {
+				return (new ClosestEntity<Ship>(getShip(), Ship.class)).getClosestEntity();
+			}
+		};
 	}
 
 	@Override
 	public ProgramExpression createAsteroidExpression(SourceLocation location) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SimpleEntityExpression(null) {
+			@Override
+			public Entity getValue() {
+				return (new ClosestEntity<Asteroid>(getShip(), Asteroid.class)).getClosestEntity();
+			}
+		};
 	}
 
 	@Override
 	public ProgramExpression createPlanetoidExpression(SourceLocation location) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SimpleEntityExpression(null) {
+			@Override
+			public Entity getValue() {
+				return (new ClosestEntity<Planetoid>(getShip(), Planetoid.class)).getClosestEntity();
+			}
+		};
 	}
 
 	@Override
 	public ProgramExpression createBulletExpression(SourceLocation location) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SimpleEntityExpression(null) {
+			@Override
+			public Entity getValue() {
+				return (new ClosestEntity<Bullet>(getShip(), Bullet.class)).getClosestEntity();
+			}
+		};
 	}
 
 	@Override
 	public ProgramExpression createPlanetExpression(SourceLocation location) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SimpleEntityExpression(null) {
+			@Override
+			public Entity getValue() {
+				return (new ClosestEntity<MinorPlanet>(getShip(), MinorPlanet.class)).getClosestEntity();
+			}
+		};
 	}
 
 	@Override
 	public ProgramExpression createAnyExpression(SourceLocation location) {
-		// TODO Auto-generated method stub
-		return null;
+		return new SimpleEntityExpression(null) {
+			@Override
+			public Entity getValue() {
+				return (new ClosestEntity<Entity>(getShip(), Entity.class)).getClosestEntity();
+			}
+		};
 	}
 
 	@Override
 	public ProgramExpression createGetXExpression(ProgramExpression e, SourceLocation location) {
-		return new GetXExpression((EntityExpression) e);
+		return new GetXExpression(e);
 	}
 
 	@Override
 	public ProgramExpression createGetYExpression(ProgramExpression e, SourceLocation location) {
-		return new GetYExpression((EntityExpression)e);
+		return new GetYExpression(e);
 	}
 
 	@Override
 	public ProgramExpression createGetVXExpression(ProgramExpression e, SourceLocation location) {
-		return new GetXVelocityExpression((EntityExpression) e);
+		return new GetXVelocityExpression(e);
 	}
 
 	@Override
 	public ProgramExpression createGetVYExpression(ProgramExpression e, SourceLocation location) {
-		return new GetYVelocityExpression((EntityExpression) e);
+		return new GetYVelocityExpression(e);
 	}
 
 	@Override
 	public ProgramExpression createGetRadiusExpression(ProgramExpression e, SourceLocation location) {
-		return new GetRadiusExpression((EntityExpression) e);
+		return new GetRadiusExpression(e);
 
 	}
 
 	@Override
 	public ProgramExpression createLessThanExpression(ProgramExpression e1, ProgramExpression e2, SourceLocation location) {
-		return new LessThanExpression((DoubleExpression) e1, (DoubleExpression) e2);
+		return new LessThanExpression(e1, e2);
 	}
 
 	@Override
@@ -172,17 +204,17 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramExpression createAdditionExpression(ProgramExpression e1, ProgramExpression e2, SourceLocation location) {
-		return new AdditionExpression((DoubleExpression) e1, (DoubleExpression) e2);
+		return new AdditionExpression(e1, e2);
 	}
 
 	@Override
 	public ProgramExpression createMultiplicationExpression(ProgramExpression e1, ProgramExpression e2, SourceLocation location) {
-		return new MultiplicationExpression((DoubleExpression) e1, (DoubleExpression) e2);
+		return new MultiplicationExpression(e1, e2);
 	}
 
 	@Override
 	public ProgramExpression createSqrtExpression(ProgramExpression e, SourceLocation location) {
-		return new SquareRootExpression((DoubleExpression) e);
+			return new SquareRootExpression(e);
 	}
 
 	@Override
@@ -194,8 +226,8 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	public ProgramStatement createThrustOnStatement(SourceLocation location) {
 		return new ActionStatement() {
 			public void execute() {
-				if ((new SelfExpression()).getValue()!=null) {
-					((Ship)(new SelfExpression()).getValue()).thrustOn();
+				if (getShip()!=null) {
+					getShip().thrustOn();
 				}
 			}
 		};
@@ -205,8 +237,8 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	public ProgramStatement createThrustOffStatement(SourceLocation location) {
 		return new ActionStatement() {
 			public void execute() {
-				if ((new SelfExpression()).getValue()!=null) {
-					((Ship)(new SelfExpression()).getValue()).thrustOff();
+				if (getShip()!=null) {
+					getShip().thrustOff();
 				}
 			}
 		};
@@ -216,8 +248,8 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	public ProgramStatement createFireStatement(SourceLocation location) {
 		return new ActionStatement() {
 			public void execute() {
-				if ((new SelfExpression()).getValue()!=null) {
-					((Ship)(new SelfExpression()).getValue()).fireBullet();
+				if (getShip()!=null) {
+					getShip().fireBullet();
 				}
 			}
 		};
@@ -227,8 +259,10 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	public ProgramStatement createTurnStatement(ProgramExpression angle, SourceLocation location) {
 		return new ActionStatement() {
 			public void execute() {
-				if ((new SelfExpression()).getValue()!=null) {
-					((Ship)(new SelfExpression()).getValue()).turn(((DoubleExpression)angle).getValue());
+				if (getShip()!=null) {
+					if (! (angle instanceof DoubleExpression))
+						throw new IllegalExpressionException(angle);
+					getShip().turn(((DoubleExpression)angle).getValue());
 				}
 			}
 		};

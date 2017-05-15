@@ -1,7 +1,7 @@
 package asteroids.model.programs.statements;
 
-import asteroids.model.programs.Program;
-import asteroids.model.programs.exceptions.IllegalExpressionException;
+import asteroids.model.Program;
+import asteroids.model.programs.exceptions.IllegalStatementException;
 import asteroids.model.programs.expressions.ProgramExpression;
 
 public class AssignmentStatement extends ProgramStatement {
@@ -12,11 +12,7 @@ public class AssignmentStatement extends ProgramStatement {
 	
 	public void setVariable(String name, ProgramExpression value) {
 		this.variableName = name;
-		if (isValidAssignment(name, value)) {
-			this.value = value;
-		}
-		else
-			throw new IllegalExpressionException(value);
+		this.value = value;
 	}
 	
 	public String getVariableName() {
@@ -29,16 +25,22 @@ public class AssignmentStatement extends ProgramStatement {
 	
 	public void execute() {
 		if (getProgram()!=null) {
-			getProgram().getVariableStack().put(getVariableName(), getVariableValue());
-		}
+			if (isValidAssignment(getVariableName(), getVariableValue())) {
+				System.out.print("ok" + getVariableValue().getValue());
+				getProgram().getVariableStack().put(getVariableName(), getVariableValue()); }
+			else
+				throw new IllegalStatementException(this);
+		}	
 	}
 	
 	public boolean isValidAssignment(String name, ProgramExpression value) {
 		if (getProgram()!=null) {
+			value.setProgram(getProgram());
 			if (getProgram().getVariableStack().containsKey(name)) {
-					if (getProgram().getVariableStack().get(name).getClass()
-							==value.getValue().getClass())
+					if (getProgram().getVariableStack().get(name).getValue().getClass()
+							==value.getValue().getClass()) {
 						return true; 
+					}
 					else
 						return false;	
 			}

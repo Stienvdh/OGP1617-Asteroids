@@ -1,9 +1,10 @@
 package asteroids.model.programs.statements;
 
+import asteroids.model.programs.exceptions.IllegalStatementException;
+
 public class BreakStatement extends ProgramStatement {
 	
 	public BreakStatement() {
-		
 	}
 	
 	public WhileStatement getWhileStatement() {
@@ -16,6 +17,8 @@ public class BreakStatement extends ProgramStatement {
 
 	@Override
 	public void execute() {
+		if (getWhileStatement()==null)
+			throw new IllegalStatementException(this);
 	}
 	
 	private WhileStatement whileStatement;

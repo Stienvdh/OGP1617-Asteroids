@@ -1,14 +1,17 @@
 package asteroids.model.programs.statements;
 
+import asteroids.model.Program;
+import asteroids.model.programs.exceptions.IllegalExpressionException;
 import asteroids.model.programs.expressions.BooleanExpression;
+import asteroids.model.programs.expressions.ProgramExpression;
 
 public class IfThenElseStatement extends ProgramStatement{
 
-	public IfThenElseStatement(BooleanExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
-	 	setParts(ifPart, thenPart, elsePart);
+	public IfThenElseStatement(ProgramExpression condition, ProgramStatement thenPart, ProgramStatement elsePart) {
+	 	setParts(condition, thenPart, elsePart);
 	 }
 	
-	public BooleanExpression getIfPart() {
+	public ProgramExpression getIfPart() {
 		return this.ifPart;
 	}
 	
@@ -20,7 +23,7 @@ public class IfThenElseStatement extends ProgramStatement{
 		return this.elsePart;
 	}
 	
-	public void setParts(BooleanExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
+	public void setParts(ProgramExpression ifPart, ProgramStatement thenPart, ProgramStatement elsePart) {
 		this.ifPart = ifPart;
 		this.thenPart = thenPart;
 		this.elsePart = elsePart;
@@ -28,14 +31,26 @@ public class IfThenElseStatement extends ProgramStatement{
 	
 	@Override
 	public void execute() {
-		if (ifPart.getValue())
+		if (! (getIfPart() instanceof BooleanExpression))
+			throw new IllegalExpressionException(ifPart);
+		if ((boolean) ifPart.getValue())
 			getThenPart().execute();
 		else
 			if (getElsePart()!=null)
 				getElsePart().execute();
 	}
 	
-	private BooleanExpression ifPart;
+	@Override
+	public void setProgram(Program program) {
+		super.setProgram(program);
+		getIfPart().setProgram(program);
+		getThenPart().setProgram(program);
+		if (getElsePart()!=null) {
+			getElsePart().setProgram(program);
+		}
+	}
+	
+	private ProgramExpression ifPart;
 	private ProgramStatement thenPart;
 	private ProgramStatement elsePart;
 

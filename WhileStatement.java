@@ -1,19 +1,23 @@
 package asteroids.model.programs.statements;
 
+import asteroids.model.Program;
+import asteroids.model.programs.exceptions.IllegalExpressionException;
+import asteroids.model.programs.exceptions.IllegalStatementException;
 import asteroids.model.programs.expressions.BooleanExpression;
+import asteroids.model.programs.expressions.ProgramExpression;
 
 public class WhileStatement extends ProgramStatement {
 	
-	public WhileStatement(BooleanExpression condition, BlockStatement block) {
+	public WhileStatement(ProgramExpression condition, ProgramStatement block) {
 		setCondition(condition);
 		setBlock(block);
 	}
 	
-	public BooleanExpression getCondition() {
+	public ProgramExpression getCondition() {
 		return this.condition;
 	}
 	
-	public void setCondition(BooleanExpression condition) {
+	public void setCondition(ProgramExpression condition) {
 		this.condition = condition;
 	}
 	
@@ -21,18 +25,30 @@ public class WhileStatement extends ProgramStatement {
 		return this.block;
 	}
 	
-	public void setBlock(BlockStatement block) {
+	public void setBlock(ProgramStatement block) {
 		this.block = block;
+	}
+	
+	@Override
+	public void setProgram(Program program) {
+		super.setProgram(program);
+		getCondition().setProgram(program);
+		getBlock().setProgram(program);
 	}
 
 	@Override
 	public void execute() {
-		while (getCondition().getValue()) {
+		if (! (getCondition() instanceof BooleanExpression))
+			throw new IllegalExpressionException(getCondition());
+		if (! (getBlock() instanceof BlockStatement))
+			throw new IllegalStatementException(getBlock());
+		((BlockStatement)getBlock()).setWhileStatement(this);
+		while ((boolean) getCondition().getValue()) {
 			getBlock().execute();
 		}
 	}
 	
-	private BooleanExpression condition;
-	private BlockStatement block;
+	private ProgramExpression condition;
+	private ProgramStatement block;
 	
 }

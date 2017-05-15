@@ -1,5 +1,6 @@
 package asteroids.model.programs.statements;
 
+import asteroids.model.Program;
 import asteroids.model.programs.expressions.ProgramExpression;
 
 public class PrintStatement extends ProgramStatement {
@@ -18,10 +19,20 @@ public class PrintStatement extends ProgramStatement {
 	
 	@Override
 	public void execute() {
-		System.out.print(getExpression().getValue().toString());
+		if (getExpression().getValue()==null) {
+			System.out.print("null");
+		}
+		else
+			System.out.print(getExpression().getValue().toString());
 		if (getProgram()!=null) {
 			getProgram().addToPrintStack(getExpression().getValue());
 		}
+	}
+	
+	@Override
+	public void setProgram(Program program) {
+		super.setProgram(program);
+		getExpression().setProgram(program);
 	}
 	
 	private ProgramExpression value;
