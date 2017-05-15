@@ -1,10 +1,7 @@
 package asteroids.model;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import asteroids.model.exceptions.IllegalRadiusException;
+import java.util.Random;
 
 public class Planetoid extends MinorPlanet {
 	
@@ -46,11 +43,31 @@ public class Planetoid extends MinorPlanet {
 		}
 	}
 	
-	public static Set<Planetoid> getAllPlanetoids(World world) {
-		Set<Planetoid> set = new HashSet<Planetoid>();
-		Stream<Entity> stream = world.getAllEntities().stream().filter(entity -> (entity instanceof Planetoid));
-		stream.forEach(planetoid -> set.add((Planetoid)planetoid));
-		return set;
+	public void collideShip(Ship ship) {
+		double randomx = ship.getRadius()*0.99 + (new Random().nextDouble() * (ship.getWorld().getWidth() - 2*ship.getRadius()*0.99));
+		double randomy = ship.getRadius()*0.99 + (new Random().nextDouble() * (ship.getWorld().getHeight() - 2*ship.getRadius()*0.99));
+		if (ship.isValidPosition(randomx, randomy))
+			ship.setPosition(randomx, randomy);
+		else
+			ship.terminate();
+	}
+	
+	public void terminate() {
+		if (this.getRadius() >= 30) {
+			double randomAngle = new Random().nextDouble()*2*Math.PI;
+			double newvel = 1.5*Math.sqrt(Math.pow(this.getXVelocity(),2) + Math.pow(this.getYVelocity(),2));
+			Asteroid asteroid1 = new Asteroid(Math.cos(randomAngle)*this.getRadius()/2,Math.sin(randomAngle)*this.getRadius()/2,
+									Math.cos(randomAngle)*newvel, Math.sin(randomAngle)*newvel, this.getRadius()/2);
+			Asteroid asteroid2 = new Asteroid(-Math.cos(randomAngle)*this.getRadius()/2,-Math.sin(randomAngle)*this.getRadius()/2,
+									-Math.cos(randomAngle)*newvel, -Math.sin(randomAngle)*newvel, this.getRadius()/2);
+			this.getWorld().addEntity(asteroid1);
+			this.getWorld().addEntity(asteroid2);
+			asteroid1.setWorld(this.getWorld());
+			asteroid2.setWorld(this.getWorld());
+		}
+		this.isTerminated=true;
+		this.getWorld().removeEntity(this);
+		this.setWorld(null);
 	}
 	
 	/**

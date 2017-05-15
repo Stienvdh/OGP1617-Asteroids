@@ -203,7 +203,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double getBulletMass(Bullet bullet) throws ModelException {
-		return bullet.getMass();
+		return bullet.getTotalMass();
 	}
 
 	@Override
@@ -243,12 +243,14 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Ship> getWorldShips(World world) throws ModelException {
-		return Ship.getAllShips(world);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public Set<? extends Bullet> getWorldBullets(World world) throws ModelException {
-		return Bullet.getAllBullets(world);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -375,7 +377,8 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Asteroid> getWorldAsteroids(World world) throws ModelException {
-		return Asteroid.getAllAsteroids(world);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -390,7 +393,8 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Planetoid> getWorldPlanetoids(World world) throws ModelException {
-		return Planetoid.getAllPlanetoids(world);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -436,7 +440,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double getAsteroidMass(Asteroid asteroid) throws ModelException {
-		return asteroid.getMass();
+		return asteroid.getTotalMass();
 	}
 
 	@Override
@@ -477,7 +481,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double getPlanetoidMass(Planetoid planetoid) throws ModelException {
-		return planetoid.getMass();
+		return planetoid.getTotalMass();
 	}
 
 	@Override

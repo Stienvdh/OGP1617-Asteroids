@@ -25,17 +25,14 @@ public abstract class MinorPlanet extends Entity {
 		this.radius = radius;
 	}
 
-	@Override
-	public double getMass() {
+	public double getTotalMass() {
 		return 4/3*Math.PI*Math.pow(getRadius(),3)*getMassDensity();
 	}
 
 	@Override
-	public void terminate() {
-		this.isTerminated=true;
-		this.getWorld().removeEntity(this);
-		this.setWorld(null);
-	}
+	abstract public void terminate();
+	
+	abstract public void collideShip(Ship ship);
 	
 	/**
 	 * A variable registering the minimum radius of a minor planet.
