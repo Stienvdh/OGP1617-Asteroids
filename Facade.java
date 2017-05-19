@@ -11,7 +11,11 @@ import asteroids.model.exceptions.IllegalPositionException;
 import asteroids.model.exceptions.IllegalRadiusException;
 import asteroids.model.exceptions.IllegalShipException;
 import asteroids.model.exceptions.IllegalWorldException;
-import asteroids.model.programs.Program;
+import asteroids.model.exceptions.IllegalBulletException;
+import asteroids.model.exceptions.IllegalOrientationException;
+import asteroids.model.programs.*;
+import asteroids.model.programs.exceptions.IllegalExpressionException;
+import asteroids.model.programs.exceptions.IllegalStatementException;
 import asteroids.part2.CollisionListener;
 import asteroids.part3.programs.IProgramFactory;
 import asteroids.util.ModelException;
@@ -130,6 +134,9 @@ public class Facade implements asteroids.part3.facade.IFacade {
 		catch (IllegalRadiusException exc2) {
 			throw new ModelException("Illegal radius");
 		}
+		catch (IllegalOrientationException exc3) {
+			throw new ModelException("Illegal orientation");
+		}
 	}
 
 	@Override
@@ -193,7 +200,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double[] getBulletVelocity(Bullet bullet) throws ModelException {
-		return new double[]{bullet.getXPosition(),bullet.getYPosition()};
+		return new double[]{bullet.getXVelocity(),bullet.getYVelocity()};
 	}
 
 	@Override
@@ -203,7 +210,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double getBulletMass(Bullet bullet) throws ModelException {
-		return bullet.getTotalMass();
+		return bullet.getMass();
 	}
 
 	@Override
@@ -243,14 +250,12 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Ship> getWorldShips(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return (new EntitySet<Ship>(world, Ship.class)).getSet();
 	}
 
 	@Override
 	public Set<? extends Bullet> getWorldBullets(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return (new EntitySet<Bullet>(world, Bullet.class)).getSet();
 	}
 
 	@Override
@@ -268,12 +273,22 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public void removeShipFromWorld(World world, Ship ship) throws ModelException {
-		world.removeEntity(ship);
+		try {
+			world.removeEntity(ship);
+		}
+		catch (IllegalEntityException exc) {
+			throw new ModelException("Illegal entity");
+		}
 	}
 
 	@Override
 	public void addBulletToWorld(World world, Bullet bullet) throws ModelException {
-		world.addEntity(bullet);
+		try {
+			world.addEntity(bullet);
+		}
+		catch (IllegalEntityException exc) {
+			throw new ModelException("Illegal entity");
+		}
 	}
 
 	@Override
@@ -293,21 +308,37 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public void loadBulletOnShip(Ship ship, Bullet bullet) throws ModelException {
-		ship.loadBullet(bullet);
+		try {
+			ship.loadBullet(bullet);
+		}
+		catch (IllegalBulletException exc) {
+			throw new ModelException("Illegal Bullet");
+		}
 	}
 
 	@Override
 	public void loadBulletsOnShip(Ship ship, Collection<Bullet> bullets) throws ModelException {
-		ship.loadBullet(bullets);
+		try {
+			ship.loadBullet(bullets);
+		}
+		catch (IllegalBulletException exc) {
+			throw new ModelException("Illegal Bullet");
+		}
 	}
 
 	@Override
 	public void removeBulletFromShip(Ship ship, Bullet bullet) throws ModelException {
-		ship.removeBullet(bullet);
+		try {
+			ship.removeBullet(bullet);
+		}
+		catch (IllegalBulletException exc) {
+			throw new ModelException("Illegal Bullet");
+		}
 	}
 
 	@Override
 	public void fireBullet(Ship ship) throws ModelException {
+
 		ship.fireBullet();
 	}
 
@@ -349,9 +380,9 @@ public class Facade implements asteroids.part3.facade.IFacade {
 		catch (IllegalEntityException exc) {
 			throw new ModelException("Illegal entity");
 		}
-		catch (IllegalPositionException exc2) {
-			throw new ModelException("Illegal position");
-		}
+//		catch (IllegalPositionException exc2) {
+//			throw new ModelException("Illegal position");
+//		}
 		catch (IllegalWorldException exc3) {
 			throw new ModelException("Illegal world");
 		}
@@ -377,8 +408,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Asteroid> getWorldAsteroids(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return (new EntitySet<Asteroid>(world, Asteroid.class)).getSet();
 	}
 
 	@Override
@@ -393,8 +423,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Planetoid> getWorldPlanetoids(World world) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return (new EntitySet<Planetoid>(world, Planetoid.class)).getSet();
 	}
 
 	@Override
@@ -440,7 +469,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double getAsteroidMass(Asteroid asteroid) throws ModelException {
-		return asteroid.getTotalMass();
+		return asteroid.getMass();
 	}
 
 	@Override
@@ -471,7 +500,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double[] getPlanetoidVelocity(Planetoid planetoid) throws ModelException {
-		return new double[]{planetoid.getXVelocity(),planetoid.getYPosition()};
+		return new double[]{planetoid.getXVelocity(),planetoid.getYVelocity()};
 	}
 
 	@Override
@@ -481,7 +510,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public double getPlanetoidMass(Planetoid planetoid) throws ModelException {
-		return planetoid.getTotalMass();
+		return planetoid.getMass();
 	}
 
 	@Override
@@ -496,26 +525,32 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Program getShipProgram(Ship ship) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return ship.getProgram();
 	}
 
 	@Override
 	public void loadProgramOnShip(Ship ship, Program program) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		ship.setProgram(program);
 	}
 
 	@Override
 	public List<Object> executeProgram(Ship ship, double dt) throws ModelException {
-		// TODO Auto-generated method stub
+		try {
+		if (ship.getProgram()!=null)
+			return ship.getProgram().execute(dt);
+		}
+		catch (IllegalExpressionException exc) {
+			throw new ModelException("Illegal expression");
+		}
+		catch (IllegalStatementException exc) {
+			throw new ModelException("Illegal statement");
+		}
 		return null;
 	}
 
 	@Override
 	public IProgramFactory<?, ?, ?, ? extends Program> createProgramFactory() throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return new ProgramFactory();
 	}
 
 }
