@@ -20,14 +20,14 @@ public abstract class MinorPlanet extends Entity {
 	 * 			| radius < MIN_RADIUS
 	 */
 	public void setRadius(double radius) {
-		if (radius <= MIN_RADIUS)
+		if (radius < MIN_RADIUS)
 			throw new IllegalRadiusException(radius);
 		this.radius = radius;
 	}
 
 	@Override
 	public double getMass() {
-		return 4/3*Math.PI*Math.pow(getRadius(),3)*getMassDensity();
+		return (4.0/3.0)*Math.PI*Math.pow(getRadius(),3)*getMassDensity();
 	}
 	
 	public abstract void terminate();

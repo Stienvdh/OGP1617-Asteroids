@@ -6,6 +6,7 @@ import asteroids.model.exceptions.IllegalPositionException;
 import asteroids.model.exceptions.IllegalShipException;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
+import java.util.Random;
 
 /**
  * @invar	Each entity has a valid position.
@@ -59,8 +60,9 @@ public abstract class Entity {
 	 */
 	@Basic @Raw
 	public void setPosition(double xpos, double ypos) {
-		if (! isValidPosition(xpos, ypos))
+		if (! isValidPosition(xpos, ypos)) {
 			throw new IllegalPositionException(xpos, ypos);
+		}
 		this.xPosition = xpos;
 		this.yPosition = ypos;
 	}
@@ -95,8 +97,8 @@ public abstract class Entity {
 	 *			| 	result == false
 	 */
 	public boolean isValidPosition(double xpos, double ypos) {
-		if ((((xpos == Double.POSITIVE_INFINITY)||(xpos == Double.NEGATIVE_INFINITY)||(Double.isNaN(xpos))))
-				&& (((ypos == Double.POSITIVE_INFINITY)||(ypos == Double.NEGATIVE_INFINITY)||(Double.isNaN(ypos)))))
+		if ((Double.isNaN(xpos))
+				|| (Double.isNaN(ypos)))
 			return false;
 		if (this.getWorld() != null) {
 			if ((xpos>0.99*getRadius())&&(xpos<1.01*(getWorld().getWidth()-getRadius()))&&
@@ -157,12 +159,17 @@ public abstract class Entity {
 	 */
 	@Raw
 	public void setVelocity(double xvel, double yvel) {
-		if (Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2)) <= this.maxSpeed) {
+		if (Double.isNaN(xvel) || Double.isNaN(yvel)) {
+			xvel = new Random().nextDouble() * this.maxSpeed;
+			yvel = new Random().nextDouble() * this.maxSpeed;
+		}
+		double absVel = Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2));
+		if (absVel <= this.maxSpeed) {
 			this.xVelocity = xvel;
 			this.yVelocity = yvel; }
 		else {
-			this.xVelocity = xvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed;
-			this.yVelocity = yvel/Math.sqrt(Math.pow(xvel,2) + Math.pow(yvel,2))*this.maxSpeed; }
+			this.xVelocity = xvel/absVel*this.maxSpeed;
+			this.yVelocity = yvel/absVel*this.maxSpeed; }
 	}
 	
 	/**
@@ -262,15 +269,19 @@ public abstract class Entity {
 			return Double.POSITIVE_INFINITY;
 		double X;
 		double Y;
-		if (this.getXVelocity()!=0) {
-			X = Math.max((getRadius()-getXPosition())/getXVelocity(),
-					((getWorld().getWidth()-getRadius())-getXPosition())/getXVelocity());
+		if (this.getXVelocity() < 0) {
+			X = (getRadius()-getXPosition())/getXVelocity();
+		}
+		else if (this.getXVelocity() > 0) {
+			X = ((getWorld().getWidth()-getRadius())-getXPosition())/getXVelocity();
 		}
 		else
 			X = Double.POSITIVE_INFINITY;
-		if (this.getYVelocity()!=0) {
-			Y = Math.max((getRadius()-getYPosition())/getYVelocity(),
-					((getWorld().getHeight()-getRadius())-getYPosition())/getYVelocity());
+		if (this.getYVelocity() < 0) {
+			Y = (getRadius()-getYPosition())/getYVelocity();
+		}
+		else if (this.getYVelocity() > 0) {
+			Y = ((getWorld().getWidth()-getRadius())-getYPosition())/getYVelocity();
 		}
 		else
 			Y = Double.POSITIVE_INFINITY;
@@ -489,10 +500,19 @@ public abstract class Entity {
 	public void collideBoundary() {
 		double[] pos = getBoundaryPosition();
 		if (pos!=null) {
-			if ((pos[0]==0)||(pos[0]==this.getWorld().getWidth()))
-				setVelocity(-getXVelocity(),getYVelocity());
-			else
-				setVelocity(getXVelocity(),-getYVelocity());
+			if ((pos[0]==0)||(pos[0]==this.getWorld().getWidth())) {
+				if (0 == pos[1] - getRadius() || getWorld().getHeight() == pos[1] + getRadius())
+					setVelocity(-getXVelocity(),-getYVelocity());
+				else
+					setVelocity(-getXVelocity(),getYVelocity());
+			}
+			else if ((pos[1]==0)||(pos[1]==this.getWorld().getHeight())) {
+				if (0 == pos[0] - getRadius() || getWorld().getHeight() == pos[0] + getRadius())
+					setVelocity(-getXVelocity(),-getYVelocity());
+				else 
+					setVelocity(getXVelocity(),-getYVelocity());
+				}
+				
 		}
 		if (this instanceof Bullet)
 			((Bullet)this).setBounces(((Bullet)this).getBounces()+1);
@@ -517,7 +537,7 @@ public abstract class Entity {
 	 * 			| dt < 0
 	 */
 	public void move(double dt) throws IllegalDurationException, IllegalPositionException {
-		if (dt < 0)
+		if (dt <= 0)
 			throw new IllegalDurationException(dt);
 		else if (dt > 0) {
 			this.setPosition(getXPosition()+getXVelocity()*dt,

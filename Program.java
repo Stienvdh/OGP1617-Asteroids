@@ -14,6 +14,7 @@ public class Program {
 	public Program(List<ProgramFunction> functions, ProgramStatement main) {
 		main.setProgram(this);
 		setMain(main);
+		setCurrentStatement(main);
 	}
 	
 	public Ship getShip() {
@@ -64,9 +65,32 @@ public class Program {
 		this.main = main;
 	}
 	
-	public List<Object> execute() {
-		main.execute();
-		return getPrintStack();
+	public double getTimeLeftToExecute() {
+		return this.timeLeftToExecute;
+	}
+	
+	public void setTimeLeftToExecute(double time) {
+		if (time >= 0)
+			this.timeLeftToExecute = time;
+	}
+	
+	public ProgramStatement getCurrentStatement() {
+		return this.currentStatement;
+	}
+	
+	public void setCurrentStatement(ProgramStatement statement) {
+		this.currentStatement = statement;
+	}
+	
+	public List<Object> execute(double dt) {
+		setTimeLeftToExecute(dt + getTimeLeftToExecute());
+		while (getTimeLeftToExecute() >= 0.2) {
+			if (getCurrentStatement()==null)
+				return getPrintStack();
+			getCurrentStatement().execute();
+			setCurrentStatement(getCurrentStatement().getNext());
+		}
+		return null;
 	}
 	
 	private Ship ship;
@@ -74,5 +98,7 @@ public class Program {
 	private Map<String, ProgramFunction> functionStack = new HashMap<String, ProgramFunction>();
 	private List<Object> printStack = new ArrayList<Object>();
 	private ProgramStatement main;
+	private double timeLeftToExecute = 0;
+	private ProgramStatement currentStatement;
 	
 }

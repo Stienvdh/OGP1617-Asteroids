@@ -94,7 +94,7 @@ public class Bullet extends Entity{
 	 * Return the mass of this bullet.
 	 */
 	public double getMass() {
-		return (4/3)*Math.PI*Math.pow(this.getRadius(),3)*this.getMassDensity();
+		return (4.0/3.0)*Math.PI*Math.pow(this.getRadius(),3)*this.getMassDensity();
 	}
 	
 	/**
@@ -324,7 +324,7 @@ public class Bullet extends Entity{
 		if (this.getSource()!=null) {
 			this.getSource().getBulletsFired().remove(this);
 		}
-		setSource(null);
+//		setSource(null);
 	}
 	
 	/**

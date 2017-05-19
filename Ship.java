@@ -8,6 +8,7 @@ import asteroids.model.exceptions.IllegalBulletException;
 import asteroids.model.exceptions.IllegalDurationException;
 import asteroids.model.exceptions.IllegalPositionException;
 import asteroids.model.exceptions.IllegalRadiusException;
+import asteroids.model.exceptions.IllegalOrientationException;
 import asteroids.model.programs.exceptions.IllegalExpressionException;
 import asteroids.model.programs.expressions.DoubleLiteralExpression;
 import be.kuleuven.cs.som.annotate.*;
@@ -131,9 +132,11 @@ public class Ship extends Entity{
 	@Override
 	public void setVelocity(double xvel, double yvel) {
 		super.setVelocity(xvel, yvel);
-		if (getBullets()!=null) {
-			for (Bullet bullet: getBullets()) {
-				bullet.setVelocity(xvel, yvel);
+		if (getBullets() != null) {
+			if (! getBullets().isEmpty()) {
+				for (Bullet bullet: getBullets()) {
+					bullet.setVelocity(xvel, yvel);
+				}
 			}
 		}
 	}
@@ -210,9 +213,11 @@ public class Ship extends Entity{
 	 * 			| new.getOrientation == orientation
 	 */
 	@Raw
-	public void setOrientation(double orientation) {
-		assert isValidOrientation(orientation);
-		this.orientation = orientation;
+	public void setOrientation(double orientation) throws IllegalOrientationException {
+		if (isValidOrientation(orientation) == true)
+			this.orientation = orientation;
+		else
+			throw new IllegalOrientationException(orientation);
 	}
 	
 	/**
@@ -338,7 +343,7 @@ public class Ship extends Entity{
 	 * 			| 	&&(this.getWorld()!=bullet.getWorld())
 	 */
 	public void loadBullet(Bullet bullet) throws IllegalBulletException {
-		if ((this.getWorld()!=null)&&(bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld()))
+		if (((bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld())))
 			throw new IllegalBulletException(bullet);
 		if (bullet.getWorld()!=null)
 			bullet.getWorld().removeEntity(bullet);
@@ -383,17 +388,21 @@ public class Ship extends Entity{
 	 */
 	public void loadBullet(Collection<Bullet> bullets) throws IllegalBulletException {
 		for (Bullet bullet: bullets) {
-			if ((this.getWorld()!=null)&&(bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld()))
+			if (bullet != null) {
+				if ((this.getWorld()!=null)&&(bullet.getWorld()!=null)&&(this.getWorld()!=bullet.getWorld()))
+					throw new IllegalBulletException(bullet);
+				if (bullet.getWorld()!=null)
+					bullet.getWorld().removeEntity(bullet);
+				this.getBullets().add(bullet);
+				bullet.setSource(null);
+				bullet.setShip(this);
+				bullet.setPosition(getXPosition(), getYPosition());
+				bullet.setVelocity(getXVelocity(), getYVelocity());
+				bullet.setBounces(0);
+				this.getBulletsFired().remove(bullet);
+			}
+			else
 				throw new IllegalBulletException(bullet);
-			if (bullet.getWorld()!=null)
-				bullet.getWorld().removeEntity(bullet);
-			this.getBullets().add(bullet);
-			bullet.setSource(null);
-			bullet.setShip(this);
-			bullet.setPosition(getXPosition(), getYPosition());
-			bullet.setVelocity(getXVelocity(), getYVelocity());
-			bullet.setBounces(0);
-			this.getBulletsFired().remove(bullet);
 		}
 	}
 	
@@ -444,30 +453,35 @@ public class Ship extends Entity{
 			bullet.setSource(null);
 			bullet.setVelocity(INITIAL_SPEED*Math.cos(getOrientation()), 
 				INITIAL_SPEED*Math.sin(getOrientation()));
-			double xpos = getXPosition()+(getRadius()+1.5*bullet.getRadius())*Math.cos(getOrientation());
-			double ypos = getYPosition()+(getRadius()+1.5*bullet.getRadius())*Math.sin(getOrientation());
+			double xpos = getXPosition()+(getRadius()+1*bullet.getRadius())*Math.cos(getOrientation());
+			double ypos = getYPosition()+(getRadius()+1*bullet.getRadius())*Math.sin(getOrientation());
 			if ((xpos<0.99*bullet.getRadius())||
 				(xpos>1.01*(this.getWorld().getWidth()-bullet.getRadius()))||
 				(ypos<0.99*bullet.getRadius())||
 				(ypos>1.01*(this.getWorld().getHeight()-bullet.getRadius())))
 				bullet.terminate();
 			else {
+				Set<Entity> terminateEntities = new HashSet<>();
 				for (Entity entity: getWorld().getEntities().keySet()) {
 					if ((!bullet.isTerminated())&&(entity!=bullet)&&(entity!=this)&&
 							((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
 							Math.pow(ypos-entity.getYPosition(),2)))<
 							0.99*(entity.getRadius()+bullet.getRadius()))) {
 						bullet.isTerminated=true;
-						entity.isTerminated=true;
+						terminateEntities.add(entity);
 					}
 				}
 				if (! bullet.isTerminated()) {
-					bullet.setSource(this);
 					bullet.setPosition(xpos, ypos);
 					getWorld().addEntity(bullet);
 					this.getBulletsFired().add(bullet);
 				}
+				if (! terminateEntities.isEmpty())
+					for (Entity entity: terminateEntities)
+						entity.terminate();
 			}
+			bullet.setWorld(null);
+			bullet.setSource(this);
 		}
 	}
 	
@@ -629,9 +643,13 @@ public class Ship extends Entity{
 	@Override
 	public void move(double dt) throws IllegalDurationException {
 		super.move(dt);
-		for (Bullet bullet: getBullets()) {
-			bullet.setPosition(getXPosition()+dt*getXVelocity(), 
-					getYPosition() + dt*getYVelocity());
+		if (getBullets() != null) {
+			if (! getBullets().isEmpty()) {
+				for (Bullet bullet: getBullets()) {
+					bullet.setPosition(getXPosition()+dt*getXVelocity(), 
+							getYPosition() + dt*getYVelocity());
+				}
+			}
 		}
 		setVelocity(getXVelocity()+dt*getAcceleration()*Math.cos(getOrientation()), 
 				getYVelocity()+dt*getAcceleration()*Math.sin(getOrientation()));

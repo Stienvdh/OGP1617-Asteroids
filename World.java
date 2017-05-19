@@ -54,12 +54,18 @@ public class World {
 	 * 			| 	new.getWidth() == UPPER_WIDTH && new.getHeight() == UPPER_HEIGHT
 	 */
 	public void setSize(double width, double height) {
-		if ((width>UPPER_WIDTH)||(height>UPPER_HEIGHT)||(Double.isNaN(width))||Double.isNaN(height)) {
+		if ((height>UPPER_HEIGHT)|| Double.isNaN(height))
+			this.height = UPPER_HEIGHT;
+		else if (height < 0)
+			this.height = 0.0;
+		else
+			this.height = height;
+		if ((width>UPPER_WIDTH)|| Double.isNaN(width))
 			this.width = UPPER_WIDTH;
-			this.height = UPPER_HEIGHT; }
+		else if (width < 0)
+			this.width = 0.0;
 		else
 			this.width = width;
-			this.height = height;
 	}
 	
 	/**
@@ -86,10 +92,17 @@ public class World {
 	 * 			| 	(new entity).isTerminated()
 	 */
 	public void addEntity(Entity entity) throws IllegalEntityException {
+		if (getEntities().containsKey(entity) || entity == null)
+			throw new IllegalEntityException(entity);
+		if (entity.getWorld() != null) {
+			entity.getWorld().removeEntity(entity);
+		}
 		if (((! (entity instanceof Bullet)))||(((Bullet)entity).getSource()==null)) {
 			entity.setWorld(this);
-			if (! entity.isValidPosition(entity.getXPosition(),entity.getYPosition()))
+			if (! entity.isValidPosition(entity.getXPosition(),entity.getYPosition())) {
 				entity.terminate();
+//				throw new IllegalEntityException(entity);
+			}
 		}
 		if ((! entity.isTerminated())&&(entity.getWorld()!=null)) {
 			double[] pos = {entity.getXPosition(),entity.getYPosition()};
@@ -112,8 +125,14 @@ public class World {
 	 * 			| (new entity).getWorld() == null
 	 */
 	public void removeEntity(Entity entity) throws IllegalEntityException {
-		this.getEntities().remove(entity);
-		entity.setWorld(null);
+		if (entity == null)
+			throw new IllegalEntityException(entity);
+		else if (entity.getWorld() != this)
+			throw new IllegalEntityException(entity);
+		else {
+			this.getEntities().remove(entity);
+			entity.setWorld(null);
+		}
 	}
 	
 	/**
@@ -250,7 +269,7 @@ public class World {
 	 * A method to evolve this world for a given duration.
 	 */
 	public void evolve(double dt) throws IllegalEntityException, IllegalWorldException, IllegalDurationException {
-		if (dt<0)
+		if (dt<0 || Double.isNaN(dt))
 			throw new IllegalDurationException(dt);
 		double boundary = Double.POSITIVE_INFINITY;
 		Entity entityB = null;
@@ -274,23 +293,23 @@ public class World {
 				}
 			}
 		}
-		if (Math.min(boundary, collision)>=dt) {
+		if (Math.min(boundary, collision)>dt) {
 			for (Entity entity: this.getAllEntities()) {
 				entity.move(dt);
 			}
 		}
 		else if (Math.min(boundary, collision)<dt) {
-			/*for (Entity entity: this.getAllEntities()) {
+			for (Entity entity: this.getAllEntities()) {
 				entity.move(Math.min(boundary, collision));
-				if (entity instanceof Ship) {
-					entity.setVelocity(entity.getXVelocity()+
-							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
-							*Math.cos(((Ship) entity).getOrientation()), 
-							entity.getYVelocity()+Math.min(boundary, collision)
-							*((Ship)entity).getAcceleration()*
-							Math.sin(((Ship) entity).getOrientation()));
-				}
-			}*/
+//				if (entity instanceof Ship) {
+//					entity.setVelocity(entity.getXVelocity()+
+//							Math.min(boundary, collision)*((Ship)entity).getAcceleration()
+//							*Math.cos(((Ship) entity).getOrientation()), 
+//							entity.getYVelocity()+Math.min(boundary, collision)
+//							*((Ship)entity).getAcceleration()*
+//							Math.sin(((Ship) entity).getOrientation()));
+//				}
+			}
 			if (boundary<collision) {
 				entityB.collideBoundary();
 				this.evolve(dt-boundary);

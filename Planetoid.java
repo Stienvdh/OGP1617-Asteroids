@@ -9,6 +9,7 @@ public class Planetoid extends MinorPlanet {
 		super(xpos,ypos,xvel,yvel,radius);
 		setMassDensity(DENSITY);
 		setTotalDistance(distance);
+		setRadius(radius);
 	}
 	
 	@Override
@@ -19,14 +20,16 @@ public class Planetoid extends MinorPlanet {
 	@Override
 	public void move(double dt) {
 		super.move(dt);
-		setTotalDistance(getTotalDistance()+getXVelocity()*dt);
-		setRadius(getRadius()-0.000001*getXVelocity()*dt);
+		double traveledDistance = dt*Math.sqrt(Math.pow(getXVelocity(), 2)+(Math.pow(getYVelocity(), 2)));
+		setTotalDistance(getTotalDistance()+traveledDistance);
+		setRadius(getRadius());
 	}
 	
 	@Override
 	public void setRadius(double radius) {
+		double newRadius = radius-0.000001*getTotalDistance();
 		try {
-			super.setRadius(radius);
+			super.setRadius(newRadius);
 			}
 		catch (IllegalRadiusException exc) {
 			terminate();
@@ -58,18 +61,26 @@ public class Planetoid extends MinorPlanet {
 		if (this.getRadius() >= 30) {
 			double randomAngle = new Random().nextDouble()*2*Math.PI;
 			double newvel = 1.5*Math.sqrt(Math.pow(this.getXVelocity(),2) + Math.pow(this.getYVelocity(),2));
-			Asteroid asteroid1 = new Asteroid(Math.cos(randomAngle)*this.getRadius()/2,Math.sin(randomAngle)*this.getRadius()/2,
+			Asteroid asteroid1 = new Asteroid(this.getXPosition()+Math.cos(randomAngle)*this.getRadius()/2,this.getYPosition()+Math.sin(randomAngle)*this.getRadius()/2,
 									Math.cos(randomAngle)*newvel, Math.sin(randomAngle)*newvel, this.getRadius()/2);
-			Asteroid asteroid2 = new Asteroid(-Math.cos(randomAngle)*this.getRadius()/2,-Math.sin(randomAngle)*this.getRadius()/2,
+			Asteroid asteroid2 = new Asteroid(this.getXPosition()-Math.cos(randomAngle)*this.getRadius()/2,this.getYPosition()+-Math.sin(randomAngle)*this.getRadius()/2,
 									-Math.cos(randomAngle)*newvel, -Math.sin(randomAngle)*newvel, this.getRadius()/2);
-			this.getWorld().addEntity(asteroid1);
-			this.getWorld().addEntity(asteroid2);
-			asteroid1.setWorld(this.getWorld());
-			asteroid2.setWorld(this.getWorld());
+			this.isTerminated=true;
+			World world = this.getWorld();
+			this.getWorld().removeEntity(this);
+			this.setWorld(null);
+			world.addEntity(asteroid1);
+			world.addEntity(asteroid2);
+			asteroid1.setWorld(world);
+			asteroid2.setWorld(world);
 		}
-		this.isTerminated=true;
-		this.getWorld().removeEntity(this);
-		this.setWorld(null);
+		else {
+			this.isTerminated=true;
+			if (this.getWorld() != null)
+				this.getWorld().removeEntity(this);
+			
+		}
+		
 	}
 	
 	/**
