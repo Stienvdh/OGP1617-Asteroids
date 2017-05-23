@@ -255,10 +255,10 @@ public class Ship extends Entity{
 	 */
 	@Raw
 	public void setMass(double mass) {
-		if (mass >= (4/3)*(Math.PI)*Math.pow(this.getRadius(), 3)*this.getMassDensity())
+		if (mass >= (4/3.)*(Math.PI)*Math.pow(this.getRadius(), 3)*this.getMassDensity())
 			this.mass = mass;
 		else
-			this.mass = (4/3)*(Math.PI)*Math.pow(this.getRadius(), 3)*this.getMassDensity();
+			this.mass = (4/3.)*(Math.PI)*Math.pow(this.getRadius(), 3)*this.getMassDensity();
 	}
 	
 	/**
@@ -287,6 +287,10 @@ public class Ship extends Entity{
 		return this.bullets;
 	}
 	
+	public Set<Bullet> getCurrentBullets() {
+		return new HashSet<Bullet>(this.bullets);
+	}
+	
 	/**
 	 * Remove the given bullet from the ship.
 	 * 
@@ -303,7 +307,7 @@ public class Ship extends Entity{
 	public void removeBullet(Bullet bullet) throws IllegalBulletException {
 		if (!this.getBullets().contains(bullet))
 			throw new IllegalBulletException(bullet);
-		this.getBullets().remove(bullet);
+		this.bullets.remove(bullet);
 		bullet.setShip(null);
 	}
 	
@@ -335,7 +339,7 @@ public class Ship extends Entity{
 	 * 			| if ((old bullet).getWorld()!=null)
 	 *			|	(new bullet).getWorld() == null
 	 * @post	This ship no longer fired this bullet.
-	 * 			| ! new.getBulletsFired().contains(bullet)
+	 * 			| ! new.getBulletsFired().contains(bullet)
 	 * @throws	IllegalBulletException
 	 * 			This ship and the given bullet both belong to a world, and these worlds are
 	 * 			not the same.
@@ -347,9 +351,15 @@ public class Ship extends Entity{
 			throw new IllegalBulletException(bullet);
 		if (bullet.getWorld()!=null)
 			bullet.getWorld().removeEntity(bullet);
-		this.getBullets().add(bullet);
+		if (Math.sqrt(Math.pow(bullet.getXPosition()-this.getXPosition(), 2)+
+				Math.pow(bullet.getYPosition()-this.getYPosition(), 2))
+				+bullet.getRadius() > this.getRadius()
+				)
+			throw new IllegalBulletException(bullet);
 		bullet.setSource(null);
-		bullet.setShip(this);
+		if (bullet.getShip()==null)
+			bullet.setShip(this);
+		this.addBullet(bullet);
 		bullet.setPosition(getXPosition(), getYPosition());
 		bullet.setVelocity(getXVelocity(), getYVelocity());
 		bullet.setBounces(0);
@@ -377,7 +387,7 @@ public class Ship extends Entity{
 	 * 			| 	if ((old bullet).getWorld()!=null)
 	 *			|		(new bullet).getWorld() == null
 	 * @post	This ship does not fire the given bullets anymore.
-	 * 			| for each (bullet: bullets)
+	 * 			| for each (bullet: bullets)
 	 * 			|	 ! new.contains(new bullet)
 	 * @throws	IllegalBulletException
 	 * 			This ship and a given bullet both belong to a world, and these worlds are
@@ -393,9 +403,15 @@ public class Ship extends Entity{
 					throw new IllegalBulletException(bullet);
 				if (bullet.getWorld()!=null)
 					bullet.getWorld().removeEntity(bullet);
-				this.getBullets().add(bullet);
+				if (Math.sqrt(Math.pow(bullet.getXPosition()-this.getXPosition(), 2)+
+						Math.pow(bullet.getYPosition()-this.getYPosition(), 2))
+						+bullet.getRadius() > this.getRadius()
+						)
+					throw new IllegalBulletException(bullet);
+				this.addBullet(bullet);
 				bullet.setSource(null);
-				bullet.setShip(this);
+				if (bullet.getShip()==null)
+					bullet.setShip(this);
 				bullet.setPosition(getXPosition(), getYPosition());
 				bullet.setVelocity(getXVelocity(), getYVelocity());
 				bullet.setBounces(0);
@@ -404,6 +420,10 @@ public class Ship extends Entity{
 			else
 				throw new IllegalBulletException(bullet);
 		}
+	}
+	
+	public void addBullet(Bullet bullet) {
+		this.bullets.add(bullet);
 	}
 	
 	/**

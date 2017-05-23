@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import asteroids.model.programs.ProgramFunction;
-import asteroids.model.programs.expressions.ProgramExpression;
 import asteroids.model.programs.statements.ProgramStatement;
 
 public class Program {
@@ -15,6 +14,10 @@ public class Program {
 		main.setProgram(this);
 		setMain(main);
 		setCurrentStatement(main);
+		for (ProgramFunction function: functions) {
+			function.setProgram(this);
+			getFunctionStack().put(function.getName(), function);
+		}
 	}
 	
 	public Ship getShip() {
@@ -25,12 +28,12 @@ public class Program {
 		this.ship = ship;
 	}
 	
-	public Map<String, ProgramExpression> getVariableStack() {
+	public Map<String, Object> getVariableStack() {
 		return this.variableStack;
 	}
 	
-	public void addVariable(String variableName, ProgramExpression value) {
-		this.getVariableStack().put(variableName, value);
+	public void addVariable(String variableName, Object object) {
+		this.getVariableStack().put(variableName, object);
 	}
 	
 	public void removeVariable(String variableName) {
@@ -94,7 +97,7 @@ public class Program {
 	}
 	
 	private Ship ship;
-	private Map<String, ProgramExpression> variableStack = new HashMap<String, ProgramExpression>();
+	private Map<String, Object> variableStack = new HashMap<String, Object>();
 	private Map<String, ProgramFunction> functionStack = new HashMap<String, ProgramFunction>();
 	private List<Object> printStack = new ArrayList<Object>();
 	private ProgramStatement main;

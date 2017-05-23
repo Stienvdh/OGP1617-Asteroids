@@ -107,8 +107,10 @@ public abstract class Entity {
 					if ((entity!=this)&&
 							(Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
 									Math.pow(ypos-entity.getYPosition(),2)))<
-									0.99*(entity.getRadius()+getRadius()))
+									0.99*(entity.getRadius()+getRadius())) {
+						System.out.println(entity);
 						return false;
+					}
 				}
 				return true;
 			}
@@ -281,7 +283,7 @@ public abstract class Entity {
 			Y = (getRadius()-getYPosition())/getYVelocity();
 		}
 		else if (this.getYVelocity() > 0) {
-			Y = ((getWorld().getWidth()-getRadius())-getYPosition())/getYVelocity();
+			Y = ((getWorld().getHeight()-getRadius())-getYPosition())/getYVelocity();
 		}
 		else
 			Y = Double.POSITIVE_INFINITY;
@@ -440,16 +442,31 @@ public abstract class Entity {
 	 */
 	public void collide(Entity other){
 		if (this instanceof Bullet) {
-			if (((Bullet)this).getSource()==other)
+			if (((Bullet) this).getSource()==other) {
+				if (this.getWorld()!=null) {
+					System.out.println("ok");
+					this.getWorld().removeEntity(this);
+				}
+				((Bullet) this).setSource(null);
+				((Bullet) this).setShip((Ship) other);
+				this.setPosition(other.getXPosition(), other.getYPosition());
 				((Ship)other).loadBullet((Bullet)this);
+			}
 			else {
 				this.terminate();
 				other.terminate();
 			}
 		}
 		else if (other instanceof Bullet) {
-			if (((Bullet)other).getSource()==this)
+			if (((Bullet)other).getSource()==this) {
+				if (other.getWorld()!=null) {
+					other.getWorld().removeEntity(other);
+				}
+				((Bullet) other).setSource(null);
+				((Bullet) other).setShip((Ship) this);
+				other.setPosition(this.getXPosition(), this.getYPosition());
 				((Ship)this).loadBullet((Bullet)other);
+			}
 			else {
 				this.terminate();
 				other.terminate();
@@ -542,6 +559,9 @@ public abstract class Entity {
 		else if (dt > 0) {
 			this.setPosition(getXPosition()+getXVelocity()*dt,
 					getYPosition()+getYVelocity()*dt);
+		}
+		if (getWorld()!=null) {
+			getWorld().getEntities().put(this, new double[]{getXPosition(), getYPosition()});
 		}
 	}
 	
@@ -658,4 +678,5 @@ public abstract class Entity {
 	public abstract void setMassDensity(double massDensity);
 	
 }
+
 
