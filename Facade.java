@@ -298,7 +298,7 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public Set<? extends Bullet> getBulletsOnShip(Ship ship) throws ModelException {
-		return ship.getBullets();
+		return ship.getCurrentBullets();
 	}
 
 	@Override
@@ -413,7 +413,11 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public void addAsteroidToWorld(World world, Asteroid asteroid) throws ModelException {
-		world.addEntity(asteroid);
+		try {
+		world.addEntity(asteroid); }
+		catch (IllegalEntityException exc) {
+			throw new ModelException("Illegal entity");
+		}
 	}
 
 	@Override
@@ -428,7 +432,11 @@ public class Facade implements asteroids.part3.facade.IFacade {
 
 	@Override
 	public void addPlanetoidToWorld(World world, Planetoid planetoid) throws ModelException {
-		world.addEntity(planetoid);
+		try {
+			world.addEntity(planetoid); }
+			catch (IllegalEntityException exc) {
+				throw new ModelException("Illegal entity");
+			}
 	}
 
 	@Override
