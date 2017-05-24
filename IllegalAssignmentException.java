@@ -3,20 +3,22 @@ package asteroids.model.programs.exceptions;
 import asteroids.model.programs.expressions.ProgramExpression;
 
 /** 
- * A class of exceptions signaling an illegal executionTime of a movement.
+ * A class of exceptions signaling an illegal assignment.
  */
 public class IllegalAssignmentException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Initialize this new illegal executionTime exception with given executionTime.
+	 * Initialize this new illegal assignment exception with given assignment.
 	 * 
-	 * @param 	dt
-	 * 			The executionTime for this new illegal executionTime exception.
-	 * @post	The executionTime of this new illegal executionTime exception is the given executionTime.
-	 * 			| new.getAssignment() == dt
-	 * @effect	This new illegal executionTime exception is further initialized as a new runtime
+	 * @param 	left
+	 * 			The left side of this new illegal assignment exception.
+	 * @param	right 
+	 * 			The right side of this new illegal assignment exception.
+	 * @post	The assignment of this new illegal assignment exception is the given assignment.
+	 * 			| new.getAssignment() == new ProgramExpression[]{left, right}
+	 * @effect	This new illegal assignment exception is further initialized as a new runtime
 	 * 			exception involving no diagnostic message and no cause.
 	 * 			| super()
 	 */
@@ -26,16 +28,19 @@ public class IllegalAssignmentException extends RuntimeException {
 	}
 	
 	/**
-	 * Return the executionTime of this illegal executionTime exception.
+	 * Return the assignment of this illegal assignment exception.
 	 */
 	public ProgramExpression[] getAssignment() {
 		return new ProgramExpression[]{left,right};
 	}
 
 	/**
-	 * A variable registering the executionTime of this illegal executionTime exception.
+	 * A variable registering the right side of the assignment of this illegal assignment exception.
 	 */
 	private final ProgramExpression right;
 	
+	/**
+	 * A variable registering the left side of the assignment of this illegal assignment exception.
+	 */
 	private final ProgramExpression left;
 }

@@ -25,14 +25,14 @@ public class IllegalShipException extends RuntimeException {
 	}
 	
 	/**
-	 * Return the duration of this illegal duration exception.
+	 * Return the ship of this illegal ship exception.
 	 */
 	public Ship getShip() {
 		return this.ship;
 	}
 
 	/**
-	 * A variable registering the duration of this illegal duration exception.
+	 * A variable registering the ship of this illegal ship exception.
 	 */
 	private final Ship ship;
 }

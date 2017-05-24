@@ -7,7 +7,7 @@ public class IllegalWorldException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Initialize this new world exception with given world.
+	 * Initialize this new illegal world exception with given world.
 	 * 
 	 * @param 	world
 	 * 			The world for this new illegal world exception.

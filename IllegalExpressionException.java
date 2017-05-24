@@ -3,7 +3,7 @@ package asteroids.model.programs.exceptions;
 import asteroids.model.programs.expressions.ProgramExpression;
 
 /** 
- * A class of exceptions signaling an illegal expression of a movement.
+ * A class of exceptions signaling an illegal expression.
  */
 public class IllegalExpressionException extends RuntimeException {
 
@@ -12,16 +12,16 @@ public class IllegalExpressionException extends RuntimeException {
 	/**
 	 * Initialize this new illegal expression exception with given expression.
 	 * 
-	 * @param 	dt
+	 * @param 	expression
 	 * 			The expression for this new illegal expression exception.
 	 * @post	The expression of this new illegal expression exception is the given expression.
-	 * 			| new.getExpression() == dt
+	 * 			| new.getExpression() == expression
 	 * @effect	This new illegal expression exception is further initialized as a new runtime
 	 * 			exception involving no diagnostic message and no cause.
 	 * 			| super()
 	 */
-	public IllegalExpressionException(ProgramExpression dt) {
-		this.expression = dt;
+	public IllegalExpressionException(ProgramExpression expression) {
+		this.expression = expression;
 	}
 	
 	/**
