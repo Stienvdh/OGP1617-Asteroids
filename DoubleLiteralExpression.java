@@ -2,10 +2,9 @@ package asteroids.model.programs.expressions;
 
 import asteroids.model.Program;
 
-public class DoubleLiteralExpression extends UnaryDoubleExpression {
+public class DoubleLiteralExpression extends DoubleExpression {
 
 	public DoubleLiteralExpression(Double value) {
-		super(null);
 		setValue(value);
 	}
 

@@ -17,9 +17,13 @@ public class ReadVariableExpression extends ProgramExpression {
 	}
 
 	public Object getValue() {
-		if (getProgram() != null) {
+		if (getFunction()!=null)
+			if (getFunction().getVariableStack().containsKey(getVariableName())) {
+				return getFunction().getVariableStack().get(getVariableName());
+			}
+		if (getProgram()!=null) {
 			if (getProgram().getVariableStack().containsKey(getVariableName()))
-				return getProgram().getVariableStack().get(getVariableName()).getValue();
+				return getProgram().getVariableStack().get(getVariableName());
 			else
 				throw new IllegalExpressionException(this);
 		}

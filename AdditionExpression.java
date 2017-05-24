@@ -16,8 +16,9 @@ public class AdditionExpression extends BinaryDoubleExpression {
 	
 	@Override
 	public Double getValue() {
-		if (! (getLeftOperand().getValue() instanceof Double))
+		if (! (getLeftOperand().getValue() instanceof Double)) {
 			throw new IllegalExpressionException(getLeftOperand());
+		}
 		if (! (getRightOperand().getValue() instanceof Double))
 			throw new IllegalExpressionException(getRightOperand());
 		return (Double)getLeftOperand().getValue()+

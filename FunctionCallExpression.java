@@ -31,7 +31,13 @@ public class FunctionCallExpression extends ProgramExpression {
 	public Object getValue() {
 		if (getProgram()!=null) {
 			if (getProgram().getFunctionStack().containsKey(getFunctionName())) {
-				return getProgram().getFunctionStack().get(getFunctionName()).call(getArguments());
+				Object result = 
+						getProgram().getFunctionStack().get(getFunctionName()).call(getArguments());
+				if (result==null)
+					throw new IllegalExpressionException(this);
+				else {
+					return result;
+				}
 			}
 			else
 				throw new IllegalExpressionException(this);

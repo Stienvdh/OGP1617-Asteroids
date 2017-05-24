@@ -1,6 +1,7 @@
 package asteroids.model.programs.expressions;
 
 import asteroids.model.Program;
+import asteroids.model.programs.ProgramFunction;
 
 public abstract class UnaryEntityExpression extends EntityExpression implements UnaryExpression{
 	
@@ -22,6 +23,12 @@ public abstract class UnaryEntityExpression extends EntityExpression implements 
 	public void setProgram(Program program) {
 		super.setProgram(program);
 		getOperand().setProgram(program);
+	}
+	
+	@Override
+	public void setFunction(ProgramFunction function) {
+		super.setFunction(function);
+		getOperand().setFunction(function);
 	}
 	
 	private ProgramExpression operand;
