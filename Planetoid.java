@@ -5,6 +5,28 @@ import java.util.Random;
 
 public class Planetoid extends MinorPlanet {
 	
+	/**
+	 * Create a new planetoid with given position, velocity and radius.
+	 * 
+	 * @param	xpos
+	 * 			The position for this planetoid along the x-axis.
+	 * @param	ypos 
+	 * 			The position for this planetoid along the y-axis.
+	 * @param	xvel
+	 * 			The velocity for this planetoid along the x-axis.
+	 * @param	yvel
+	 * 			The velocity for this planetoid along the y-axis.
+	 * @param	radius
+	 * 			The radius for this planetoid.
+	 * @post	The mass density of this new planetoid is the standard density.
+	 * 			|new.getMassDensity() == DENSITY
+	 * @post	The total distance of this new planetoid is the given distance.
+	 * 			|new.getTotalDistance()==distance
+	 * @post	The radius of this new planetoid is the given radius.
+	 * 			|new.getRadius()=radius
+	 * @effect	The new planetoid is initialized as an minor planet with the given x position,
+	 * 			y position, x velocity, y velocity and radius.
+	 */
 	public Planetoid(double xpos, double ypos, double xvel, double yvel, double radius, double distance) {
 		super(xpos,ypos,xvel,yvel,radius);
 		setMassDensity(DENSITY);
@@ -12,11 +34,21 @@ public class Planetoid extends MinorPlanet {
 		setRadius(radius);
 	}
 	
+	/**
+	 * Set the mass density of this planetoid to the given mass density.
+	 */
 	@Override
 	public void setMassDensity(double massDensity) {
 		this.massDensity=DENSITY;
 	}
 
+	/**
+	 * Move this planetoid for a time dt.
+	 * 
+	 * @param	dt
+	 * 			The duration of the movement.
+	 * @effect	The planetoid moves as an entity for a time dt.
+	 */
 	@Override
 	public void move(double dt) {
 		super.move(dt);
