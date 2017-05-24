@@ -1,14 +1,21 @@
 package asteroids.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
-import asteroids.model.exceptions.IllegalBulletException;
 import asteroids.model.exceptions.IllegalDurationException;
 import asteroids.model.exceptions.IllegalEntityException;
 import asteroids.model.exceptions.IllegalWorldException;
-import asteroids.model.exceptions.IllegalPositionException;
 
+/**
+ * A class of worlds, involving a height and width.
+ * 
+ * @invar	The height of a world does not exceed its upper bound.
+ * 			| getHeight() <= UPPER_HEIGHT.
+ * @invar	The width of a world does not exceed its upper bound.
+ * 			| getWidth() <= UPPER_WIDTH
+ */
 public class World {
 	
 	/**
@@ -20,7 +27,7 @@ public class World {
 	 * 			The height of this new world.
 	 * @post	The width of this new ship is equal to the given width.
 	 * 			| new.getWidth() == width
-	 * 			| new.getHeight() == height
+	 * 			| new.getHeight() == height
 	 */
 	public World(double width, double height) {
 		this.setSize(width,height);
@@ -47,21 +54,13 @@ public class World {
 	 * 			The new width of this world.
 	 * @param 	height
 	 * 			The new height of this world.
-	 * @post	If the given width and/or height doesn't exceed the upper bound or isn't NaN, the width and/or height of the world
-	 * 			is set to the given width, else the upper bound.
-	 * 			If a height or a width is negative, the height or the width of the world is set to zero.
-	 * 			|if (height>UPPER_HEIGHT)|| Double.isNaN(height)
-	 *			|	then new.getHeight() = UPPER_HEIGHT;
-	 *			|else if (height < 0)
-	 *	 		|	then new.getHeight() = 0.0;
-	 *			|else
-	 *			|	then new.getHeight() = height;
-	 *			|if ((width>UPPER_WIDTH)|| Double.isNaN(width))
-	 *			|	then new.getWidth() = UPPER_WIDTH;
-	 *			|else if (width < 0)
-	 *			|	then new.getWidth() = 0.0;
-	 *			|else
-	 *			|	then new.getWidth() = width;
+	 * @post	If nor the given width, nor the given height exceeds its upper bound, the size of this
+	 * 			world is set to the given width and height. Otherwise, its size is set to its
+	 * 			upper bound.
+	 * 			| if ! width > UPPER_WIDTH && ! height > UPPER_HEIGHT
+	 * 			| 	then new.getWidth() == width && new.getHeight() == height
+	 * 			| else
+	 * 			| 	new.getWidth() == UPPER_WIDTH && new.getHeight() == UPPER_HEIGHT
 	 */
 	public void setSize(double width, double height) {
 		if ((height>UPPER_HEIGHT)|| Double.isNaN(height))
@@ -90,22 +89,19 @@ public class World {
 	 * 
 	 * @param 	entity
 	 * 			The entity, that has to be added to this world.
-	 * @post	The world contains the given entity and the entity is not null.
-	 * 			| new.getEntities().contains(entity) || entity == null
-	 * @post	If the entity already is located in a world, it is removed from that world. 
-	 * 			|if entity.getWorld() != null
-	 *			|	then entity.getWorld().removeEntity(entity)
+	 * @post	The world contains the given entity.
+	 * 			| new.getAllEntities().contains(entity)
+	 * @post	The given entity is located in this world. 
+	 * 			| (new entity).getWorld() == this
+	 * 			| (new entity).hasPosition()
 	 * @post	If the given entity does not have a valid position in this world, the entity is
 	 * 			terminated.
-	 * 			| if ! (old entity).isValidPosition((old entity).getXPosition(),(old entity).getYPosition())
-	 * 			| 	then (new entity).isTerminated()
-	 * @post	If the entity is not terminated and is located in a world, the entity is added to the list of entities.
-	 * 			|if (! entity.isTerminated()) && (entity.getWorld()!=null) 
-	 *			|	then double[] pos = {entity.getXPosition(),entity.getYPosition()};
-	 *			|	getEntities().put(entity, pos);
+	 * 			| if (! (old entity).isValidPosition(entity.getXPosition(),
+	 * 			| 	(old entity).getYPosition()))
+	 * 			| 	(new entity).isTerminated()
 	 * @throws	IllegalEntityException
-	 * 			The given entity has no valid position.
-	 * 			|! (old entity).isValidPosition((old entity).getXPosition(),(old entity).getYPosition())
+	 * 			This world already contains the given entity, or the given entity is ineffective.
+	 * 			| (getEntities().containsKey(entity) || entity == null)
 	 */
 	public void addEntity(Entity entity) throws IllegalEntityException {
 		if (getEntities().containsKey(entity) || entity == null)
@@ -131,15 +127,19 @@ public class World {
 	 * 
 	 * @param	entity
 	 * 			The entity to remove from this world.
-	 * @post	The entity is removed from this world.
-	 * 			|this.getEntities().remove(entity);
-	 *			|entity.setWorld(null);
+	 * @post	This world does not contain the given entity.
+	 * 			| (! new.getEntities().contains(entity))
+	 * @post	This entity is no longer associated with this world.
+	 * 			| (new entity).getWorld() == null
 	 * @throws	IllegalEntityException
-	 * 			The given entity is null or isn't located in this world.
-	 * 			|entity == null || entity.getWorld() != this
+	 * 			The given entity is ineffective
+	 * 				or the given entity is not located in this world.
+	 * 			| (entity == null) || (entity.getWorld() != this)
 	 */
 	public void removeEntity(Entity entity) throws IllegalEntityException {
-		if (entity == null || entity.getWorld() != this)
+		if (entity == null)
+			throw new IllegalEntityException(entity);
+		else if (entity.getWorld() != this)
 			throw new IllegalEntityException(entity);
 		else {
 			this.getEntities().remove(entity);
@@ -155,10 +155,7 @@ public class World {
 	 * @param	ypos
 	 * 			The position along the y-axis to investigate. 
 	 * @return 	Return the entity whose center coincides with the given position. Null if none.
-	 * 			|for (Entity entity: getEntities().keySet())
-	 *			|	if (getEntities().get(entity)[0]==xpos) && (getEntities().get(entity)[1]==ypos)
-	 *			|		result == entity
-	 * 			|result == null
+	 * 			| @see implementation
 	 */
 	public Entity getEntityAt(double xpos,double ypos) {
 		for (Entity entity: getEntities().keySet()) {
@@ -169,45 +166,22 @@ public class World {
 	}
 	
 	/**
-	 * Return whether this world is terminated.
+	 * Return the entities in this world.
 	 */
-	public boolean isTerminated() {
-		return this.isTerminated;
+	public Set<? extends Entity> getAllEntities() {
+		return new HashSet<Entity>(getEntities().keySet());
 	}
-	
-	/**
-	 * Terminate this world.
-	 *
-	 * @post	The state of this world is terminated.
-	 * 			| new.isTerminated()
-	 * @post	This world does not contain any entities and the bullets don't have sources.
-	 * 			| (for each entity: old.getEntities())
-	 * 			|		if (entity instanceof Bullet)
-	 *			|			then entity.getSource(null)
-	 *			|		entity.getWorld(null);
-	 * @post 	The list of entities is cleared.
-	 * 			|getEntities.isEmpty()
-	 */
-	public void terminate() {
-		this.isTerminated=true;
-		for (Entity entity: this.getEntities().keySet()) {
-			if (entity instanceof Bullet)
-				((Bullet) entity).setSource(null);
-			entity.setWorld(null);
-		}
-		this.entities.clear();
-	}
-	
+
 	/**
 	 * Return the time until the first collision in this world.
 	 * 
 	 * @return	The time until the first collision, that will occur in this world, of an entity 
 	 * 			within that world with either a boundary of that world or another entity 
 	 * 			in that world.
-	 * 			| for (entity1: getAllEntities())
-	 * 			| 	result <= entity1.getTimeToBoundary()
-	 * 			| 		for (entity2: getAllEntities())
-	 * 			| 			result <= entity1.getTimeToCollision(entity2)
+	 * 			| for (entity1: getAllEntities())
+	 * 			| 	result <= entity1.getTimeToBoundary()
+	 * 			| 		for (entity2: getAllEntities())
+	 * 			| 			result <= entity1.getTimeToCollision(entity2)
 	 */
 	public double getTimeFirstCollision() {
 		double boundary = Double.POSITIVE_INFINITY;
@@ -234,18 +208,15 @@ public class World {
 	 * 
 	 * @return	The position, where the first collision of an entity within this world
 	 * 			with either a boundary of this world or another entity in that world.
-	 * 			| getAllEntities().move(getTimeFirstCollision)
-	 * 			| for (entity: getAllEntities())
+	 * 			| getAllEntities().move(getTimeFirstCollision)
+	 * 			| for (entity1: getAllEntities())
 	 * 			|	if (! entity1.isValidPosition(entity1.getXPosition(),entity1.getYPosition())
-	 * 			| 		if (entity1.getTimeToBoundary()==0)
-	 * 			| 			result == entity1.getBoundaryPosition()
-	 * 			| 		for (entity2: getAllEntities())
-	 * 			| 			if (entity2!=entity1)&&(!entity2.isValidPosition(
+	 * 			| 		if (entity1.getTimeToBoundary()==0)
+	 * 			| 			result == entity1.getBoundaryPosition()
+	 * 			| 		for (entity2: getAllEntities())
+	 * 			| 			if (entity2!=entity1)&&(!entity2.isValidPosition(
 	 * 			|				entity2.getXPosition(),entity2.getYPosition())
-	 * 			| 				result == entity1.getCollisionPosition(entity2)
-	 * @return	Null if nothing collides.
-	 * 			|if (Math.min(boundary, collision)==Double.POSITIVE_INFINITY)
-	 *			|	then result == null
+	 * 			| 				result == entity1.getCollisionPosition(entity2)
 	 */
 	public double[] getFirstCollisionPosition() {
 		double boundary = Double.POSITIVE_INFINITY;
@@ -282,26 +253,7 @@ public class World {
 	/**
 	 * A method to evolve this world for a given duration.
 	 * 
-	 * @param	dt
-	 * 			The duration time of the evolution of this world.
-	 * @post	If the time until the first collision is shorter than dt, all the entities
-	 * 			move for that period of time. The collision is resolved and the world	
-	 * 			evolves with the remaining time. If the time until the first collision is
-	 * 			longer than dt, all the entities move for the time dt.
-	 * 			|for (entity1: getAllEntities())
-	 * 			|	time <= entity1.getTimeToBoundary()
-	 * 			|		for (entity2: getAllEntities())
-	 * 			|			time <= entity1.getTimeToCollision(entity2)
-	 * 			|if (time < dt)
-	 * 			|	for (entity: getAllEntities())
-	 *			|		entity.move(time)
-	 *			|	if (boundary<collision)
-	 *			|		then entity1.collideBoundary()
-	 *			|			 this.evolve(dt-time)
-	  *			|	else
-	 *			|		entity1.collide(entity2)
-	 *			|		this.evolve(dt-time)
-	 * 			
+	 * | @see implementation
 	 */
 	public void evolve(double dt) throws IllegalEntityException, IllegalWorldException, IllegalDurationException {
 		if (dt<0 || Double.isNaN(dt))
@@ -349,14 +301,35 @@ public class World {
 	}
 	
 	/**
-	 * Return the entities in this world.
+	 * Return whether this world is terminated.
 	 */
-	public Set<Entity> getAllEntities() {
-		return getEntities().keySet();
+	public boolean isTerminated() {
+		return this.isTerminated;
 	}
 
 	/**
-	 * A variable registering the height of this world.
+	 * Terminate this world.
+	 *
+	 * @post	The state of this world is terminated.
+	 * 			| new.isTerminated()
+	 * @post	This world does not contain any entities.
+	 * 			| (for each entity: old.getEntities())
+	 * 			| 	entity.getWorld() == null
+	 * 			| 	entity.getSource() == null
+	 * 			| new.getEntities().size() == 0
+	 */
+	public void terminate() {
+		this.isTerminated=true;
+		for (Entity entity: this.getEntities().keySet()) {
+			if (entity instanceof Bullet)
+				((Bullet) entity).setSource(null);
+			entity.setWorld(null);
+		}
+		this.entities.clear();
+	}
+
+	/**
+	 * A variable registering the width of this world.
 	 */
 	public double height;
 	
@@ -381,7 +354,7 @@ public class World {
 	private static final double UPPER_WIDTH = Double.MAX_VALUE;
 	
 	/**
-	 * A variable registering the upper bound for the height of a world.
+	 * A variable registering the upper bound for the width of a world.
 	 */
 	private static final double UPPER_HEIGHT = Double.MAX_VALUE;
 }

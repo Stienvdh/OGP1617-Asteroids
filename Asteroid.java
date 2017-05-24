@@ -1,59 +1,57 @@
 package asteroids.model;
 
+import asteroids.model.exceptions.IllegalPositionException;
+import asteroids.model.exceptions.IllegalRadiusException;
+
+/**
+ * A class of asteroids, involving a position, velocity and radius.
+ */
 public class Asteroid extends MinorPlanet {
 	
 	/**
-	 * Create a new asteroid with given position, velocity and radius.
+	 * Initialize this asteroid with given position, velocity and radius.
 	 * 
-	 * @param	xpos
-	 * 			The position for this asteroid along the x-axis.
-	 * @param	ypos 
-	 * 			The position for this asteroid along the y-axis.
-	 * @param	xvel
-	 * 			The velocity for this asteroid along the x-axis.
-	 * @param	yvel
-	 * 			The velocity for this asteroid along the y-axis.
-	 * @param	radius
-	 * 			The radius for this asteroid.
-	 * @post	The mass density of this new asteroid is the standard density.
-	 * 			|new.getMassDensity() == DENSITY
-	 * @effect	The new asteroid is initialized as an minor planet with the given x position,
-	 * 			y position, x velocity, y velocity and radius.
+	 * @post	The density of this asteroid is set to DENSITY.
+	 * 			| new.getMassDensity() == DENSITY
 	 */
-	public Asteroid(double xpos, double ypos, double xvel, double yvel, double radius) {
+	public Asteroid(double xpos, double ypos, double xvel, double yvel, double radius) 
+		throws IllegalPositionException, IllegalRadiusException {
 		super(xpos,ypos,xvel,yvel,radius);
 		setMassDensity(DENSITY);
 	}
 	
 	/**
-	 * Set the mass density of this asteroid to the given mass density.
+	 * Return whether the given density is valid for this asteroid.
+	 * 
+	 * @result	True if and only if density equals DENSITY.
+	 * 			| result == (density == DENSITY)
 	 */
 	@Override
-	public void setMassDensity(double massDensity) {
-		this.massDensity=DENSITY;
+	public boolean isValidDensity(double density) {
+		return (density == DENSITY);
 	}
-	
+
 	/**
-	 * Terminate the given ship on collision with this asteroid.
+	 * Resolve a collision of this asteroid with a given ship.
 	 * 
-	 * @effect	Terminate the given ship.
-	 * 			|ship.isTerminated() == True
+	 * @effect	The given ship is terminated.
+	 * 			| ship.terminate()
 	 */
+	@Override
 	public void collideShip(Ship ship) {
 		ship.terminate();
 	}
 	
+	
 	/**
 	 * Terminate this asteroid.
 	 * 
-	 * @post	The new state of this asteroid is terminated, it is removed from it's world and
-	 * 			its world is set to null.
-	 * 			|new.isTerminated() == true
-	 * 			|old.getWorld().contains(this) == false
-	 * 			|new.getWorld() == null
+	 * @post	This asteroid is no longer associated with a world.
+	 * 			| @see implementation
 	 */
+	@Override
 	public void terminate() {
-		this.isTerminated=true;
+		super.terminate();
 		this.getWorld().removeEntity(this);
 		this.setWorld(null);
 	}
@@ -61,6 +59,6 @@ public class Asteroid extends MinorPlanet {
 	/**
 	 * A variable registering the minimum mass density of this asteroid.
 	 */
-	protected static double DENSITY = 2.65*Math.pow(10, 12);
+	private static final double DENSITY = 2.65*Math.pow(10, 12);
 	
 }

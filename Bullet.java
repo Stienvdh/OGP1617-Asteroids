@@ -1,49 +1,41 @@
 package asteroids.model;
 
 import asteroids.model.exceptions.IllegalBulletException;
-import asteroids.model.exceptions.IllegalDurationException;
 import asteroids.model.exceptions.IllegalPositionException;
 import asteroids.model.exceptions.IllegalRadiusException;
+import be.kuleuven.cs.som.annotate.Raw;
 
 /**
- * @invar	Each bullet has a valid position.	
- * 			| isValidPosition(getXPosition() ,getYPosition())
- * @invar	Each bullet cannot be located in a world and a ship at the same time.
+ * A class of bullets involving a position, velocity and radius.
+ * 
+ * @invar	Each bullet cannot be located in a world and associated with a ship at the 
+ * 			same time.
  * 			| if (getWorld()!=null)
- * 			| 	getShip() == null
- * 			| else if (getShip()!=null)
- * 			| 	getWorld() == null
+ * 			| 	getShip() == null
+ * 			| else if (getShip()!=null)
+ * 			| 	getWorld() == null
  */
 public class Bullet extends Entity{
 	
 	/**
 	 * Create a new bullet with given position, velocity and radius.
 	 * 
-	 * @param	xpos
-	 * 			The position for this bullet along the x-axis.
-	 * @param	ypos 
-	 * 			The position for this bullet along the y-axis.
-	 * @param	xvel
-	 * 			The velocity for this bullet along the x-axis.
-	 * @param	yvel
-	 * 			The velocity for this bullet along the y-axis.
-	 * @param	radius
-	 * 			The radius for this ship.
+	 * @post	The new bullet is not located in a world.
+	 * 			| new.getWorld() == null
 	 * @post	The new bullet has no owner.
 	 * 			| new.getShip() == null
 	 * @post	The new bullet has not been fired by a ship.
 	 * 			| new.getSource() == null
-	 * @post	The new mass density for this new bullet is equal to the standard density.
-	 * 			| new.getMassDensity() == DENSITY
-	 * @effect	The new bullet is initialized as an entity with the given x position,
-	 * 			y position, x velocity, y velocity and radius.
-	 * 			|super(xpos,ypos,xvel,yvel,radius)
+	 * @post	The new radius for this new bullet is equal to the given radius.
+	 * 			| new.getRadius() == radius
+	 * @post	The new mass density of this bullet is set to DENSITY.
+	 * 			| new.getMassDensity() == DENSITY.
 	 * @throws	IllegalPositionException
 	 * 			The given position is not valid.
-	 * 			| ! isValidPosition(xpos,ypos)
+	 * 			| ! isValidPosition(xpos,ypos)
 	 */
 	public Bullet(double xpos, double ypos, double xvel, double yvel, double radius) 
-			throws IllegalPositionException {
+			throws IllegalPositionException, IllegalRadiusException {
 		super(xpos,ypos,xvel,yvel,radius);
 		setShip(null);
 		setSource(null);
@@ -51,49 +43,96 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Checks whether the given position is a valid position
+	 * Checks whether the given position is a valid position for this bullet.
 	 * 
-	 * @param 	xpos
-	 * 			The position along the x-axis to check.
-	 * @param 	ypos
-	 * 			The position along the y-axis to check.
-	 * @return 	If the bullet isn't located in a world, return true.
-	 * 			|if (getWorld()==null)
-	 *			|	then result == true
-	 * @return	If the bullet isn't loaded into a ship, return true.
-	 * 			|if (getShip()==null)
-	 *			|	then result == true	
-	 * @return	If a bullet has a valid position as an entity, return true or else false.
-	 * 			|result == super.isValidPosition(xpos, ypos)
+	 * @return	True if and only if 
+	 * 			nor xpos, nor ypos is positive of negative infinity or not a number
+	 * 			and 
+	 * 			this bullet is not associated with a world
+	 * 				or this bullet is loaded on a ship
+	 * 				or this bullet lies fully within the boundaries of its world.
+	 * 					and no entity in its world overlaps with this bullet.
+	 * 			| result == (! xpos == Double.POSITIVE_INFINITY)&&(! xpos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(xpos))
+	 *			| 	&& (! ypos == Double.POSITIVE_INFINITY)&&(! ypos == Double.NEGATIVE_INFINITY)&&(! Double.isNaN(ypos))
+	 *			|	&& (
+	 *			|	(this.getWorld() == null)
+	 *			| 	|| (this.getShip()!=null) 
+	 *			| 	|| (
+	 *			| 	(xpos>0.99*getRadius())&&(xpos<1.01*(getWorld().getWidth()-getRadius()))
+	 *			| 	&& (ypos>0.99*getRadius())&&(ypos<1.01*(getWorld().getHeight()-getRadius()))
+	 *			| 	&& (for each entity in getWorld().getEntities():
+	 *			| 		(entity == this)
+	 *			| 		|| ((Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+	 *			|					Math.pow(ypos-entity.getYPosition(),2)))>=
+	 *			|					0.99*(entity.getRadius()+getRadius())))
+	 *			|	)
+	 *			|	)
 	 */
-	@Override
+	@Override @Raw
 	public boolean isValidPosition(double xpos, double ypos) {
-		if (this.getWorld()==null)
-			return true;
 		if (this.getShip()!=null)
 			return true;
-		return super.isValidPosition(xpos, ypos);
+		if ((Double.isNaN(xpos))||(Double.isNaN(ypos)))
+			return false;
+		if (getWorld()!=null) {
+			if ((xpos>0.99*getRadius())&&(xpos<1.01*(getWorld().getWidth()-getRadius()))&&
+					(ypos>0.99*getRadius())&&(ypos<1.01*(getWorld().getHeight()-getRadius()))) {
+				for (Entity entity: getWorld().getEntities().keySet()) {
+					if ((entity!=this)&&
+							(Math.sqrt(Math.pow(xpos-entity.getXPosition(),2)+
+									Math.pow(ypos-entity.getYPosition(),2)))<
+									0.99*(entity.getRadius()+getRadius())) {
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+		return true;
 	}
 	
+	
+	/**
+	 * Return whether this bullet is associated with a world/ship.
+	 * 
+	 * @return	True if and only if this bullet is not located in a world, not fired by a ship
+	 * 			and not loaded by a ship.
+	 * 			| result == (getWorld()!=null)||(getShip()!=null)||(getSource()!=null)
+	 */
+	public boolean hasPosition() {
+		return ((this.getWorld()!=null)||(this.getShip()!=null)||(this.getSource()!=null));
+	}
+
+	/**
+	 * Return whether the given radius is valid for this bullet.
+	 * 
+	 * @result 	True if and only if radius exceeds MIN_RADIUS.
+	 * 			| result = (radius >= MIN_RADIUS)
+	 */
+	@Override
+	public boolean isValidRadius(double radius) {
+		return (radius >= MIN_RADIUS);
+	}
+
 	/**
 	 * Return the mass of this bullet.
+	 * 
+	 * @return	| result == (4.0/3.0)*Math.PI*Math.pow(this.getRadius(),3)*this.getMassDensity()
 	 */
 	public double getMass() {
 		return (4.0/3.0)*Math.PI*Math.pow(this.getRadius(),3)*this.getMassDensity();
 	}
 	
 	/**
-	 * Return the mass density of this bullet.
+	 * Return whether the given density is valid for this bullet.
+	 * 	
+	 * @return	True if and only if density equals DENSITY.
+	 * 			| result == (density == DENSITY)
 	 */
-	public double getMassDensity() {
-		return DENSITY;
-	}
-	
-	/**
-	 * Set the mass density of this bullet to a given value.
-	 */
-	public void setMassDensity(double massDensity) {
-		this.massDensity=DENSITY;
+	@Override
+	public boolean isValidDensity(double density) {
+		return (density == DENSITY);
 	}
 	
 	/**
@@ -108,13 +147,14 @@ public class Bullet extends Entity{
 	 * 
 	 * @param 	ship
 	 * 			The ship in which this bullet has to be loaded.
-	 * @post	If the given ship is null, set the ship to null.
-	 * 			|new.getShip() == null
+	 * @post	If the given ship is ineffective, the ship of this bullet is set to null.
+	 * 			| if (ship == null)
+	 * 			| 	new.getShip()==null
 	 * @post	This bullet is loaded in the given ship.
-	 * 			| new.getShip() == ship
+	 * 			| new.ship == ship
 	 * @throws	IllegalBulletException
 	 * 			This bullet is already located in a world/loaded by as ship/fired by a ship.
-	 * 			| this.hasPosition()
+	 * 			| this.hasPosition()
 	 */
 	public void setShip(Ship ship) throws IllegalBulletException{
 		if (ship==null)
@@ -126,16 +166,18 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Return the world, in which this bullet is located.
+	 * Return the world, in which this bullet is located. Null if none.
 	 * 
-	 * @return	If the world is not null, return the world of the bullet.
-	 * 			|if (world!=null)
-	 *			|	then result == world
-	 * @return	If the bullet has a source, return the world of the source.
-	 * 			|if (getSource() != null)
-	 *			|	then result == getSource().getWorld()
-	 * @return	In all other cases, return null
-	 * 			|result == null
+	 * @return	If this bullet is associated with a world, that world is returned.
+	 * 			If this bullet is associated with a source, the world associated
+	 * 			with that source is returned. 
+	 * 			Otherwise, null is returned.
+	 * 			| if (getWorld()!=null)
+	 * 			| 	result == getWorld()
+	 * 			| if (getSource()!=null)
+	 * 			| 	result == getSource().getWorld()
+	 * 			| else
+	 * 			| 	result == null
 	 */
 	@Override
 	public World getWorld() {
@@ -152,20 +194,16 @@ public class Bullet extends Entity{
 	 * 
 	 * @param 	world
 	 * 			The world, in which this bullet has to be located.
-	 * @post	If the given world is null, the world of the bullet is set to null and if it has a source,
-	 * 			the source is set to null
-	 * 			|new.getWorld()=null;
-	 *			|	if (getSource()!=null)
-	 *			|		then new.getSource(null)
-	 * @post	If the bullet does not belong to a world/ship yet, the new world of this bullet 
-	 * 			is the given world.
-	 * 			| if (!old.hasPosition())
-	 *			|	new.getWorld() == world;		
+	 * @post	If the given world is ineffective, the world of this bullet is set to null.
+	 * 			| if (world == null)
+	 * 			| 	new.getWorld() == null
+	 * @post	The new world of this bullet is the given world.
+	 * 			| new.getWorld() == world;		
 	 * @throws	IllegalBulletException
 	 * 			This bullet is already located in a world/loaded by as ship/fired by a ship.
-	 * 			| this.hasPosition()
+	 * 			| old.hasPosition()
 	 */
-	@Override
+	@Override @Raw
 	public void setWorld(World world) throws IllegalBulletException{
 		if (world==null) {
 			this.world=null;
@@ -176,17 +214,6 @@ public class Bullet extends Entity{
 		else if (this.hasPosition())
 			throw new IllegalBulletException(this);
 		this.world = world;
-	}
-	
-	/**
-	 * Return whether this bullet is located in a world/ship.$
-	 * 
-	 * @return	True if and only if this bullet is not located in a world, not fired by a ship
-	 * 			and not loaded by a ship.
-	 * 			| result == (getWorld()!=null)||(getShip()!=null)
-	 */
-	public boolean hasPosition() {
-		return ((this.getWorld()!=null)||(this.getShip()!=null)||(this.getSource()!=null));
 	}
 	
 	/**
@@ -217,30 +244,6 @@ public class Bullet extends Entity{
 	}
 	
 	/**
-	 * Return the radius of this bullet.
-	 */
-	public double getRadius() {
-		return this.radius;
-	}
-	
-	/**
-	 * Set the radius of this bullet to a given radius.
-	 * 
-	 * @param	radius
-	 * 			The new radius of this bullet.
-	 * @post	The new radius of this bullet is the given radius.
-	 * 			| new.getRadius() == radius
-	 * @throws	IllegalRadiusException
-	 * 			The given radius does not exceed its minimum value.
-	 * 			| radius <= MIN_RADIUS
-	 */
-	public void setRadius(double radius) {
-		if (radius <= MIN_RADIUS)
-			throw new IllegalRadiusException(radius);
-		this.radius = radius;
-	}
-	
-	/**
 	 * Return the number of times this bullet has bounced off the boundaries of its world, if any.
 	 */
 	public int getBounces() {
@@ -257,10 +260,10 @@ public class Bullet extends Entity{
 	 * @post	The new number of bounces this bullet has done is equal to the given number 
 	 * 			of bounces. If this number exceeds the maximum number of bounces, this bullet is
 	 * 			terminated.
-	 * 			| if (bounces >= old.getMaxBounces())
-	 * 			| 	new.isTerminated()
-	 * 			| else
-	 * 			| 	new.getNbBullets() == bounces
+	 * 			| if (bounces >= old.getMaxBounces())
+	 * 			| 	new.isTerminated()
+	 * 			| else
+	 * 			| 	new.getNbBullets() == bounces
 	 */
 	public void setBounces(int bounces) {
 		if (bounces >= this.getMaxBounces())
@@ -284,9 +287,9 @@ public class Bullet extends Entity{
 	 * @post	If the given number of bounces is larger than 0, the maximum number of bounces
 	 * 			of this bullet is set to the given value. Otherwise, it is set to zero.
 	 * 			| if (bounces>0)
-	 * 			| 	then new.getMaxBounces()==bounces
-	 * 			| else
-	 * 			| 	then new.getMaxBounces()==0
+	 * 			| 	new.getMaxBounces()==bounces
+	 * 			| else
+	 * 			| 	new.getMaxBounces()==0
 	 */
 	public void setMaxBounces(int bounces) {
 		if (bounces<0)
@@ -296,25 +299,53 @@ public class Bullet extends Entity{
 	}
 	
 	/**
+	 * Resolve the collision of this bullet with a boundary of its world.
+	 * 
+	 * @effect	The number of bounces of this bullet is increased by 1.
+	 * 			| setBounces(getBounces+1)
+	 */
+	public void collideBoundary() {
+		super.collideBoundary();
+		this.setBounces(getBounces()+1);
+	}
+	
+	/**
+	 * Return whether this bullet has been terminated in a loop.
+	 */
+	public boolean isLoopTerminated() {
+		return this.loopTerminated;
+	}
+	
+	/**
+	 * Terminate this bullet in a loop.
+	 * 
+	 * @post	This bullet is terminated in a loop.
+	 * 			| new.isLoopTerminated() == true
+	 */
+	public void setLoopTerminated() {
+		this.loopTerminated = true;
+	}
+	
+	/**
 	 * Terminate this bullet.
 	 * 
 	 * @post	If this bullet was located in a world, it is not anymore.
-	 * 			| if old.getWorld()!=null
-	 * 			| 	! old.getWorld().getEntities().contains(entity)
-	 * 			| 	! old.getWorld().getBullets().contains(old)
-	 * 			| 	new.getWorld() == null
+	 * 			| if old.getWorld()!=null
+	 * 			| 	! old.getWorld().getEntities().contains(entity)
+	 * 			| 	! old.getWorld().getBullets().contains(old)
+	 * 			| 	new.getWorld() == null
 	 * @post	If this bullet was associated with a ship, it is not anymore.
-	 * 			| if old.getShip != null
-	 * 			| 	if old.getShip().getBullets().contains(old)
-	 * 			| 		! new.getShip().getBullets().contains(old)
-	 * 			| 	new.getShip() == null
+	 * 			| if old.getShip != null
+	 * 			| 	if old.getShip().getBullets().contains(old)
+	 * 			| 		! new.getShip().getBullets().contains(old)
+	 * 			| 	new.getShip() == null
 	 * @post	If this bullet was shot by a ship, it is not anymore.
 	 * 			| new.getSource() == null
-	 * 			| if (old.getSource()!=null)
-	 * 			| 	! new.getSource().getBulletsFired().contains(new)
+	 * 			| if (old.getSource()!=null)
+	 * 			| 	! new.getSource().getBulletsFired().contains(new)
 	 */
 	public void terminate() {
-		this.isTerminated = true;
+		super.terminate();
 		if (this.getWorld()!=null) {
 			this.getWorld().removeEntity(this);
 		}
@@ -325,31 +356,8 @@ public class Bullet extends Entity{
 		if (this.getSource()!=null) {
 			this.getSource().getBulletsFired().remove(this);
 		}
-//		setSource(null);
 	}
-	
-	/**
-	 * Move this bullet for a given amount of time according to its current position, velocity 
-	 * and orientation.
-	 * 
-	 * @param 	dt
-	 * 			The duration of the movement.
-	 * @effect	The ship, if not null, will move as an entity with the time dt.
-	 * 			|if (getShip()==null)
-	 * 			| then super.move(dt)
-	 * @throws 	IllegalDurationException
-	 * 			The given duration of the movement is negative.
-	 * 			| dt < 0
-	 */
-	@Override
-	public void move(double dt) throws IllegalDurationException {
-		if (dt < 0)
-			throw new IllegalDurationException(dt);
-		if (this.getShip()==null) {
-			super.move(dt);
-		}
-	}
-	
+
 	/**
 	 * A variable registering in which ship this bullet is loaded. Null if none.
 	 */
@@ -378,6 +386,11 @@ public class Bullet extends Entity{
 	private int maxBounces = 3;
 	
 	/**
+	 * A variable registering whether this bullet was terminated in a loop.
+	 */
+	private boolean loopTerminated = false;
+	
+	/**
 	 * A variable registering the minimum radius of a bullet.
 	 */
 	private static double MIN_RADIUS = 1;
@@ -385,6 +398,6 @@ public class Bullet extends Entity{
 	/**
 	 * A variable registering the mass density of a bullet.
 	 */
-	private static double DENSITY = 7.8*Math.pow(10,12);
+	private final static double DENSITY = 7.8*Math.pow(10,12);
 
 }
