@@ -1,6 +1,8 @@
 package asteroids.model.programs.statements;
 
+import asteroids.model.Program;
 import asteroids.model.programs.ProgramFunction;
+import asteroids.model.programs.exceptions.IllegalStatementException;
 import asteroids.model.programs.expressions.ProgramExpression;
 
 public class ReturnStatement extends ProgramStatement {
@@ -16,20 +18,22 @@ public class ReturnStatement extends ProgramStatement {
 	public void setResult(ProgramExpression result) {
 		this.result = result;
 	}
-
-	@Override
-	public void execute() {
+	
+	public Object execute(ProgramFunction function) {
+		getResult().setFunction(function);
+		return getResult().getValue();
 	}
 	
-	public ProgramFunction getFunction() {
-		return this.function;
-	}
-	
-	public void setFunction(ProgramFunction function) {
-		this.function = function;
+	public void setProgram(Program program) {
+		super.setProgram(program);
+		getResult().setProgram(program);
 	}
 
 	private ProgramExpression result;
-	private ProgramFunction function;
+
+	@Override
+	public void execute() {
+		throw new IllegalStatementException(this);
+	}
 	
 }

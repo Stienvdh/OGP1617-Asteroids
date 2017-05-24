@@ -1,8 +1,8 @@
 package asteroids.model.programs.statements;
 
 import asteroids.model.Program;
+import asteroids.model.programs.ProgramFunction;
 import asteroids.model.programs.exceptions.IllegalExpressionException;
-import asteroids.model.programs.exceptions.IllegalStatementException;
 import asteroids.model.programs.expressions.BooleanExpression;
 import asteroids.model.programs.expressions.ProgramExpression;
 
@@ -11,6 +11,7 @@ public class WhileStatement extends ProgramStatement {
 	public WhileStatement(ProgramExpression condition, ProgramStatement block) {
 		setCondition(condition);
 		setBlock(block);
+		block.setParent(this);
 	}
 	
 	public ProgramExpression getCondition() {
@@ -40,12 +41,22 @@ public class WhileStatement extends ProgramStatement {
 	public void execute() {
 		if (! (getCondition() instanceof BooleanExpression))
 			throw new IllegalExpressionException(getCondition());
-		if (! (getBlock() instanceof BlockStatement))
-			throw new IllegalStatementException(getBlock());
-		((BlockStatement)getBlock()).setWhileStatement(this);
-		while ((boolean) getCondition().getValue()) {
-			getBlock().execute();
+		else if ((boolean) getCondition().getValue()) {
+			getProgram().setCurrentStatement(getBlock());
+			getProgram().getCurrentStatement().execute();
 		}
+	}
+	
+	@Override
+	public Object execute(ProgramFunction function) {
+		getCondition().setFunction(function);
+		while ((boolean) getCondition().getValue()) {
+			Object result = getBlock().execute(function);
+			if (result!=null) {
+				return result;
+			}
+		}
+		return null;
 	}
 	
 	private ProgramExpression condition;

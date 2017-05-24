@@ -6,6 +6,7 @@ import asteroids.model.Asteroid;
 import asteroids.model.Bullet;
 import asteroids.model.ClosestEntity;
 import asteroids.model.Entity;
+import asteroids.model.EntitySet;
 import asteroids.model.MinorPlanet;
 import asteroids.model.Planetoid;
 import asteroids.model.Program;
@@ -26,8 +27,7 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramFunction createFunctionDefinition(String functionName, ProgramStatement body, SourceLocation sourceLocation) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ProgramFunction(functionName, body);
 	}
 
 	@Override
@@ -72,8 +72,7 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 
 	@Override
 	public ProgramExpression createReadParameterExpression(String parameterName, SourceLocation sourceLocation) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ReadParameterExpression(parameterName);
 	}
 
 	@Override
@@ -141,7 +140,16 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 		return new SimpleEntityExpression(null) {
 			@Override
 			public Entity getValue() {
-				return (new ClosestEntity<Bullet>(getShip(), Bullet.class)).getClosestEntity();
+				if (getShip()!=null) {
+					Object[] stream = (new EntitySet<Bullet>(getShip().getWorld(),Bullet.class))
+							.getSet().stream().filter(entity -> ((Bullet)entity).getSource()==getShip()).toArray();
+					if (stream.length>0) {
+						return (Entity) stream[0];
+					}
+					else
+						return null;
+				}
+				return null;
 			}
 		};
 	}
@@ -161,7 +169,10 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 		return new SimpleEntityExpression(null) {
 			@Override
 			public Entity getValue() {
-				return (new ClosestEntity<Entity>(getShip(), Entity.class)).getClosestEntity();
+				if (getShip()!=null) {
+					return (Entity) getShip().getWorld().getAllEntities().toArray()[0];
+				}
+				return null;
 			}
 		};
 	}
@@ -225,7 +236,9 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	@Override
 	public ProgramStatement createThrustOnStatement(SourceLocation location) {
 		return new ActionStatement() {
+			@Override
 			public void execute() {
+				super.execute();
 				if (getShip()!=null) {
 					getShip().thrustOn();
 				}
@@ -236,7 +249,9 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	@Override
 	public ProgramStatement createThrustOffStatement(SourceLocation location) {
 		return new ActionStatement() {
+			@Override
 			public void execute() {
+				super.execute();
 				if (getShip()!=null) {
 					getShip().thrustOff();
 				}
@@ -247,7 +262,9 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	@Override
 	public ProgramStatement createFireStatement(SourceLocation location) {
 		return new ActionStatement() {
+			@Override
 			public void execute() {
+				super.execute();
 				if (getShip()!=null) {
 					getShip().fireBullet();
 				}
@@ -258,7 +275,9 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	@Override
 	public ProgramStatement createTurnStatement(ProgramExpression angle, SourceLocation location) {
 		return new ActionStatement() {
+			@Override
 			public void execute() {
+				super.execute();
 				if (getShip()!=null) {
 					if (! (angle instanceof DoubleExpression))
 						throw new IllegalExpressionException(angle);
@@ -271,7 +290,6 @@ public class ProgramFactory implements IProgramFactory<ProgramExpression,
 	@Override
 	public ProgramStatement createSkipStatement(SourceLocation location) {
 		return new ActionStatement() {
-			public void execute() {}
 		};
 	}
 }

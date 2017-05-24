@@ -1,6 +1,8 @@
 package asteroids.model.programs.statements;
 
 import asteroids.model.Program;
+import asteroids.model.programs.ProgramFunction;
+import asteroids.model.programs.exceptions.IllegalStatementException;
 import asteroids.model.programs.expressions.ProgramExpression;
 
 public class PrintStatement extends ProgramStatement {
@@ -36,5 +38,10 @@ public class PrintStatement extends ProgramStatement {
 	}
 	
 	private ProgramExpression value;
+
+	@Override
+	public Object execute(ProgramFunction function) {
+		throw new IllegalStatementException(this);
+	}
 
 }
